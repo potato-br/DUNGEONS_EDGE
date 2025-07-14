@@ -7,7 +7,7 @@
 
 Dungeons Edge é um jogo web 2D desenvolvido com JavaScript puro, que nasceu como parte de um projeto universitário. A ideia inicial era criar uma coletânea com quatro minijogos distintos, mas, devido à alta demanda de trabalhos e prazos apertados, o desenvolvimento acabou ficando sob minha responsabilidade.
 
-A partir disso, o projeto evoluiu significativamente, superando os limites de um simples trabalho acadêmico e se transformando em um jogo com potencial real. Com gráficos simples baseados em imagens, lógica implementada em JavaScript e estrutura em HTML5, Dungeons Edge está atualmente em estado semi-completo, com uma base sólida para expansão.
+A partir disso, o projeto evoluiu significativamente, superando os limites de um simples trabalho acadêmico e se transformando em um jogo com potencial real. Com gráficos simples baseados em imagens e pixelart, lógica implementada em JavaScript e estrutura em HTML5, Dungeons Edge está atualmente em estado semi-completo, com uma base sólida para expansão.
 
 🚧 Estado atual
 
@@ -33,7 +33,7 @@ Canvas API para renderização 2D
 
 Dungeons Edge is a 2D web game developed using pure JavaScript, originally created as part of a university project. The initial idea was to build a collection of four separate minigames, but due to the high demand for assignments and tight deadlines, development eventually became my sole responsibility.
 
-From that point on, the project evolved significantly, going beyond the boundaries of a simple academic task and turning into a game with real potential. Featuring simple image-based graphics, logic implemented in JavaScript, and an HTML5 structure, Dungeons Edge is currently in a semi-complete state, with a solid foundation for future expansion.
+From that point on, the project evolved significantly, going beyond the boundaries of a simple academic task and turning into a game with real potential. Featuring simple image-based graphics and pixelart, logic implemented in JavaScript, and an HTML5 structure, Dungeons Edge is currently in a semi-complete state, with a solid foundation for future expansion.
 
 🚧 Current Status
 
