@@ -51,10 +51,15 @@ Adjust the original scope into a more cohesive experience
 Make the game accessible directly through the browser, with no installation required
 
 
+#historia
 
-🎯 Objetivos
-Finalizar e otimizar a jogabilidade
+Há muitos séculos, o Reino de Eldoria era conhecido por sua paz e prosperidade. Governado por um rei sábio e justo, Eldoria floresceu sob a proteção de suas grandiosas muralhas e da magia ancestral que permeava suas terras. O povo vivia tranquilo, sem temer os perigos do mundo exterior. Porém, essa paz foi tragicamente interrompida por uma antiga sombra, libertada de sua prisão.
 
-Ajustar o escopo original para uma experiência mais completa
+Numa noite sombria, enquanto a princesa Amélia, herdeira do trono, descansava em seu quarto, uma força obscura invadiu o castelo. Os portões do reino ruíram, e o castelo foi tomado. A princesa foi sequestrada e levada para uma misteriosa dungeon nas profundezas da terra — um labirinto de pedras e mistérios onde dizem que as forças mais negras se escondem. Desde então, ninguém ousou descer até lá para tentar resgatá-la.
 
-Tornar o jogo acessível diretamente via navegador, sem necessidade de instalação
+Mas o reino ainda guarda esperança. A lenda fala de um herói — ou talvez mais de um — capaz de sobreviver aos horrores da dungeon e trazer a princesa de volta. Para isso, será preciso mais que coragem: a dungeon não é uma simples prisão, mas uma entidade viva, repleta de armadilhas mortais, criaturas terríveis e uma ameaça invisível que devora qualquer um que ouse atravessá-la.
+
+Você será capaz de guiar os heróis através desses perigos e trazer a luz de volta ao reino? O destino de Eldoria está em suas mãos. Se tomar as decisões certas, a princesa será salva e a escuridão afastada. Mas se falhar, a dungeon consumirá tudo, e o ciclo recomeçará.
+
+Prepare-se para a batalha. A missão será difícil, mas a salvação de Eldoria depende de você. A princesa Amélia aguarda por sua libertação...
+
