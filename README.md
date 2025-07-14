@@ -51,7 +51,7 @@ Adjust the original scope into a more cohesive experience
 Make the game accessible directly through the browser, with no installation required
 
 
-#historia
+# Historia
 
 Há muitos séculos, o Reino de Eldoria era conhecido por sua paz e prosperidade. Governado por um rei sábio e justo, Eldoria floresceu sob a proteção de suas grandiosas muralhas e da magia ancestral que permeava suas terras. O povo vivia tranquilo, sem temer os perigos do mundo exterior. Porém, essa paz foi tragicamente interrompida por uma antiga sombra, libertada de sua prisão.
 
