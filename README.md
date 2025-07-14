@@ -21,6 +21,35 @@ JavaScript puro (vanilla JS)
 
 Canvas API para renderização 2D
 
+-//////////////////////////////////////////////////////////////////////////////////////////-
+🎮 Dungeons Edge
+Dungeons Edge is a 2D web game developed using pure JavaScript, originally created as part of a university project. The initial idea was to build a collection of four separate minigames, but due to the high demand for assignments and tight deadlines, development eventually became my sole responsibility.
+
+From that point on, the project evolved significantly, going beyond the boundaries of a simple academic task and turning into a game with real potential. Featuring simple image-based graphics, logic implemented in JavaScript, and an HTML5 structure, Dungeons Edge is currently in a semi-complete state, with a solid foundation for future expansion.
+
+🚧 Current Status
+Core mechanics implemented
+
+Partially functional gameplay
+
+Still under active development
+
+💡 Technologies Used
+HTML5
+
+Pure JavaScript (Vanilla JS)
+
+Canvas API for 2D rendering
+
+🎯 Goals
+Finalize and optimize gameplay
+
+Adjust the original scope into a more cohesive experience
+
+Make the game accessible directly through the browser, with no installation required
+
+
+
 🎯 Objetivos
 Finalizar e otimizar a jogabilidade
 
