@@ -1,4 +1,7 @@
-# dungeons_edge
+<p align="center">
+  <img src="images\imagens de fundo\fundo do menuprincipal\meu-fundo.gif" alt="Menu principal" width="500"/>
+</p>
+
 🎮 Dungeons Edge
 Dungeons Edge é um jogo web 2D desenvolvido com JavaScript puro, que nasceu como parte de um projeto universitário. A ideia inicial era criar uma coletânea com quatro minijogos distintos, mas, devido à alta demanda de trabalhos e prazos apertados, o desenvolvimento acabou ficando sob minha responsabilidade.
 
