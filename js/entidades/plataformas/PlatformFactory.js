@@ -108,7 +108,7 @@ class PlatformFactory {
         this.normalCategoryThresholds = {
             [this.platformTypes.NORMAL]:0,           // Always available
             [this.platformTypes.ESCORREGADIA]: 20000,   // Available after some progress
-            [this.platformTypes.QUEBRAVEL]: 0,     // Available later in game
+            [this.platformTypes.QUEBRAVEL]: 40000,     // Available later in game
             [this.platformTypes.MOVEL]: 10000,         // Available even later
             [this.platformTypes.FANTASMA]: 70000,   // Disponível após 10000 pontos
         };
