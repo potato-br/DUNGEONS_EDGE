@@ -268,14 +268,14 @@ let nextBg = mainBg;
 let trocaCount = 0;
 
 // NOVO: Imagens das laterais (pode ser o mesmo conjunto, mas permite expandir)
-const lateralImages = [];
+
 for (let i = 1; i <= 4; i++) {
   const img = new Image();
   img.src = `./images/imagens de fundo/fundos do jogo/imagemfundo${i}.jpg`;
   lateralImages.push(img);
 }
 let currentLateralLeft = lateralImages[0];
-let currentLateralRight = lateralImages[1] || lateralImages[0];
+let currentLateralRight = lateralImages[0];
 
 // Função para sortear laterais sem repetir o fundo central
 function sortearLaterais(bgCentral) {
@@ -294,6 +294,9 @@ function resetarBackgroundsELaterais() {
   nextBg = mainBg;
   currentLateralLeft = lateralImages[0];
   currentLateralRight = lateralImages[0];
+  // Também reseta os próximos backgrounds laterais
+  nextLateralLeftBg = lateralImages[0];
+  nextLateralRightBg = lateralImages[0];
 }
 
 // Carregamento de sprites de inimigos

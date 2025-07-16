@@ -1,26 +1,30 @@
 // ==========================
 // ===== RESET E LOOP =====
 // ==========================
-function resetGame({ pauseOnStart = true, showShop = false, il = true, la = false } = {}) {
+function resetGame({ pauseOnStart = true, showShop = false, il = true,  } = {}) {
   frameCount = 0; // Reset frame count
   Object.assign(player, { velocityY: 0, isJumping: false, jumpCount: 0 });
   isGameOver = false;
   serras = [];
+
+  // Inicialização das laterais
+  currentLateralLeftBg = lateralImages[0];
+  nextLateralLeftBg = lateralImages[0];
+  currentLateralRightBg =  lateralImages[0];
+  nextLateralRightBg = lateralImages[0];
+  lateralBackgroundY = 0;
   
   // Reset do sistema da bomba de fumaça do Ninja
   NINJA.smokeBombActive = false;
   ninjaSmokeBombCooldown = false;
   ninjaSmokeBombTimer = 0;
-  
-  drawlateral();
+
   if (il) {
      ajustarCanvas(); // Garante que o player esteja visível
   } else if (!il) {
     ajustarCanvas(false); // Garante que o canvas tenha largura fixa
   }
- if (la) {
-   drawlateral();
- }
+ 
       player.currentDashes = player.maxDashes;
       player.lastDashRecharge = 0;
   particles.length = 0;  dashCooldown = false;
@@ -158,7 +162,8 @@ function drawAll() {
     return;
   }
 
-  // Limpa o canvas e desenha na ordem correta  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Limpa o canvas e desenha na ordem correta
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (typeof drawlateral === 'function') drawlateral();
   drawBackground();
   drawPlataformas();

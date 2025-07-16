@@ -249,7 +249,10 @@ function drawPlataformas() {
              platform.ignoreEnemyCollision = true;
             // Só faz shake global se for grande e no início da quebra
             if (platform.isGrande && platform.breakAnimTime === 1) {
-                triggerScreenShake(7, 12);
+                // Shake proporcional à largura do canvas
+                const canvas = document.getElementById('gameCanvas');
+                const magnitude = Math.max(1, Math.min(0.04, 7 / canvas.width));
+                triggerScreenShake(magnitude, 12);
             }
 
            // Inicialização dos parâmetros de animação
@@ -265,7 +268,10 @@ function drawPlataformas() {
                     leftVA: 0.08 - Math.random() * 0.04, // rotação angular
                     rightVA: -0.08 + Math.random() * 0.04
                 };
-                triggerScreenShake(1, 8);
+                // Shake proporcional à largura do canvas
+                const canvas = document.getElementById('gameCanvas');
+                const magnitude = Math.max(1, Math.min(0.03, 1 / canvas.width));
+                triggerScreenShake(magnitude, 8);
             }
             const anim = platform.breakAnim;
             anim.time++;

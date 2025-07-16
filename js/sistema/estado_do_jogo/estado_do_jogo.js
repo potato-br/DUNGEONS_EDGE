@@ -2,6 +2,7 @@
 // ===== ESTADO DO JOGO =====
 // ==========================
 let serras = [];
+const lateralImages = [];
 let plataformas = [];
 let keys = {};
 let isGameOver = false;

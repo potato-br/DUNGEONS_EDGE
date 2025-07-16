@@ -4,50 +4,97 @@
 
 let parallaxOffset = 0;
 let gradientAngle = 110;
-let parallaxSpeed = 0.2; // Nova variável para controlar velocidade
+let parallaxSpeed = 0.2;
+
+// Variáveis para transição das laterais
+let currentLateralLeftBg = lateralImages[0];
+let nextLateralLeftBg = lateralImages[0];
+let currentLateralRightBg = lateralImages[0];  // Agora começa com o background 0
+let nextLateralRightBg = lateralImages[0];     // Agora começa com o background 0
+let lateralBackgroundY = 0;
+let lateralTransitionSpeed = 0.7; 
+let lateralTrocaCount = 0;
 
 function drawlateral() {
-  if (gameState === 'loja') {
-    document.body.style.backgroundImage = '';
-    document.body.style.backgroundSize = '';
-    document.body.style.backgroundPosition = '';
-    document.body.style.backgroundRepeat = '';
-    document.body.style.backgroundColor = '';
-    return;
+    if (gameState === 'loja') {
+        return;
+    }
+
+    if (gameState === 'jogando' && !isPaused && !isRespawning) {
+        lateralBackgroundY -= lateralTransitionSpeed * gameSpeed;
+    }
+    gradientAngle = (gradientAngle + 0.3) % 360; // Reduzido a velocidade da animação
+
+    const leftWidth = canvas.width * 0.38;
+    const rightWidth = canvas.width * 0.38;
+
+    // Desenha backgrounds em um único contexto salvo
+    ctx.save();
+
+    // Desenha lado esquerdo
+    ctx.beginPath();
+    ctx.rect(0, 0, leftWidth, canvas.height);
+    ctx.clip();
+    
+    if (currentLateralLeftBg && nextLateralLeftBg) {
+        ctx.drawImage(currentLateralLeftBg, 0, lateralBackgroundY, leftWidth, canvas.height);
+        ctx.drawImage(nextLateralLeftBg, 0, lateralBackgroundY + canvas.height, leftWidth, canvas.height);
+    }
+    ctx.restore();
+
+    // Desenha lado direito
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(canvas.width - rightWidth, 0, rightWidth, canvas.height);
+    ctx.clip();
+    
+    if (currentLateralRightBg && nextLateralRightBg) {
+        ctx.drawImage(currentLateralRightBg, canvas.width - rightWidth, lateralBackgroundY, rightWidth, canvas.height);
+        ctx.drawImage(nextLateralRightBg, canvas.width - rightWidth, lateralBackgroundY + canvas.height, rightWidth, canvas.height);
+    }
+    ctx.restore();
+
+  // Check if we need to transition to next background
+  if (lateralBackgroundY <= -canvas.height) {
+    lateralBackgroundY = 0;
+    currentLateralLeftBg = nextLateralLeftBg;
+    currentLateralRightBg = nextLateralRightBg;
+    lateralTrocaCount++;
+    
+    // Nova lógica para seleção de backgrounds com possibilidade de serem iguais
+    if (Math.random() < 0.4) { // 40% de chance de usar o background 0
+      nextLateralLeftBg = lateralImages[0];
+      nextLateralRightBg = lateralImages[0];
+    } else {
+      // Escolhe um background aleatório para cada lateral
+      const leftIdx = Math.floor(Math.random() * lateralImages.length);
+      const rightIdx = Math.floor(Math.random() * lateralImages.length);
+      nextLateralLeftBg = lateralImages[leftIdx];
+      nextLateralRightBg = lateralImages[rightIdx];
+    }
   }
 
-  if (gameState === 'jogando' && !isPaused && !isRespawning) {
-    parallaxOffset = (parallaxOffset + parallaxSpeed * gameSpeed) % window.innerHeight;
-  }
-  gradientAngle = (gradientAngle + 0.5) % 1;
-
-  // SORTEIO DE LATERAIS: se mudou o fundo central, sorteia novas laterais
-  if (typeof currentBg !== 'undefined' && (typeof lastBgCentral === 'undefined' || lastBgCentral !== currentBg)) {
-    const [left, right] = sortearLaterais(currentBg);
-    currentLateralLeft = left;
-    currentLateralRight = right;
-    lastBgCentral = currentBg;
-  }
-
-  document.body.style.backgroundImage = `
-    linear-gradient(${gradientAngle}deg, 
-      rgba(0, 0, 0, 0.88), 
-      rgba(0, 0, 0, 0.52), 
-      rgba(0, 0, 0, 0.59)
-    ),
-    url('${currentLateralLeft.src}'),
-    url('${currentLateralRight.src}')
-  `;
-  document.body.style.backgroundPosition = `center, left 0px top ${parallaxOffset}px, right 0px top ${parallaxOffset}px`;
-  document.body.style.backgroundRepeat = 'no-repeat, repeat-y, repeat-y';
-  document.body.style.backgroundSize = 'cover, 38% 100%, 38% 100%';
-  document.body.style.backgroundColor = '#5e5e5e';
-  document.body.style.margin = '0';
-  document.body.style.padding = '0';
+  // Draw cone light effect
+  const centerX = (Math.sin(gradientAngle * Math.PI / 180) * canvas.width) + canvas.width / 2;
+  const centerY = canvas.height / 2;
+  const gradient = ctx.createRadialGradient(
+    centerX, centerY, 0,           // Inner circle
+    centerX, centerY, canvas.width  // Outer circle
+  );
+  
+  // Create cone effect with lighter falloff for mais visibilidade
+  gradient.addColorStop(0, 'rgba(0, 0, 0, 0.4)');   // Centro mais escuro
+  gradient.addColorStop(0.1, 'rgba(0, 0, 0, 0.5)');  // Inner cone mais escuro
+  gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.6)');  // Middle cone mais escuro
+  gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.7)');  // Outer cone mais escuro
+  gradient.addColorStop(1, 'rgba(0, 0, 0, 0.85)');   // Bordas mais escuras
+  
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function drawBackground() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
   ctx.fillStyle = 'rgba(0,0,0,0)';
   ctx.fillRect(0, 0, gamePlayArea.x, canvas.height);
   ctx.fillRect(gamePlayArea.x + gamePlayArea.width, 0, canvas.width - (gamePlayArea.x + gamePlayArea.width), canvas.height);
@@ -281,9 +328,3 @@ function drawAllHitboxes() {
     }
     ctx.restore();
 }
-
-
-
-
-
-

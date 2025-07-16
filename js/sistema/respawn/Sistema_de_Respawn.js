@@ -104,8 +104,8 @@ function getLowestVisiblePlatform() {
 
   for (let i = 0; i < plataformas.length; i++) {
     const plat = plataformas[i];
-    // Se a plataforma estiver dentro da tela (visível)
-    if (plat.y + plat.height < screenHeight) {
+    // Se a plataforma estiver dentro da tela (visível) e NÃO estiver caindo
+    if (plat.y + plat.height < screenHeight && !plat.falling) {
       if (plat.type === PLATFORM_TYPES.FANTASMA) {
         if (plat.visible) {
           fantasmaVisivel = plat;
