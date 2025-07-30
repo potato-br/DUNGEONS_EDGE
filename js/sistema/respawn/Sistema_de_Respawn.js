@@ -1,54 +1,54 @@
-// ==========================
-// ===== SISTEMA DE RESPAWN =====
-// ==========================
-let isRespawning = false; // Flag para indicar se o jogador está renascendo
-let isInvulnerable = false; // Flag para indicar se o jogador está invulnerável (NÃO USAR MAIS, usar DASH.isInvulnerable)
+
+
+
+let isRespawning = false; 
+let isInvulnerable = false; 
 
 function respawnPlayer() {
-  if (isRespawning) return; // Evita múltiplos respawns simultâneos
+  if (isRespawning) return; 
 
-  // Limpa partículas antigas
+  
   particles.length = 0;
 
   const plataformaAlvo = getLowestVisiblePlatform();
 
   if (plataformaAlvo) {
    
-    // Remove todos os inimigos da tela
+    
     enemies.length = 0;
-    // Reinicia as cerras ao respawnar
+     morcegos.length = 0;
     serras.length = 0;
     if (typeof spawnCerras !== "undefined") {
       spawnCerras.lastSpawn = undefined;
     }
 
-    // Reset player states
+    
     player.velocityX = 0;
     player.velocityY = 0;
     player.jumpCount = 0;
     player.isJumping = false;
 
-    // Reset ice physics
+    
     if (icePhysics) {
       icePhysics.iceVelocity = 0;
       icePhysics.wasOnIce = false;
     }
 
   
-    // Posiciona o jogador
+    
     player.x = plataformaAlvo.x + Math.random() * (plataformaAlvo.width - player.width);
     player.y = plataformaAlvo.y - player.height - 5;
     
-    // Força sprite parado ao respawn e durante todo o processo
+    
     if (typeof setPlayerSpriteRow === 'function') {
       setPlayerSpriteRow(1);
-      player._idleTimer = 0; // Reset idle timer to prevent animation changes
+      player._idleTimer = 0; 
     }
 
-    lastEnemyAllowedTime = performance.now() + 2000; // Bloqueia spawn de inimigos por 2s
-    lastSerraAllowedTime = lastEnemyAllowedTime + 1000; // Bloqueia spawn de serras por 3s (1s após inimigos)
+    lastEnemyAllowedTime = performance.now() + 2000; 
+    lastSerraAllowedTime = lastEnemyAllowedTime + 1000; 
 
-    isRespawning = true; // Ativa a flag de renascimento
+    isRespawning = true; 
     pausar();
   } else {
     
@@ -58,33 +58,33 @@ function respawnPlayer() {
 function pausar({ piscadas = 5, velocidade = 180, tempoPausa = 1080 } = {}) {
   gameState = 'respawnando';
   player.visible = false;
-  isRespawning = true; // Garante que flag está ativa durante todo o processo
-  setPlayerSpriteRow(1); // Força sprite parado no início da pausa
+  isRespawning = true; 
+  setPlayerSpriteRow(1); 
 
   let blinkCount = 0;
   let blinkInterval;
 
-  // Calcula o tempo total necessário para todas as piscadas
+  
   const totalBlinkTime = velocidade * piscadas;
   
-  // Garante que tempoPausa seja maior que o tempo total de piscadas
+  
   tempoPausa = Math.max(tempoPausa, totalBlinkTime + 100);
 
   blinkInterval = setInterval(() => {
     if (blinkCount < piscadas) {
       player.visible = !player.visible;
       if (player.visible) {
-        setPlayerSpriteRow(1); // Mantém sprite parado a cada piscada
+        setPlayerSpriteRow(1); 
       }
       blinkCount++;
     } else {
       clearInterval(blinkInterval);
       player.visible = true;
-      setPlayerSpriteRow(1); // Garante sprite parado ao terminar piscada
+      setPlayerSpriteRow(1); 
     }
   }, velocidade);
 
-  // Garante que o jogo só volta após todas as piscadas terminarem
+  
   setTimeout(() => {
     if (blinkInterval) {
       clearInterval(blinkInterval);
@@ -92,7 +92,7 @@ function pausar({ piscadas = 5, velocidade = 180, tempoPausa = 1080 } = {}) {
     player.visible = true;
     gameState = 'jogando';
     isRespawning = false;
-    setPlayerSpriteRow(1); // Garante sprite parado uma última vez
+    setPlayerSpriteRow(1); 
   }, tempoPausa);
 }
 
@@ -104,7 +104,7 @@ function getLowestVisiblePlatform() {
 
   for (let i = 0; i < plataformas.length; i++) {
     const plat = plataformas[i];
-    // Se a plataforma estiver dentro da tela (visível) e NÃO estiver caindo
+    
     if (plat.y + plat.height < screenHeight && !plat.falling) {
       if (plat.type === PLATFORM_TYPES.FANTASMA) {
         if (plat.visible) {
@@ -115,13 +115,13 @@ function getLowestVisiblePlatform() {
       } else {
         countNormais++;
         if (!alvo || plat.y > alvo.y) {
-          alvo = plat;  // Salva a mais baixa visível
+          alvo = plat;  
         }
       }
     }
   }
 
-  // Failsafe: se só houver plataforma fantasma e ela estiver invisível, força ela a aparecer
+  
   if (!alvo && fantasmaInvisivel && countNormais === 0) {
     fantasmaInvisivel.fadeState = 'fadeIn';
     fantasmaInvisivel.fadeTimer = 0;
@@ -131,7 +131,7 @@ function getLowestVisiblePlatform() {
     alvo = fantasmaVisivel;
   }
 
-  // Se não encontrou nenhuma, cria uma plataforma normal de emergência
+  
   if (!alvo) {
     const canvas = document.getElementById('gameCanvas');
     const emergencyPlatform = platformFactory.createPlatform(PLATFORM_TYPES.NORMAL);

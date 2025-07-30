@@ -1,14 +1,14 @@
-// ==========================
-// ===== MENU DE PAUSE ======
-// ==========================
+
+
+
 
 let isPaused = false;
 let pauseOptions = ["Continuar", "Ir para Loja"];
 let selectedPauseIndex = 0;
 
-// Abre/fecha o pause com 'p' ou 'esc'
+
 window.addEventListener("keydown", function(e) {
-    if (gameState === "loja") return; // Não pausa na loja
+    if (gameState === "loja") return; 
     if ((e.key === "p" || e.key === "P" || e.key === "Escape") && !isPaused && gameState === "jogando") {
         isPaused = true;
         gameState = "pause";
@@ -55,7 +55,7 @@ function goToShopFromPause() {
     gameState = "loja";
 }
 
-// Desenha o menu de pause simples
+
 function drawPause() {
     ctx.save();
     ctx.globalAlpha = 0.85;

@@ -25,7 +25,7 @@ function drawMagoAbilityCooldown() {
             const pulseIntensity = (Math.sin(now * 0.01) * 0.3 + 0.7);
             ctx.globalAlpha = pulseIntensity;
             ctx.drawImage(mageAbilityIcon, x, y, iconSize, iconSize);
-            // Tempo restante
+            
             let remainingActive = 0;
             if (typeof activeAbilityTimers !== 'undefined' && activeAbilityTimers.magicBlast && typeof activeAbilityTimers.magicBlast.startTime !== 'undefined') {
                 remainingActive = MAGO.MAGIC_BLAST_DURATION - (now - activeAbilityTimers.magicBlast.startTime);

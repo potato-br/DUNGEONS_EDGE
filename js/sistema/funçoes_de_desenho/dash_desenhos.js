@@ -14,7 +14,7 @@ function drawDashUI() {
         const dashCount = activeCharacter === 'Kuroshi, o Ninja' ? player.maxDashes : 1;
         for (let i = 0; i < dashCount; i++) {
             const x = startX + i * spacing;
-            // Corrige dashCooldown e dashCooldownTime para O Errante de Eldoria
+            
             let dashCooldown = false;
             let dashCooldownTime = 1000;
             let lastDashTime = 0;

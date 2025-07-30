@@ -5,16 +5,16 @@ canvas.addEventListener('click', function(e) {
   const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
   const my = (e.clientY - rect.top) * (canvas.height / rect.height);
 
-  // Se o modal de seleção de personagem estiver aberto
+  
   if (showCharacterSelect) {
-    // Checa clique no X (botão fechar)
+    
     if (Math.hypot(mx-(canvas.width-60), my-100) < 28) {
       showCharacterSelect = false;
       drawLoja();
       return;
     }
     
-    // Checa clique nos personagens do modal
+    
     for (const r of characterSelectRects) {
       if (r.modal && mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
         selectedCharacterModalIndex = r.index;
@@ -27,8 +27,8 @@ canvas.addEventListener('click', function(e) {
     return;
   }
 
-  // Checa clique no botão de seleção de personagem
-  // Botão Selecionar Personagem (agora responsivo)
+  
+  
   {
     const { x, y, w, h } = getCharacterBtnRect();
     if (mx >= x && mx <= x + w && my >= y && my <= y + h) {
@@ -39,26 +39,26 @@ canvas.addEventListener('click', function(e) {
     }
   }
 
-  // Botão Dungeon
+  
   const dungeonBtnX = canvas.width - 220;
   const dungeonBtnY = 20;
   const dungeonBtnW = 200;
   const dungeonBtnH = 40;
 
-  // Checa clique no botão dungeon
+  
   if (mx >= dungeonBtnX && mx <= dungeonBtnX + dungeonBtnW &&
       my >= dungeonBtnY && my <= dungeonBtnY + dungeonBtnH) {
     closeShop();
     return;
   }
 
-  // Checa cliques nos itens da loja
+  
   for (let i = 0; i < lojaOptionRects.length; i++) {
     const r = lojaOptionRects[i];
     if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
-      // Apenas atualiza o índice selecionado sem tentar comprar
+      
       selectedIndex = r.index;
-      // Marca o item como lido quando selecionado
+      
       const visibleItems = shopItems.filter(item => 
         !item.exclusiveToCharacter || item.exclusiveToCharacter === activeCharacter
       );
@@ -79,11 +79,11 @@ canvas.addEventListener('click', function(e) {
 canvas.addEventListener('mousemove', function(e) {
   if (gameState !== 'loja') return;
   
-  // Obtém coordenadas do mouse relativas ao canvas
+  
   const rect = canvas.getBoundingClientRect();  const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
   const my = (e.clientY - rect.top) * (canvas.height / rect.height);
   
-  // Dungeon button hover check
+  
   const dungeonBtnX = canvas.width - 220;
   const dungeonBtnY = 20;
   const dungeonBtnW = 200;
@@ -97,7 +97,7 @@ canvas.addEventListener('mousemove', function(e) {
     drawLoja();
   }
   
-  // Verifica se o mouse está sobre o botão
+  
   {
     const { x, y, w, h } = getCharacterBtnRect();
     isCharacterSelectButtonHovered = (
@@ -106,17 +106,17 @@ canvas.addEventListener('mousemove', function(e) {
     );
   }
   
-  // Redesenha a loja para atualizar o efeito hover
+  
   if (gameState === 'loja') {
     drawLoja();
   }
 });
 
-// Add debug mode toggle
+
 window.addEventListener('keydown', function(e) {
     if (e.key === 'F12') {
         isDebugMode = !isDebugMode;
-        // Refresh shop display
+        
         if (gameState === 'loja') {
             revelarItensSecretos();
             drawLoja();
@@ -127,18 +127,18 @@ window.addEventListener('keydown', function(e) {
 canvas.addEventListener('mousemove', function(e) {
   if (gameState !== 'loja' || showCharacterSelect) return;
   
-  // Obtém coordenadas do mouse relativas ao canvas
+  
   const rect = canvas.getBoundingClientRect();
   const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
   const my = (e.clientY - rect.top) * (canvas.height / rect.height);
   
-  // Botão Dungeon
+  
   const dungeonBtnX = canvas.width - 220;
   const dungeonBtnY = 20;
   const dungeonBtnW = 200;
   const dungeonBtnH = 40;
 
-  // Checa hover nos botões
+  
   if (mx >= dungeonBtnX && mx <= dungeonBtnX + dungeonBtnW &&
       my >= dungeonBtnY && my <= dungeonBtnY + dungeonBtnH) {
     selectedElement = { type: 'dungeon', index: -1 };
@@ -156,7 +156,7 @@ canvas.addEventListener('mousemove', function(e) {
       drawLoja();
       return;
     }
-    // Checa hover nos itens da loja
+    
     for (let i = 0; i < lojaOptionRects.length; i++) {
       const r = lojaOptionRects[i];
       if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
@@ -173,9 +173,9 @@ canvas.addEventListener('mousemove', function(e) {
   }
 });
 
-// Rolagem da loja
+
 canvas.addEventListener('wheel', function(e) {
-  if (gameState !== 'loja' || showCharacterSelect) return; // Bloqueia scroll no modal
+  if (gameState !== 'loja' || showCharacterSelect) return; 
   e.preventDefault();
   if (e.deltaY < 0) {
     scrollOffset = Math.max(0, scrollOffset - SCROLL_SPEED);
@@ -194,7 +194,7 @@ canvas.addEventListener('mousemove', function(e) {
   
   let foundHover = false;
   
-  // Checar hover no botão X
+  
   const wasHovered = closeButtonHovered;
   closeButtonHovered = Math.hypot(mx-(canvas.width-60), my-100) < 28;
   
@@ -217,7 +217,7 @@ canvas.addEventListener('mousemove', function(e) {
   }
 });
 
-// Adicione este evento de mouseout
+
 canvas.addEventListener('mouseout', function() {
   if (hoveredCharacterIndex !== -1) {
     hoveredCharacterIndex = -1;
@@ -225,7 +225,7 @@ canvas.addEventListener('mouseout', function() {
   }
 });
 
-// Mouse: detecta clique na opção e mouseover
+
 canvas.addEventListener('mousemove', function(e) {
   if (showCharacterSelect) return;
   if (gameState !== 'loja') return;
@@ -244,7 +244,7 @@ canvas.addEventListener('mousemove', function(e) {
   }
 });
 
-// Mouse: troca personagem na barra
+
 canvas.addEventListener('click', function(e) {
   if (gameState !== 'loja') return;
   const rect = canvas.getBoundingClientRect();
@@ -270,7 +270,7 @@ canvas.addEventListener('click', function(e) {
   }
 });
 
-// Teclado: navegação e compra
+
 
 window.addEventListener('keydown', e => {
   if (gameState === 'loja' && isShopLoading) {
@@ -284,7 +284,7 @@ window.addEventListener('keydown', e => {
       const unlocked = getUnlockedCharacters();
       const key = e.key.toLowerCase();
 
-      // Navegação entre X e personagens
+      
       if (key === 'arrowup' || key === 'w') {
         if (!closeButtonSelected && selectedCharacterModalIndex === 0) {
           closeButtonSelected = true;
@@ -298,13 +298,13 @@ window.addEventListener('keydown', e => {
           drawLoja();
         }
       } else if ((key === 'arrowleft' || key === 'arrowright') && !closeButtonSelected) {
-        // Navegação horizontal apenas quando não estiver no X
+        
         const direction = (key === 'arrowleft') ? -1 : 1;
         selectedCharacterModalIndex = (selectedCharacterModalIndex + direction + unlocked.length) % unlocked.length;
         drawLoja();
       }
 
-      // Ação no Enter
+      
       if (key === 'enter') {
         if (closeButtonSelected) {
           showCharacterSelect = false;
@@ -316,7 +316,7 @@ window.addEventListener('keydown', e => {
         drawLoja();
       }
 
-      // Ação no Escape
+      
       if (key === 'escape') {
         showCharacterSelect = false;
         closeButtonSelected = false;
@@ -350,7 +350,7 @@ window.addEventListener('keydown', e => {
           isCharacterSelectButtonHovered = true;
           break;
         case 'items': {
-          // Só permite sair para dungeon se estiver na última linha
+          
           if (selectedIndex >= 0) {
             currentRow = Math.floor(selectedIndex / itemsPerRow);
             if (currentRow === totalRows - 1) {
@@ -360,7 +360,7 @@ window.addEventListener('keydown', e => {
               isDungeonButtonHovered = true;
               break;
             }
-            // Move para baixo na grid
+            
             let nextIndex = selectedIndex + itemsPerRow;
             if (nextIndex < visibleItems.length) {
               selectedIndex = nextIndex;
@@ -370,9 +370,9 @@ window.addEventListener('keydown', e => {
           break;
         }
       }
-      // Ajusta scroll para grid
+      
       if (selectedElement.type === 'items' && selectedIndex >= 0) {
-        let rowY = Math.floor(selectedIndex / itemsPerRow) * 100; // 100 = itemHeight+gap
+        let rowY = Math.floor(selectedIndex / itemsPerRow) * 100; 
         let visibleRows = Math.floor((canvas.height - 360 - 40) / 100);
         let minScroll = rowY;
         let maxScroll = rowY - (visibleRows - 1) * 100;
@@ -386,11 +386,11 @@ window.addEventListener('keydown', e => {
     if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') {
       switch (selectedElement.type) {
         case 'dungeon':
-          // Agora vai para o último item da loja
+          
           selectedElement.type = 'items';
           isDungeonButtonHovered = false;
           selectedIndex = visibleItems.length - 1;
-          ensureSelectedItemVisible(); // Garante que o último item fique visível
+          ensureSelectedItemVisible(); 
           break;
         case 'character':
           selectedElement.type = 'dungeon';
@@ -407,7 +407,7 @@ window.addEventListener('keydown', e => {
               isCharacterSelectButtonHovered = true;
               break;
             }
-            // Move para cima na grid
+            
             let prevIndex = selectedIndex - itemsPerRow;
             if (prevIndex >= 0) {
               selectedIndex = prevIndex;
@@ -417,7 +417,7 @@ window.addEventListener('keydown', e => {
           break;
         }
       }
-      // Ajusta scroll para grid
+      
       if (selectedElement.type === 'items' && selectedIndex >= 0) {
         let rowY = Math.floor(selectedIndex / itemsPerRow) * 100;
         if (rowY < scrollOffset) {
@@ -477,7 +477,7 @@ window.addEventListener('keydown', e => {
   }
 });
 
-// Click handler for Dungeon button
+
 canvas.addEventListener('click', function(e) {
   if (gameState !== 'loja' || isShopLoading || showCharacterSelect) return;
 
@@ -485,20 +485,20 @@ canvas.addEventListener('click', function(e) {
   const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
   const my = (e.clientY - rect.top) * (canvas.height / rect.height);
   
-  // Botão Dungeon
+  
   const dungeonBtnX = canvas.width - 220;
   const dungeonBtnY = 20;
   const dungeonBtnW = 200;
   const dungeonBtnH = 40;
 
-  // Checa clique no botão dungeon
+  
   if (mx >= dungeonBtnX && mx <= dungeonBtnX + dungeonBtnW &&
       my >= dungeonBtnY && my <= dungeonBtnY + dungeonBtnH) {
     closeShop();
   }
 });
 
-// Também atualiza o evento de teclado para o ESC
+
 window.addEventListener('keydown', e => {
   if (gameState === 'loja') {
     if (e.key === 'Escape' && !isShopLoading) {
@@ -512,7 +512,7 @@ window.addEventListener('keydown', e => {
   }
 });
 
-// Adiciona lógica de marcação de itens lidos no evento mousemove
+
 canvas.addEventListener('mousemove', function(e) {
     if (gameState !== 'loja' || showCharacterSelect) return;
     
@@ -541,11 +541,11 @@ canvas.addEventListener('mousemove', function(e) {
     }
 });
 
-// Modifica o event listener do teclado para marcar itens como lidos
+
 window.addEventListener('keydown', e => {
     if (gameState !== 'loja' || showCharacterSelect) return;
 
-    // Marcar como lido ao navegar com qualquer tecla de navegação ou Enter
+    
     const navigationKeys = [
       'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
       'w', 'a', 's', 'd', 'Enter'
@@ -568,7 +568,7 @@ window.addEventListener('keydown', e => {
     }
 });
 
-// Garante que o item selecionado está visível no grid da loja
+
 function ensureSelectedItemVisible() {
   if (selectedElement.type !== 'items' || selectedIndex < 0) return;
   const itemsPerRow = 3;

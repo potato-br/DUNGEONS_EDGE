@@ -1,6 +1,6 @@
-// ==========================
-// ===== PLATAFORMAS FANTASMA =====
-// ==========================
+
+
+
 
 function handleGhostPlatform(platform) {
     initializeGhostPlatform(platform);
@@ -18,7 +18,7 @@ function initializeGhostPlatform(platform) {
         platform.fadeState = 'visible';
         platform.particleTimer = 0;
         
-        // Pega as specs corretas baseado no tamanho
+        
         const specs = platform.isGrande ? 
             platformFactory.platformgrandeSpecs.fantasma :
             platformFactory.platformnormalSpecs.fantasma;
@@ -33,7 +33,7 @@ function initializeGhostPlatform(platform) {
 }
 
 function updateGhostVisibility(platform) {
-    // Se o jogador está respawnando e sobre a plataforma
+    
     if (isRespawning && player.y + player.height <= platform.y + 5) {
         platform.fadeState = 'visible';
         platform.opacity = 1;
@@ -45,7 +45,7 @@ function updateGhostVisibility(platform) {
 
     platform.fadeTimer++;
 
-    // Gerencia o estado de fade
+    
     switch (platform.fadeState) {
         case 'visible':
             if (platform.fadeTimer >= platform.fadeTime) {
@@ -68,7 +68,7 @@ function updateGhostVisibility(platform) {
             if (platform.fadeTimer >= platform.fadeTime / 2) {
                 platform.fadeState = 'fadeIn';
                 platform.fadeTimer = 0;
-                platform.ignoreEnemyCollision = true; // Ignora colisão com inimigos
+                platform.ignoreEnemyCollision = true; 
                 platform.visible = true;
             }
             break;
@@ -77,7 +77,7 @@ function updateGhostVisibility(platform) {
             platform.opacity = Math.min(1, platform.fadeTimer / platform.fadeInTime);
             if (platform.fadeTimer >= platform.fadeInTime) {
                 platform.fadeState = 'visible';
-                platform.ignoreEnemyCollision = false; // Restaura colisão com inimigos
+                platform.ignoreEnemyCollision = false; 
                 platform.fadeTimer = 0;
             }
             break;
@@ -85,7 +85,7 @@ function updateGhostVisibility(platform) {
 }
 
 function updateGhostEffects(platform) {
-    // Cria partículas espectrais
+    
     platform.particleTimer++;
     if (platform.visible && Math.random() < platform.particleFrequency && platform.particleTimer > 5) {
         const particleX = platform.x + Math.random() * platform.width;
@@ -94,13 +94,13 @@ function updateGhostEffects(platform) {
         createParticles(
             particleX,
             particleY,
-            1, // Menos partículas, mas mais frequentes
+            1, 
             platform.color || '#E6E6FA',
             {
-                speedY: -0.5 - Math.random(), // Movimento para cima
+                speedY: -0.5 - Math.random(), 
                 fadeSpeed: 0.02,
                 size: 2 + Math.random() * 2,
-                gravity: -0.05 // Flutuam para cima
+                gravity: -0.05 
             }
         );
         platform.particleTimer = 0;
@@ -112,24 +112,24 @@ function drawGhostPlatform(ctx, platform, img) {
     
     ctx.save();
     
-    // Efeito de pulsação
+    
     const pulse = Math.sin(platform.fadeTimer * platform.pulseSpeed) * platform.pulseIntensity;
     const baseOpacity = platform.opacity || 1;
     ctx.globalAlpha = Math.max(0, Math.min(1, baseOpacity + pulse));
     
-    // Efeito de distorção/ondulação
+    
     const waveAmplitude = 2;
     const waveFrequency = platform.fadeTimer * 0.05;
     ctx.setTransform(
-        1, // Scale X
-        Math.sin(waveFrequency) * 0.02, // Skew X
-        0, // Skew Y
-        1, // Scale Y
-        platform.x, // Translate X
-        platform.y + Math.sin(waveFrequency) * waveAmplitude // Translate Y
+        1, 
+        Math.sin(waveFrequency) * 0.02, 
+        0, 
+        1, 
+        platform.x, 
+        platform.y + Math.sin(waveFrequency) * waveAmplitude 
     );
     
-    // Desenha a plataforma com um leve brilho
+    
     if (platform.opacity > 0.5) {
         ctx.shadowColor = platform.color || '#E6E6FA';
         ctx.shadowBlur = 10;

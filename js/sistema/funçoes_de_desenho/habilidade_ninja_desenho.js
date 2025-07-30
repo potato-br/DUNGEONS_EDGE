@@ -29,7 +29,7 @@ function drawNinjaAbilityCooldown() {
             ctx.globalAlpha = pulseIntensity;
             ctx.drawImage(ninjaAbilityIcon, x, y, iconSize, iconSize);
             ctx.fillStyle = '#ffffff';
-            // Tempo restante
+            
             let remainingActive = 0;
             if (typeof activeAbilityTimers !== 'undefined' && activeAbilityTimers.ninjaSmoke && typeof activeAbilityTimers.ninjaSmoke.remainingTime !== 'undefined' && activeAbilityTimers.ninjaSmoke.remainingTime > 0) {
                 remainingActive = activeAbilityTimers.ninjaSmoke.remainingTime;

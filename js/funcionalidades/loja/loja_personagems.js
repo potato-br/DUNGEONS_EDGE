@@ -1,5 +1,5 @@
 
-// Função utilitária para obter o retângulo do botão de seleção de personagem de forma responsiva
+
 function getCharacterBtnRect() {
   const btnW = Math.max(180, Math.min(canvas.width * 0.22, 350));
   const btnH = Math.max(36, Math.min(canvas.height * 0.055, 60));
@@ -12,10 +12,10 @@ function getCharacterBtnRect() {
 function getUnlockedCharacters() {
   const unlocked = ['O Errante de Eldoria'];
   
-  // Check purchases for all special characters
+  
   for (let character in characterData) {
     const purchases = characterData[character].purchases;
-    // Check each special character
+    
     ['Kuroshi, o Ninja', 'Roderick, o Cavaleiro', 'Valthor, o Mago'].forEach(charName => {
       if (purchases[charName] && purchases[charName] > 0 && !unlocked.includes(charName)) {
         unlocked.push(charName);
@@ -26,18 +26,18 @@ function getUnlockedCharacters() {
   return unlocked;
 }
 
-// ====== VARIÁVEIS PARA MODAL DE SELEÇÃO DE PERSONAGEM ======
+
 let showCharacterSelect = false;
 let characterSelectRects = [];
 let selectedCharacterModalIndex = 0;
-let closeButtonHovered = false; // Variável para hover do botão fechar
-let closeButtonSelected = false; // Nova variável para seleção via teclado
+let closeButtonHovered = false; 
+let closeButtonSelected = false; 
 
-// Botão para abrir seleção de personagem
+
 function drawCharacterSelectButton() {
   if(insufficientFundsMessage) return;
 
-  // Usa a função utilitária para obter o retângulo do botão
+  
   const { x: btnX, y: btnY, w: btnW, h: btnH } = getCharacterBtnRect();
   ctx.save();
   ctx.globalAlpha = 0.93;
@@ -62,7 +62,7 @@ function drawCharacterSelectButton() {
 }
 
 let hoveredCharacterIndex = -1;
-// Modal de seleção de personagem
+
 function drawCharacterSelectModal() {
   if (!showCharacterSelect) return;
   ctx.save();
@@ -78,7 +78,7 @@ function drawCharacterSelectModal() {
   ctx.shadowBlur = 12;
   ctx.fillText('Selecione seu Personagem', canvas.width/2, 110);
   ctx.restore();
-  // Botão de fechar
+  
   ctx.save();
   ctx.globalAlpha = 0.85;
   ctx.fillStyle = (closeButtonHovered || closeButtonSelected) ? '#333' : '#222';
@@ -90,35 +90,35 @@ function drawCharacterSelectModal() {
   ctx.textAlign = 'center';
   ctx.fillText('X', canvas.width-60, 112);
   ctx.restore();
-  // Lista de personagens desbloqueados
+  
   const unlocked = getUnlockedCharacters();
   const charW = 170, charH = 260;
   const gap = 30;
-  // Corrige: calcula corretamente o startX para centralizar e evitar overflow
+  
   const totalW = unlocked.length * charW + (unlocked.length - 1) * gap;
   const startX = Math.max(60, Math.floor((canvas.width - totalW) / 2));
-  characterSelectRects = []; // Corrige: limpa antes de preencher
+  characterSelectRects = []; 
 
   for (let i = 0; i < unlocked.length; i++) {
       const nome = unlocked[i];
       const x = startX + i * (charW + gap);
       const y = 180;
-      // Card com efeito hover
+      
       ctx.save();
       ctx.globalAlpha = 0.97;
       let isHovered = i === hoveredCharacterIndex;
-      // Fundo do card com efeito hover
+      
        ctx.fillStyle = isHovered ? 'rgba(255,215,0,0.2)' : 
                    (selectedCharacterModalIndex===i) ? 'rgba(172, 83, 83, 0.13)' : 
                    'rgba(172, 83, 83, 0.13)';
-      // Card// Borda com brilho no hover
+      
       ctx.strokeStyle = isHovered ? '#fff' :
                      (activeCharacter===nome) ? '#ffd700' : 
                      '#fff';
 
       ctx.lineWidth = (activeCharacter===nome) ? 4 : 2;
 
-       // Adiciona sombra no hover
+       
     if (isHovered) {
       ctx.shadowColor = '#ffd700';
       ctx.shadowBlur = 15;
@@ -129,26 +129,26 @@ function drawCharacterSelectModal() {
     ctx.fill();
     ctx.stroke();
     ctx.restore();
-    // Nome - Ajustado para texto mais longo
+    
     ctx.save();
-    // Quebra o nome em múltiplas linhas se necessário
+    
     let nomeLines = [];
     let nomeRest = nome.trim();
     const maxWidth = charW - 18;
     ctx.font = 'bold 16px PixelFont';
-    // Reduz fonte se nome for muito longo
+    
     let fontSize = 16;
     if (ctx.measureText(nome).width > maxWidth) {
       fontSize = 13;
       ctx.font = `bold ${fontSize}px PixelFont`;
     }
-    // Algoritmo simples de quebra de linha por palavra
+    
     while (nomeRest.length > 0) {
       let fit = nomeRest.length;
       while (fit > 0 && ctx.measureText(nomeRest.slice(0, fit)).width > maxWidth) fit--;
       if (fit === 0) fit = 1;
       let line = nomeRest.slice(0, fit);
-      // Evita quebrar no meio da palavra
+      
       if (fit < nomeRest.length && nomeRest[fit] !== ' ') {
         let lastSpace = line.lastIndexOf(' ');
         if (lastSpace > 0) {
@@ -163,7 +163,7 @@ function drawCharacterSelectModal() {
     ctx.font = `bold ${fontSize}px PixelFont`;
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
-    // Centraliza verticalmente as linhas do nome no card
+    
     let nomeStartY = y + charH - 28 - (nomeLines.length - 1) * (fontSize + 1) / 2;
     for (let l = 0; l < nomeLines.length; l++) {
       ctx.fillText(nomeLines[l], x + charW / 2, nomeStartY + l * (fontSize + 1));
@@ -174,7 +174,7 @@ function drawCharacterSelectModal() {
         ctx.fillText('ATIVO', x+charW/2, y+charH+15);
     }
     ctx.restore();
-    // Ícones e stats menores, distribuídos entre esquerda e direita, sem inimigos
+    
     ctx.save();
     let stats = characterData[nome]?.stats || { maxJumps: player.maxJumps, speed: player.speed, liveupgrade: live };
     const iconStats = [
@@ -186,7 +186,7 @@ function drawCharacterSelectModal() {
     const valueFont = '13px PixelFont';
     const iconY = y + 100;
     const iconSpacing = 85;
-    // Esquerda (pulos)
+    
     ctx.font = iconFont;
     ctx.textAlign = 'left';
     ctx.fillStyle = '#fff';
@@ -194,7 +194,7 @@ function drawCharacterSelectModal() {
     ctx.font = valueFont;
     ctx.fillStyle = '#ffd700';
     ctx.fillText(iconStats[0].value, x + 43, iconY);
-    // Direita (velocidade)
+    
     ctx.font = iconFont;
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'right';
@@ -202,7 +202,7 @@ function drawCharacterSelectModal() {
     ctx.font = valueFont;
     ctx.fillStyle = '#ffd700';
     ctx.fillText(iconStats[1].value, x + charW - 34, iconY);
-    // Centro (vidas)
+    
     ctx.font = iconFont;
     ctx.textAlign = 'center';
     ctx.fillStyle = '#fff';
@@ -211,43 +211,43 @@ function drawCharacterSelectModal() {
     ctx.fillStyle = '#ffd700';
     ctx.fillText(iconStats[2].value, x + charW/2 + 18, iconY + iconSpacing);
     ctx.restore();
-    // Animação idle do personagem
+    
     drawCharacterIdlePreview(nome, x+charW/2, y+charH/2+10, 3.2, i===selectedCharacterModalIndex);
-    // Corrige: registra corretamente a área de clique para cada personagem
+    
     characterSelectRects.push({x, y, w: charW, h: charH, nome, index: i, modal:true});
   }
 }
 
-// Função para desenhar animação idle do personagem
+
 function drawCharacterIdlePreview(nome, cx, cy, scale, highlight) {
   if (!playerSpriteLoaded) return;
   
-  // Get the correct sprite and config
+  
   const characterSprite = playerSprites[nome].sprite;
   const characterConfig = playerSprites[nome].config;
   
-  // Get frame info from character config
-  const frameHeight = characterConfig[2].frameHeight; // Row 2 = idle animation
+  
+  const frameHeight = characterConfig[2].frameHeight; 
   const frameWidth = characterConfig[2].frameWidth;
   const offsetX = characterConfig[2].offsetX || 0;
   const offsetY = characterConfig[2].offsetY || 0;
   
-  // Idle animation frame calculation
+  
   let frame;
   if (nome === 'Kuroshi, o Ninja') {
-    frame = Math.floor((performance.now()/1000)%2); // Standard idle speed for ninja
+    frame = Math.floor((performance.now()/1000)%2); 
   } else if (nome === 'Roderick, o Cavaleiro') {
-    frame = Math.floor((performance.now()/1600)%2); // Slower idle
+    frame = Math.floor((performance.now()/1600)%2); 
   } else if (nome === 'Valthor, o Mago') {
-    frame = Math.floor((performance.now()/1200)%2); // Faster idle
+    frame = Math.floor((performance.now()/1200)%2); 
   } else {
-    frame = Math.floor((performance.now()/1400)%2); // Default speed
+    frame = Math.floor((performance.now()/1400)%2); 
   }
 
   const fw = frameWidth * scale;
   const fh = frameHeight * scale;
   const sx = frame * frameWidth;
-  const sy = 2 * frameHeight; // Row 2 = idle animation
+  const sy = 2 * frameHeight; 
   
   ctx.save();
   if (highlight) {
@@ -255,7 +255,7 @@ function drawCharacterIdlePreview(nome, cx, cy, scale, highlight) {
     ctx.shadowBlur = 24;
   }
   
-  // Draw the sprite with proper offset
+  
   ctx.drawImage(
     characterSprite,
     sx, sy, frameWidth, frameHeight,
@@ -264,7 +264,7 @@ function drawCharacterIdlePreview(nome, cx, cy, scale, highlight) {
   
   ctx.restore();
 if (showCharacterSelect) return;
-  // Stats no idle preview: igual ao card do modal
+  
   ctx.save();
   let stats = characterData[nome]?.stats || { maxJumps: player.maxJumps, speed: player.speed, liveupgrade: live };
   const iconStats = [
@@ -276,7 +276,7 @@ if (showCharacterSelect) return;
   const valueFont = '13px PixelFont';
   const iconY = 155;
   const iconSpacing = 70;
-  // Esquerda (pulos)
+  
   ctx.font = iconFont;
   ctx.textAlign = 'left';
   ctx.fillStyle = '#fff';
@@ -284,7 +284,7 @@ if (showCharacterSelect) return;
   ctx.font = valueFont;
   ctx.fillStyle = '#ffd700';
   ctx.fillText(iconStats[0].value, cx - iconSpacing + 25, iconY);
-  // Direita (velocidade)
+  
   ctx.font = iconFont;
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'right';
@@ -292,7 +292,7 @@ if (showCharacterSelect) return;
   ctx.font = valueFont;
   ctx.fillStyle = '#ffd700';
   ctx.fillText(iconStats[1].value, cx + iconSpacing - 20, iconY);
-  // Centro (vidas)
+  
   ctx.font = iconFont;
   ctx.textAlign = 'center';
   ctx.fillStyle = '#fff';

@@ -30,7 +30,7 @@ function drawCavaleiroAbilitiesCooldown() {
             const pulseIntensity = (Math.sin(now * 0.01) * 0.3 + 0.7);
             ctx.globalAlpha = pulseIntensity;
             ctx.drawImage(knightShieldIcon, x, y, iconSize, iconSize);
-            // Tempo restante
+            
             let remainingActive = 0;
             if (typeof activeAbilityTimers !== 'undefined' && activeAbilityTimers.shield && typeof activeAbilityTimers.shield.startTime !== 'undefined') {
                 remainingActive = CAVALEIRO.SHIELD_DURATION - (now - activeAbilityTimers.shield.startTime);

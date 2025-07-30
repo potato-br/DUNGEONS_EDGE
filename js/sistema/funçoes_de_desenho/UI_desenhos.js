@@ -1,20 +1,20 @@
 function drawLives() {
   if (gameState === 'gameover') return;
 
-  // Verifica se perdeu vida
+  
   if (live < previousLive) {
-    // Adiciona animação para cada coração perdido
+    
     for (let i = live; i < previousLive; i++) {
       animatingHearts.push({
         index: i,
         startTime: performance.now(),
-        duration: 1000, // duração da animação em ms
+        duration: 1000, 
       });
     }
   }
   previousLive = live;
 
-  // Remove animações concluídas
+  
   animatingHearts = animatingHearts.filter(heart => {
     const elapsed = performance.now() - heart.startTime;
     return elapsed < heart.duration;
@@ -78,14 +78,14 @@ switch (activeCharacter) {
   }
 
   if (typeof heartSpriteLoaded !== 'undefined' && heartSpriteLoaded) {
-    // Primeiro desenha os corações normais
+    
     for (let i = 0; i < live; i++) {
       const currentRow = Math.floor(i / heartsPerRow);
       const currentCol = i % heartsPerRow;
       const heartX = x + (currentCol * (heartSize + spacing));
       const heartY = y - heartSize + padding + 8 + (currentRow * (heartSize + spacing));
       
-      // Efeito de balanço suave
+      
       const now = performance.now();
       const swing = Math.sin(now * 0.005 + i) * 0.18;
       ctx.save();
@@ -100,7 +100,7 @@ switch (activeCharacter) {
       ctx.restore();
     }
 
-    // Depois desenha os corações que estão sendo animados (desaparecendo)
+    
     for (const heart of animatingHearts) {
       const currentRow = Math.floor(heart.index / heartsPerRow);
       const currentCol = heart.index % heartsPerRow;
@@ -110,9 +110,9 @@ switch (activeCharacter) {
       const elapsed = performance.now() - heart.startTime;
       const progress = elapsed / heart.duration;
       
-      // Efeito de pulsar e desaparecer
-      const scale = 1 + Math.sin(progress * Math.PI) * 0.5; // Aumenta e diminui
-      const opacity = 1 - progress; // Desaparece gradualmente
+      
+      const scale = 1 + Math.sin(progress * Math.PI) * 0.5; 
+      const opacity = 1 - progress; 
       
       ctx.save();
       ctx.translate(heartX + heartSize/2, heartY + heartSize/2);
@@ -120,7 +120,7 @@ switch (activeCharacter) {
       ctx.translate(-heartSize/2, -heartSize/2);
       ctx.globalAlpha = opacity;
       
-      // Desenha o coração com um brilho vermelho
+      
       ctx.filter = 'drop-shadow(0 0 5px red)';
       ctx.drawImage(heartSprite,
         col * 420, row * 420, 300, 350,
@@ -136,7 +136,7 @@ switch (activeCharacter) {
       const currentCol = i % heartsPerRow;
       const heartX = x + (currentCol * (heartSize + spacing));
       const heartY = y - heartSize/2 + padding + 8 + (currentRow * (heartSize + spacing));
-      // Efeito de balanço
+      
       const now = performance.now();
       const swing = Math.sin(now * 0.005 + i) * 0.18;
       ctx.save();

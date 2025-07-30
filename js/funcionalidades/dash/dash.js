@@ -1,18 +1,18 @@
-// ==========================
-// ===== DASH SYSTEM ========
-// ==========================
 
-// === Dash State ===
+
+
+
+
 const DASH = {
-    isInvulnerable: false, // Invulnerabilidade geral
+    isInvulnerable: false, 
     isDashing: false,
     cooldown: false,
-    duration: 150, // ms
+    duration: 150, 
     speed: 10,
-    cooldownTime: 5000, // ms
+    cooldownTime: 5000, 
     lastDashTime: 0,
-    extraInvuln: 1000, // ms
-    extraInvulnMax: 3000, // ms
+    extraInvuln: 1000, 
+    extraInvulnMax: 3000, 
     invulnTimeout: null,
     trailPoints: [],
     trailActive: false,
@@ -23,7 +23,7 @@ const DASH = {
     trailFadeFrame: 0
 };
 
-// === Personagem: Roderick, o Cavaleiro ===
+
 const CAVALEIRO = {
     shieldActive: false,
     shieldCooldown: false,
@@ -35,7 +35,7 @@ const CAVALEIRO = {
     VOID_RESURRECTION_COOLDOWN: 30000
 };
 
-// === Personagem: Valthor, o Mago ===
+
 const MAGO = {
     magicBlastActive: false,
     magicBlastCooldown: false,
@@ -45,7 +45,7 @@ const MAGO = {
     magicBlastCooldownStart: null
 };
 
-// === Personagem: Kuroshi, o Ninja ===
+
 const NINJA = {
     smokeBombActive: false,
     smokeBombCooldown: false,
@@ -53,10 +53,10 @@ const NINJA = {
     NINJA_SMOKE_DURATION: 2000,
     NINJA_SMOKE_COOLDOWN: 8000,
     smokeBombCooldownStart: null,
-    invulneravelPorDano: false // Flag para aura de dano
+    invulneravelPorDano: false 
 };
 
-// === Controle de Pausa e Timers ===
+
 let pauseStartTime = null;
 let totalPausedTime = 0;
 let activeAbilityTimers = {
@@ -64,14 +64,14 @@ let activeAbilityTimers = {
     magicBlast: { startTime: 0, remainingTime: 0 },
     ninjaSmoke: { startTime: 0, remainingTime: 0 },
     voidRes: { startTime: 0, remainingTime: 0 },
-    // ... outros se necessário ...
+    
 };
 
-// === Função: Pausa/Despausa ===
+
 function onPauseToggle(paused) {
     if (paused) {
         pauseStartTime = performance.now();
-        // Salva o tempo restante de cada habilidade ativa
+        
         if (CAVALEIRO.shieldActive && activeAbilityTimers.shield.startTime) {
             activeAbilityTimers.shield.remainingTime = 
                 CAVALEIRO.SHIELD_DURATION - (pauseStartTime - activeAbilityTimers.shield.startTime);
@@ -94,13 +94,13 @@ function onPauseToggle(paused) {
             activeAbilityTimers.ninjaSmoke.remainingTime = 
                 NINJA.NINJA_SMOKE_DURATION - (pauseStartTime - activeAbilityTimers.ninjaSmoke.startTime);
         }
-        // Invulnerabilidade
+        
         if (DASH.isInvulnerable && typeof invulnEndTime !== 'undefined' && invulnEndTime > pauseStartTime) {
             activeAbilityTimers.invulnerabilidade = {
                 remainingTime: invulnEndTime - pauseStartTime
             };
         }
-        // Cooldowns
+        
         if (MAGO.magicBlastCooldown && MAGO.magicBlastCooldownStart) {
             activeAbilityTimers.magicBlastCooldown = {
                 remainingTime: MAGO.MAGIC_BLAST_COOLDOWN - (pauseStartTime - MAGO.magicBlastCooldownStart)
@@ -116,7 +116,7 @@ function onPauseToggle(paused) {
                 remainingTime: CAVALEIRO.SHIELD_COOLDOWN - (pauseStartTime - CAVALEIRO.shieldCooldownStart)
             };
         }
-        // --- PAUSA O BLOQUEIO DE INIMIGOS DO MAGO ---
+        
         if (typeof lastEnemyAllowedTime !== 'undefined' && lastEnemyAllowedTime > pauseStartTime) {
             activeAbilityTimers.magoEnemyBlock = {
                 remainingTime: lastEnemyAllowedTime - pauseStartTime
@@ -127,11 +127,11 @@ function onPauseToggle(paused) {
         totalPausedTime += pauseDuration;
         if (player.lastDashRecharge) player.lastDashRecharge += pauseDuration;
         if (DASH.lastDashTime) DASH.lastDashTime += pauseDuration;
-        // Restaura timers do escudo
+        
         if (activeAbilityTimers.shield.remainingTime) {
-            // Garante que o escudo dure o tempo correto após o pause
+            
             activeAbilityTimers.shield.startTime = performance.now();
-            // Atualiza o shieldCooldownStart para o novo fim do escudo
+            
             if (CAVALEIRO.shieldActive) {
                 CAVALEIRO.shieldCooldownStart = performance.now() + activeAbilityTimers.shield.remainingTime;
             }
@@ -140,12 +140,12 @@ function onPauseToggle(paused) {
             CAVALEIRO.shieldCooldownStart = performance.now() - (CAVALEIRO.SHIELD_COOLDOWN - activeAbilityTimers.shieldCooldown.remainingTime);
             activeAbilityTimers.shieldCooldown = null;
         }
-        // Restaura timer da ressurreição
+        
         if (activeAbilityTimers.voidRes && activeAbilityTimers.voidRes.remainingTime) {
             CAVALEIRO.voidResurrectionLastUsed = performance.now() - (CAVALEIRO.VOID_RESURRECTION_COOLDOWN - activeAbilityTimers.voidRes.remainingTime);
             activeAbilityTimers.voidRes = null;
         }
-        // Restaura timers
+        
         if (activeAbilityTimers.magicBlast.remainingTime) {
             activeAbilityTimers.magicBlast.startTime = performance.now() - 
                 (MAGO.MAGIC_BLAST_DURATION - activeAbilityTimers.magicBlast.remainingTime);
@@ -154,15 +154,15 @@ function onPauseToggle(paused) {
             activeAbilityTimers.ninjaSmoke.startTime = performance.now() - 
                 (NINJA.NINJA_SMOKE_DURATION - activeAbilityTimers.ninjaSmoke.remainingTime);
         }
-        // Corrige o fim da invulnerabilidade
+        
         if (typeof DASH.invulnEndTime !== 'undefined' && DASH.isInvulnerable && DASH.invulnEndTime) {
             DASH.invulnEndTime += pauseDuration;
         }
-        // Corrige o timer da bomba de fumaça
+        
         if (NINJA.smokeBombActive && NINJA.smokeBombTimer) {
             NINJA.smokeBombTimer += pauseDuration;
         }
-        // --- RETOMA O BLOQUEIO DE INIMIGOS DO MAGO ---
+        
         if (activeAbilityTimers.magoEnemyBlock && activeAbilityTimers.magoEnemyBlock.remainingTime) {
             lastEnemyAllowedTime = performance.now() + activeAbilityTimers.magoEnemyBlock.remainingTime;
             activeAbilityTimers.magoEnemyBlock = null;
@@ -188,16 +188,16 @@ function onPauseToggle(paused) {
     if (typeof onPauseTogglePiscada === 'function') onPauseTogglePiscada(paused);
 }
 
-// === Função: Lidar com Cooldowns ===
+
 function updateCooldowns(now) {
     if (isPaused && typeof pauseStartTime !== 'undefined' && pauseStartTime !== null) {
         now = pauseStartTime;
     }
-    // Dash global cooldown (exceto Ninja)
+    
     if (DASH.cooldown && now - DASH.lastDashTime >= DASH.cooldownTime) {
         DASH.cooldown = false;
     }
-    // Ninja: recarrega dash individual
+    
     if (activeCharacter === 'Kuroshi, o Ninja' && player.currentDashes < player.maxDashes) {
         const timeSinceLastDash = now - player.lastDashRecharge;
         if (!input.dash && timeSinceLastDash >= player.dashRechargeTime && !DASH.isDashing) {
@@ -205,7 +205,7 @@ function updateCooldowns(now) {
             player.lastDashRecharge = now;
         }
     }
-    // Ninja: cooldown da bomba de fumaça
+    
     if (NINJA.smokeBombActive) {
         if (!DASH.isInvulnerable) {
             NINJA.smokeBombActive = false;
@@ -217,7 +217,7 @@ function updateCooldowns(now) {
         NINJA.smokeBombCooldown = false;
         NINJA.smokeBombTimer = 0;
     }
-    // Cavaleiro: cooldown do escudo
+    
     if (CAVALEIRO.shieldActive && CAVALEIRO.shieldCooldownStart && now >= CAVALEIRO.shieldCooldownStart) {
         CAVALEIRO.shieldActive = false;
         DASH.isInvulnerable = false;
@@ -239,7 +239,7 @@ function updateCooldowns(now) {
             activeAbilityTimers.shield.remainingTime = null;
         }
     }
-    // Mago: cooldown da magia
+    
     if (MAGO.magicBlastActive && activeAbilityTimers.magicBlast.startTime) {
         const elapsed = now - activeAbilityTimers.magicBlast.startTime;
         if (elapsed >= MAGO.MAGIC_BLAST_DURATION) {
@@ -255,7 +255,7 @@ function updateCooldowns(now) {
         MAGO.magicBlastCooldown = false;
         MAGO.magicBlastCooldownStart = null;
     }
-    // Cooldown da ressurreição do cavaleiro
+    
     if (!CAVALEIRO.voidResurrectionAvailable && CAVALEIRO.voidResurrectionLastUsed !== null) {
         if (now - CAVALEIRO.voidResurrectionLastUsed >= CAVALEIRO.VOID_RESURRECTION_COOLDOWN) {
             CAVALEIRO.voidResurrectionAvailable = true;
@@ -264,7 +264,7 @@ function updateCooldowns(now) {
     }
 }
 
-// === Função: Aplicar Invulnerabilidade ===
+
 function aplicarInvulnerabilidade(duration) {
     DASH.isInvulnerable = true;
     clearTimeout(DASH.invulnTimeout);
@@ -273,9 +273,9 @@ function aplicarInvulnerabilidade(duration) {
     }, duration);
 }
 
-// === Função: Atualizar Trail ===
+
 function atualizarTrail(now) {
-    // Limpa o trail apenas quando NÃO estiver em dash nem invulnerável
+    
     if (!DASH.isDashing && !DASH.isInvulnerable && DASH.trailPoints.length) {
         DASH.trailFadeFrame++;
         if (DASH.trailFadeFrame % 3 === 0) {
@@ -285,7 +285,7 @@ function atualizarTrail(now) {
             }
         }
     }
-    // Atualiza o fade dos pontos
+    
     for (let i = DASH.trailPoints.length - 1; i >= 0; i--) {
         const point = DASH.trailPoints[i];
         if (!point.fadeStart && !DASH.isDashing) {
@@ -304,12 +304,12 @@ function atualizarTrail(now) {
     }
 }
 
-// === Função: Handle Dash Principal ===
+
 function handleDash(now) {
     updateCooldowns(now);
     if (gameState !== 'jogando' || isRespawning) return;
     if (isGameOver || gameState !== 'jogando' || isRespawning) {
-        // Reset de estados
+        
         DASH.isDashing = false;
         DASH.isInvulnerable = false;
         DASH.trailActive = false;
@@ -322,7 +322,7 @@ function handleDash(now) {
         player.visible = true;
         return;
     }
-    // Habilidades Especiais
+    
     if (activeCharacter === 'Roderick, o Cavaleiro' && input.dash && !CAVALEIRO.shieldActive && !CAVALEIRO.shieldCooldown) {
         return handleCavaleiroShield(now);
     }
@@ -330,7 +330,7 @@ function handleDash(now) {
         return usarHabilidadeMagica(now);
     }
     if (activeCharacter === 'Valthor, o Mago' || activeCharacter === 'Roderick, o Cavaleiro') return;
-    // Ninja: recarrega dash
+    
     if (activeCharacter === 'Kuroshi, o Ninja' && player.currentDashes < player.maxDashes) {
         const timeSinceLastDash = now - player.lastDashRecharge;
         if (!input.dash && timeSinceLastDash >= player.dashRechargeTime && !DASH.isDashing) {
@@ -338,7 +338,7 @@ function handleDash(now) {
             player.lastDashRecharge = now;
         }
     }
-    // Criação de fantasmas
+    
     let podeCriarFantasma = DASH.isDashing || DASH.isInvulnerable || NINJA.smokeBombActive;
     if (podeCriarFantasma && !isBlinking) {
         if (!DASH.startPoint) {
@@ -366,7 +366,7 @@ function handleDash(now) {
         }
     }
     atualizarTrail(now);
-    // Verifica se já terminou o dash
+    
     if (DASH.isDashing && now - DASH.lastDashTime >= DASH.duration) {
         DASH.isDashing = false;
         player.visible = true;
@@ -379,7 +379,7 @@ function handleDash(now) {
             player.lastIndividualDash = now;
         }
     }
-    // Dash real: movimento
+    
     if (DASH.isDashing) {
         const MIN_DIST_DASH = 40;
         const last = DASH.trailPoints[0];
@@ -397,13 +397,13 @@ function handleDash(now) {
                 DASH.trailPoints.pop();
             }
         }
-        // Partículas
+        
         if (typeof createParticles === 'function' && Math.random() < 0.4) {
             const particleX = player.x + player.width/2 + (player.facingRight ? -10 : 10);
             const particleY = player.y + player.height/2;
             createParticles(particleX, particleY, 2, 'rgba(255, 215, 0, 0.6)');
         }
-        // Direção
+        
         let dashDirection = handleDash.dashInitialDirection;
         if (input.right) {
             dashDirection = 1;
@@ -412,7 +412,7 @@ function handleDash(now) {
             dashDirection = -1;
             player.facingRight = false;
         }
-        // Colisão
+        
         const newX = player.x + DASH.speed * dashDirection;
         if (newX <= 0 || newX + player.width >= screenWidth) {
             DASH.isDashing = false;
@@ -424,7 +424,7 @@ function handleDash(now) {
         player.x = newX;
         return;
     }
-    // Inicia novo dash
+    
     if (input.dash && !DASH.isDashing && !DASH.cooldown && !handleDash._dashPressed) {
         let canDash = true;
         if (activeCharacter === 'Kuroshi, o Ninja') {
@@ -462,7 +462,7 @@ function handleDash(now) {
     if (!input.dash) {
         handleDash._dashPressed = false;
     }
-    // Limpa trails antigos
+    
     for (let i = DASH.trailStack.length - 1; i >= 0; i--) {
         const trail = DASH.trailStack[i];
         const elapsed = now - trail.endTime;
@@ -470,7 +470,7 @@ function handleDash(now) {
             DASH.trailStack.splice(i, 1);
         }
     }
-    // Limpa o trail do dash atual
+    
     if (!DASH.isDashing && !DASH.trailActive && DASH.trailPoints.length > 0 && DASH.endTime) {
         const elapsed = now - DASH.endTime;
         if (elapsed > DASH.extraInvuln) {
@@ -480,9 +480,9 @@ function handleDash(now) {
     }
 }
 
-// Função para resetar cooldowns e estados de habilidades ao sair da loja
+
 function resetarCooldownsHabilidades() {
-    // Ninja
+    
     NINJA.smokeBombActive = false;
     NINJA.smokeBombCooldown = false;
     NINJA.smokeBombTimer = 0;
@@ -492,7 +492,7 @@ function resetarCooldownsHabilidades() {
         activeAbilityTimers.ninjaSmoke = { startTime: 0, remainingTime: 0 };
         activeAbilityTimers.ninjaSmokeCooldown = { remainingTime: 0 };
     }
-    // Cavaleiro
+    
     CAVALEIRO.shieldActive = false;
     CAVALEIRO.shieldCooldown = false;
     CAVALEIRO.shieldCooldownStart = null;
@@ -503,7 +503,7 @@ function resetarCooldownsHabilidades() {
         activeAbilityTimers.shieldCooldown = { remainingTime: 0 };
         activeAbilityTimers.voidRes = { startTime: 0, remainingTime: 0 };
     }
-    // Mago
+    
     MAGO.magicBlastActive = false;
     MAGO.magicBlastCooldown = false;
     MAGO.magicBlastCooldownStart = null;
@@ -511,8 +511,8 @@ function resetarCooldownsHabilidades() {
         activeAbilityTimers.magicBlast = { startTime: 0, remainingTime: 0 };
         activeAbilityTimers.magicBlastCooldown = { remainingTime: 0 };
     }
-    // Dash global
+    
     DASH.cooldown = false;
     DASH.lastDashTime = 0;
-    // Outros resets se necessário...
+    
 }

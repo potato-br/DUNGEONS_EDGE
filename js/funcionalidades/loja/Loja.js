@@ -1,9 +1,9 @@
-// ==========================
-// ===== LOJA CANVAS ========
-// ==========================
+
+
+
 let selectedElement = {
-  type: 'dungeon', // começa no botão 1 (dungeon)
-  index: -1 // -1 significa que está nos botões, >= 0 significa índice do item da loja
+  type: 'dungeon', 
+  index: -1 
 };
 const shopItems = [
   {
@@ -13,17 +13,17 @@ const shopItems = [
     priceMultiplier: 1.5,
     priceIncrement: 0,
     requiredDepthSteps: {
-      0: 200,    // primeira compra
-      1: 400,    // após 1ª compra
-      2: 600     // após 2ª compra
+      0: 200,    
+      1: 400,    
+      2: 600     
     },
     disponivel: true,
     efeito: () => { if (player.maxJumps < 3) player.maxJumps += 1; },
     maxCompras: 3,
     compras: 0,
     exclusiveToCharacter: 'O Errante de Eldoria',
-    imgWidth: 90, // Exemplo de largura personalizada
-    imgHeight: 90 // Exemplo de altura personalizada
+    imgWidth: 90, 
+    imgHeight: 90 
   },
   {
     nome: 'Cinto Relâmpago',
@@ -212,8 +212,8 @@ const shopItems = [
     maxCompras: 3,
     compras: 0,
     exclusiveToCharacter: 'O Errante de Eldoria',
-    imgWidth: 140, // Exemplo de largura personalizada
-    imgHeight: 140 // Exemplo de altura personalizada
+    imgWidth: 140, 
+    imgHeight: 140 
   },
 {
     nome: 'Rolo Secreto de Kage',
@@ -274,10 +274,10 @@ const shopItems = [
   }
 ];
 
-// Função para revelar itens secretos com quantidade específica de outro item
+
 let newSecretItems = new Set();
 
-// Add this near the top with other constants
+
 const SECRET_ITEMS = [
   {
     nome: 'Kuroshi, o Ninja',
@@ -335,10 +335,10 @@ const SECRET_ITEMS = [
     maxCompras: 1,
     compras: 0,
     exclusiveToCharacter: 'O Errante de Eldoria',
-    imgWidth: 105, // Exemplo de largura personalizada
+    imgWidth: 105, 
    
   },
-  // Add more secret items here following the same structure
+  
 ];
 
 let isDebugMode = false;
@@ -354,7 +354,7 @@ function revelarItensSecretos() {
                 disponivel: true,
                 compras: 0,
                 isSecret: true,
-                isNew: true, // Add this flag
+                isNew: true, 
                 efeito: secretItem.efeito || (() => {})
             };
             shopItems.push(novoItem);
@@ -362,7 +362,7 @@ function revelarItensSecretos() {
         }
     });
 }
-// Chame essa função sempre que a profundidade mudar ou um item for comprado
+
 function onDepthChange(newDepth) {
     depthPoints = newDepth;
     revelarItensSecretos();
@@ -371,34 +371,37 @@ function onDepthChange(newDepth) {
         drawLoja();
     }
 }
+
 function checkDepthRequirement(item, compras) {
     if (!item.requiredDepthSteps) return true;
     
-    // Pega o requisito da próxima compra (atual + 1)
+    
     const nextCompra = compras;
     const currentDepth = item.requiredDepthSteps[nextCompra] || 
                         item.requiredDepthSteps[0] || 0;
     
     return depthPoints >= currentDepth;
 }
+
 function checkItemRequirement(item, compras) {
     if (!item.requiredItem || !item.requiredItemSteps) return true;
     
     const characterPurchases = characterData[activeCharacter].purchases;
     const requiredItemPurchases = characterPurchases[item.requiredItem] || 0;
     
-    // Pega o requisito da próxima compra (atual + 1)
+    
     const nextCompra = compras;
     const currentRequired = item.requiredItemSteps[nextCompra] || 
                           item.requiredItemSteps[0] || 0;
     
     return requiredItemPurchases >= currentRequired;
 }
+
 function getCurrentRequirements(item) {
     const characterPurchases = characterData[activeCharacter].purchases;
     const compras = characterPurchases[item.nome] || 0;
     
-    // Pega o requisito da próxima compra (atual + 1)
+    
     const nextCompra = compras;
     
     const depthReq = item.requiredDepthSteps?.[nextCompra] || 
@@ -411,6 +414,7 @@ function getCurrentRequirements(item) {
 
     return { depthReq, itemReq };
 }
+
 function updateShopAvailability() {
     shopItems.forEach(item => {
         if (item.exclusiveToCharacter && item.exclusiveToCharacter !== activeCharacter) {
@@ -418,7 +422,7 @@ function updateShopAvailability() {
             return;
         }
 
-        // Em modo debug, todos os itens estão disponíveis
+        
         if (isDebugMode) {
             item.disponivel = true;
             return;
@@ -433,7 +437,7 @@ function updateShopAvailability() {
         item.disponivel = depthRequirementMet && itemRequirementMet;
     });
 }
-// Garante que moneyplus está definida
+
 if (typeof moneyplus === 'undefined') {
   var moneyplus = 250;
 }
@@ -442,38 +446,38 @@ let shopMessage = '';
 let shopMessageTimeout;
 let selectedIndex = 0;
 let lojaOptionRects = [];
-let lojaScrollOffset = 0; // Novo: offset de rolagem
+let lojaScrollOffset = 0; 
 const LOJA_ITENS_POR_PAGINA = 4;
 let scrollOffset = 0;
-const SCROLL_SPEED = 45; // altura de um item
+const SCROLL_SPEED = 45; 
 let insufficientFundsMessage = '';
 let insufficientFundsTimeout;
-let purchaseHistory = []; // Array para guardar histórico de compras
-const MAX_HISTORY = 3; // Número máximo de mensagens no histórico
-let recentPurchases = {}; // Objeto para rastrear compras recentes por item
+let purchaseHistory = []; 
+const MAX_HISTORY = 3; 
+let recentPurchases = {}; 
 let purchaseHistoryTimeout;
 let isShopLoading = false;
 let isDungeonButtonHovered = false;
 let show = false;
 
-// ====== VARIÁVEIS PARA TROCA DE PERSONAGEM NA LOJA ======
+
 let characterBarRects = [];
 let selectedCharacterIndex = 0;
-let isCharacterSelectButtonHovered = false;  // Nova variável para o hover
+let isCharacterSelectButtonHovered = false;  
 
 
-// Adiciona chamada do botão e modal no drawLoja
+
 const _oldDrawLoja = drawLoja;
 drawLoja = function() {
   _oldDrawLoja.apply(this, arguments);
   if (!showCharacterSelect) drawCharacterSelectButton();
   if (showCharacterSelect) drawCharacterSelectModal();
 };
-// Visualizador de personagem ativo na loja
+
 function drawActiveCharacterViewer() {
   const nome = activeCharacter || 'O Errante de Eldoria';
   const cx = 190, cy = 190, scale = 3.7;
-  // Card de fundo
+  
   ctx.save();
   ctx.globalAlpha = 0.97;
   ctx.fillStyle = 'rgba(40, 40, 60, 0)';
@@ -481,9 +485,9 @@ function drawActiveCharacterViewer() {
   ctx.lineWidth = 4;
   
   ctx.restore();
-  // Avatar grande
+  
   drawCharacterIdlePreview(nome, cx, cy-10, scale, true);
-  // Nome do personagem
+  
   ctx.save();
   ctx.font = 'bold 22px PixelFont';
   ctx.fillStyle = '#ffd700';
@@ -493,8 +497,9 @@ function drawActiveCharacterViewer() {
   ctx.fillText(nome, cx, cy+65);
   ctx.restore();
 }
+
 function drawDungeonButton() {
-  // Responsivo: largjogoweb/dungeons_edge_beta_3/index.htmlura e altura proporcionais ao canvas
+  
   const btnW = Math.max(180, Math.min(canvas.width * 0.22, 350));
   const btnH = Math.max(36, Math.min(canvas.height * 0.055, 60));
   const margin = Math.max(12, canvas.width * 0.015);
@@ -522,12 +527,13 @@ function drawDungeonButton() {
   ctx.fillText('Ir para Dungeon →', btnX + btnW/2, btnY + btnH/2 + btnH*0.18);
   ctx.restore();
 }
+
 function drawLoja() {
   if (gameState === 'jogando' && gameState !== 'loja') return;
   updateShopAvailability();
-  updateBodyStyles(true);
+
   
-  // Garante que os estados visuais estejam corretos
+  
   isDungeonButtonHovered = selectedElement.type === 'dungeon';
   isCharacterSelectButtonHovered = selectedElement.type === 'character';
   if (selectedElement.type === 'dungeon' || selectedElement.type === 'character') {
@@ -536,11 +542,11 @@ function drawLoja() {
   
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.save();
-  // Fundo escuro semi-transparente
+  
   ctx.globalAlpha = 0.95;
   ctx.fillStyle = 'rgba(0, 0, 0, 0)';
   ctx.fillRect(0, 0, 700, canvas.height);
-  // Título LOJA em amarelo brilhante
+  
   ctx.globalAlpha = 1;
   ctx.font = 'bold 42px PixelFont';
   ctx.textAlign = 'left';
@@ -550,16 +556,16 @@ function drawLoja() {
   ctx.fillText('LOJA', 20, 60);
   ctx.shadowBlur = 0;
 
-  // Draw Dungeon button
+  
   drawDungeonButton();
-  // Visualizador do personagem ativo
+  
   drawActiveCharacterViewer();
-  // Info do dinheiro com sprite animado
+  
   ctx.font = '28px PixelFont';
   ctx.fillStyle = '#ffd700';
   ctx.fillText(`Seu dinheiro: $${money}`, 20, 100);
   
-  // Stats do jogador em linhas
+  
   let startY = 140;
   const lineHeight = 20;
   
@@ -570,7 +576,7 @@ function drawLoja() {
   
   
   
-  // Find next secret item depth
+  
   const nextSecretDepth = SECRET_ITEMS
     .filter(item => !shopItems.find(i => i.nome === item.nome))
     .reduce((nearest, item) => 
@@ -578,7 +584,7 @@ function drawLoja() {
       (nearest === null || item.requiredDepth < nearest) ? 
       item.requiredDepth : nearest, null);
 
-  // Profundidade atual responsiva
+  
   const margin = Math.max(12, canvas.width * 0.015);
   const profFontSize = Math.max(14, Math.min(canvas.width * 0.017, 22));
   ctx.font = `bold ${profFontSize}px PixelFont`;
@@ -598,32 +604,32 @@ function drawLoja() {
   
 
   
-  // ====== ITENS DA LOJA EM GRID COM ROLAGEM (AGORA QUADRADOS E SEM INFO) ======
+  
   lojaOptionRects = [];
-  // Calcula altura do rodapé
+  
   const footerHeight = 50;
-  // Calcula altura máxima do grid para não sobrepor o rodapé
+  
   let shopStartY = 360;
   const itemsPerRow = 3;
-  const itemSize = 100; // quadrado
+  const itemSize = 100; 
   const itemGap = 10;
   const gridStartX = 20;
   let visibleItems = shopItems.filter(item => !item.exclusiveToCharacter || item.exclusiveToCharacter === activeCharacter);
   const totalRows = Math.ceil(visibleItems.length / itemsPerRow);
-  // Ajusta a altura disponível para o grid
+  
   const availableHeight = canvas.height - shopStartY - footerHeight - 10;
   const visibleRows = Math.floor(availableHeight / (itemSize + itemGap));
   let shopHeight = visibleRows * (itemSize + itemGap);
   let maxScroll = Math.max(0, (totalRows - visibleRows) * (itemSize + itemGap));
   scrollOffset = Math.min(scrollOffset, maxScroll);
 
-  // Calcula área do grid para posicionar as setas
+  
   const gridWidth = itemsPerRow * itemSize + (itemsPerRow - 1) * itemGap;
   const gridX = gridStartX;
   const gridY = shopStartY;
 
-  // Indicadores de rolagem (setas mais próximas do grid, mas deslocadas para o lado)
-  const arrowOffsetX = gridWidth + 30; // desloca as setas para a direita do grid
+  
+  const arrowOffsetX = gridWidth + 30; 
   if (scrollOffset > 0) {
     ctx.fillStyle = 'rgba(255, 215, 0, 0.7)';
     ctx.beginPath();
@@ -648,9 +654,9 @@ function drawLoja() {
   let gridRow = 0;
   let gridCol = 0;
   let selectedItemRect = null;
-  // Atualiza os zooms dos itens visíveis
+  
   updateLojaZooms(visibleItems, selectedIndex);
-  // Primeiro desenha todos os quadrados normalmente, MENOS o selecionado
+  
   for (let i = 0; i < visibleItems.length; i++) {
     if (i === selectedIndex) continue;
     gridRow = Math.floor(i / itemsPerRow);
@@ -702,7 +708,7 @@ function drawLoja() {
       lojaOptionRects.push({x, y, w: itemSize, h: itemSize, index: i});
     }
   }
-  // Agora desenha o quadrado selecionado por cima de todos
+  
   if (selectedIndex >= 0 && selectedIndex < visibleItems.length) {
     let i = selectedIndex;
     gridRow = Math.floor(i / itemsPerRow);
@@ -756,19 +762,19 @@ function drawLoja() {
     }
   }
 
-  // Exibe as informações do item selecionado à direita do quadrado
+  
   if (selectedItemRect) {
     const { x, y, item } = selectedItemRect;
     const infoX = x + itemSize + 30;
     const infoY = y + 10;
     ctx.save();
-    // Medidas dinâmicas para a caixa
+    
     ctx.font = 'bold 18px PixelFont';
     const nomeWidth = ctx.measureText(item.nome).width;
     ctx.font = '16px PixelFont';
     const descWidth = ctx.measureText(item.descricao).width;
 
-    // Corrige: usa o número de compras atualizado do personagem ativo
+    
     const characterPurchases = characterData[activeCharacter]?.purchases || {};
     const comprasAtual = characterPurchases[item.nome] || 0;
     let precoText;
@@ -794,14 +800,14 @@ function drawLoja() {
     }
     ctx.font = '14px PixelFont';
     const reqWidth = reqText ? ctx.measureText('🔒 ' + reqText).width : 0;
-    // Calcula largura máxima
+    
     const maxWidth = Math.max(220, nomeWidth, descWidth, precoWidth, reqWidth) + 30;
-    // Calcula altura
-    let lines = 4; // agora inclui o nome
+    
+    let lines = 4; 
     if (reqText) lines++;
     const lineHeight = 22;
     const boxHeight = lines * lineHeight + 10;
-    // Caixa adaptativa
+    
     ctx.globalAlpha = 0.85;
     ctx.fillStyle = '#222';
     ctx.strokeStyle = '#ffd700';
@@ -811,7 +817,7 @@ function drawLoja() {
     ctx.fill();
     ctx.globalAlpha = 1;
     ctx.stroke();
-    // Texto do item
+    
     let textY = infoY + 28;
     ctx.font = 'bold 18px PixelFont';
     ctx.fillStyle = '#ffd700';
@@ -834,7 +840,7 @@ function drawLoja() {
     ctx.restore();
   }
 
-  // Mensagem de compra simples
+  
   if (shopMessage) {
     ctx.font = '24px PixelFont';
     ctx.textAlign = 'left';
@@ -842,23 +848,23 @@ function drawLoja() {
     ctx.fillText(shopMessage, 20, canvas.height - 60);
   }
   
-  // Desenha mensagem de dinheiro insuficiente se existir (movido para o final)
+  
   if (insufficientFundsMessage) {
     ctx.save();
-    // Adiciona um overlay semi-transparente em toda a tela
+    
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Desenha o banner da mensagem
+    
     ctx.fillStyle = 'rgb(0, 0, 0)';
     ctx.fillRect(0, canvas.height/2 - 50, canvas.width, 100);
     
-    // Adiciona borda ao banner
+    
     ctx.strokeStyle = '#ff4444';
     ctx.lineWidth = 2;
     ctx.strokeRect(0, canvas.height/2 - 50, canvas.width, 100);
     
-    // Desenha a mensagem
+    
     ctx.font = 'bold 32px PixelFont';
     ctx.fillStyle = '#ff4444';
     ctx.textAlign = 'center';
@@ -866,7 +872,7 @@ function drawLoja() {
     ctx.restore();
   }
 
-  // Mensagens de compra em lista
+  
   if (purchaseHistory.length > 0) {
     ctx.font = '24px PixelFont';
     ctx.textAlign = 'left';
@@ -882,7 +888,7 @@ function drawLoja() {
   ctx.fillText('"Setas/🖱️" Navegar   |   "⏎/🖱️" Comprar   |   "Esc" ir para dungeon ', 20, canvas.height - 30);
   ctx.restore();
 
-  // Adiciona indicador de modo debug
+  
     if (isDebugMode) {
         ctx.save();
         ctx.font = 'bold 20px PixelFont';
@@ -892,11 +898,11 @@ function drawLoja() {
         ctx.restore();
     }
 }
-// Carregamento de imagens dos itens da loja e personagens especiais
+
 const lojaItemImages = {};
 const lojaItemImageNotFound = {};
 
-// Lista dos personagens compráveis e itens especiais com imagem
+
 const personagensComImagem = [
   'Kuroshi, o Ninja',
   'Roderick, o Cavaleiro',
@@ -906,7 +912,7 @@ const personagensComImagem = [
 [...shopItems, ...SECRET_ITEMS.filter(i => personagensComImagem.includes(i.nome))].forEach(item => {
   if (!item.nome) return;
   const img = new Image();
-  // Caminho: images/loja/<nome do item em minúsculo>.png
+  
   const imgName = item.nome.toLowerCase().replace(/ /g, ' ').replace(/[^a-z0-9 ]/gi, '').replace(/ +/g, ' ').trim();
   const imgPath = `./images/loja/${imgName}.png`;
   img.src = imgPath;
@@ -917,14 +923,17 @@ const personagensComImagem = [
     lojaItemImages[item.nome] = img;
   };
 });
+
 function closeShop() {
   if (isShopLoading) return;
+  updateBodyStyles(false);
   isShopLoading = true;
-  // Resetar cooldowns de habilidades ao sair da loja
+
   if (typeof resetarCooldownsHabilidades === 'function') resetarCooldownsHabilidades();
-  // Resetar backgrounds e laterais ao sair da loja
+  
   if (typeof resetarBackgroundsELaterais === 'function') resetarBackgroundsELaterais();
-  // Cria tela preta para transição
+  
+
   const blackScreen = document.createElement('div');
   Object.assign(blackScreen.style, {
     position: 'fixed',
@@ -939,55 +948,36 @@ function closeShop() {
     justifyContent: 'center',
     zIndex: 9999
   });
-  blackScreen.innerHTML = '<span style="color:white;font-size:2.5rem;font-family:sans-serif;letter-spacing:2px;">Carregando...</span>';
+  blackScreen.innerHTML = '<span style="color:white;font-size:2.5rem;font-family:PixelFont;letter-spacing:2px;">Carregando...</span>';
   document.body.appendChild(blackScreen);
 
-  // Adiciona fade out do canvas
+  
   canvas.style.opacity = '0';
   setTimeout(() => {
     resetGame({ pauseOnStart: true, showShop: false, il: false, la: true });
-    updateBodyStyles(false);
     
-    // Atualiza as dimensões do PlatformFactory após o canvas ser redimensionado
+    
+    
     platformFactory.updateScreenDimensions();
     
     if (typeof drawlateral === 'function') drawlateral();
     canvas.style.opacity = '1';
     setTimeout(() => {
       if (typeof drawlateral === 'function') drawlateral();
-      // Remove a tela preta com fade
+      
       blackScreen.style.opacity = '0';
       setTimeout(() => {
         if (blackScreen.parentNode) blackScreen.parentNode.removeChild(blackScreen);
         isShopLoading = false;
       }, 400);
     }, 50);
-  }, 300); // 300ms matches the transition duration
+  }, 300); 
 }
-// Reseta estados quando abre a loja
-function openShopWithTransition() {
-  isShopLoading = true;
-  showLoadingTransition((removeTransition) => {
-    resetGame({ pauseOnStart: false, showShop: true });
-    // Inicializa os estados da loja
-    selectedElement = { type: 'dungeon', index: -1 };
-    isDungeonButtonHovered = true;
-    isCharacterSelectButtonHovered = false;
-    selectedIndex = -1;
-    scrollOffset = 0;
-    
-    onDepthChange(salvoprofundidade);
-    setTimeout(() => {
-      drawLoja(); // Força redesenho da loja para atualizar estados visuais
-      removeTransition();
-      isShopLoading = false;
-    }, 300);
-  });
-}
+
 function updateBodyStyles(isLoja) {
   if (gameState !== 'loja') return;
   if (isLoja) {
-    // Fundo animado com gradiente e imagem
+    
     document.body.style.backgroundImage = `
       linear-gradient(
         135deg,
@@ -1000,12 +990,12 @@ function updateBodyStyles(isLoja) {
     document.body.style.backgroundSize = '100vw 100vh';
     document.body.style.backgroundPosition = 'center';
     document.body.style.backgroundRepeat = 'no-repeat';
-    document.body.style.backgroundColor = '#000'; // Fallback color
+    document.body.style.backgroundColor = '#000'; 
      
-    // Adiciona uma animação suave de transição
+    
     canvas.style.transition = 'all 0.3s ease-in-out';
   } else {
-    // Reset styles when leaving shop
+    
     document.body.style.backgroundImage = '';
     document.body.style.backgroundSize = '';
     document.body.style.backgroundPosition = '';
@@ -1014,7 +1004,7 @@ function updateBodyStyles(isLoja) {
     canvas.style.transition = '';
   }
 }
-// Adicione esta função para mostrar a mensagem de erro
+
 function showInsufficientFunds(price) {
   if (showCharacterSelect) return;
   show = true;
@@ -1039,7 +1029,7 @@ function showShopMessage(message) {
         drawLoja();
     }, 1000);
 }
-// Modifique a função attemptPurchase (adicione onde ela estiver definida)
+
 function attemptPurchase() {
   if (showCharacterSelect || isShopLoading || gameState !== 'loja' || show) return;
 
@@ -1047,7 +1037,7 @@ function attemptPurchase() {
   const item = visibleItems[selectedIndex];
   if (!item) return;
 
-  // Mark item as seen when selected
+  
   if (item.isSecret) {
         newItemsSeen.add(item.nome);
     }
@@ -1055,15 +1045,15 @@ function attemptPurchase() {
   const characterPurchases = characterData[activeCharacter].purchases;
   const compras = characterPurchases[item.nome] || 0;
 
-  // Sempre verifica o limite máximo de compras, mesmo em debug
+  
   if (compras >= item.maxCompras) {
     showShopMessage('Limite máximo de compras atingido!');
     return;
   }
 
-  // Em modo debug, ignora verificação de requisitos mas mantém limite de compras
+  
   if (!isDebugMode) {
-    // Verifica requisitos apenas se não estiver em debug
+    
     const depthMet = checkDepthRequirement(item, compras);
     const itemMet = checkItemRequirement(item, compras);
 
@@ -1091,13 +1081,13 @@ function attemptPurchase() {
       money -= item.preco;
     }
     
-    // Atualiza compras ANTES de aplicar o efeito
+    
     characterPurchases[item.nome] = (characterPurchases[item.nome] || 0) + 1;
     
-    // Aplica o efeito
+    
     item.efeito();
     
-    // Atualiza estatísticas
+    
     characterData[activeCharacter].stats = {
         speed: player.speed,
         maxJumps: player.maxJumps,
@@ -1108,10 +1098,10 @@ function attemptPurchase() {
         enemySpawnInterval: enemySpawnInterval
     };
 
-    // Atualiza preço
+    
     item.preco = Math.floor(item.preco * item.priceMultiplier + item.priceIncrement);
 
-    // Atualiza histórico de compras
+    
     if (!recentPurchases[item.nome]) {
       recentPurchases[item.nome] = 1;
     } else {
@@ -1128,19 +1118,19 @@ function attemptPurchase() {
             drawLoja();
         }, 3000);
         
-        // Atualiza disponibilidade e redesenha
+        
         updateShopAvailability();
         drawLoja();
   } else {
     showInsufficientFunds(item.preco);
   }
 }
-// Substitua a lógica de abrir a loja durante o jogo por esta função:
+
 function openShopWithTransition() {
   isShopLoading = true;
   showLoadingTransition((removeTransition) => {
     resetGame({ pauseOnStart: false, showShop: true });
-    // Inicializa os estados da loja
+    
     selectedElement = { type: 'dungeon', index: -1 };
     isDungeonButtonHovered = true;
     isCharacterSelectButtonHovered = false;
@@ -1149,24 +1139,25 @@ function openShopWithTransition() {
     
     onDepthChange(salvoprofundidade);
     setTimeout(() => {
-      drawLoja(); // Força redesenho da loja para atualizar estados visuais
+      updateBodyStyles(true);
+      drawLoja(); 
       removeTransition();
       isShopLoading = false;
     }, 300);
   });
 }
 
-// ====== ANIMAÇÃO DE ZOOM E BALANÇO NOS ITENS DA LOJA ======
+
 let lojaZooms = [];
 let lojaWobbles = [];
 let lojaWobbleTime = 0;
 
-// Animação desacoplada: zoom e balanço juntos, sempre suave
-// Limita animação da loja a 60 FPS
+
+
 let lastLojaFrame = 0;
 function tickLojaAnimation(now) {
   if (!now) now = performance.now();
-  if (now - lastLojaFrame >= 1000 / 60) { // 60 FPS
+  if (now - lastLojaFrame >= 1000 / 60) { 
     lastLojaFrame = now;
     if (gameState === 'loja') {
       lojaWobbleTime += 0.06;
@@ -1191,7 +1182,7 @@ function tickLojaAnimation(now) {
 }
 tickLojaAnimation();
 
-// updateLojaZooms agora só inicializa arrays se necessário
+
 function updateLojaZooms(visibleItems, selectedIndex) {
   if (!lojaZooms || lojaZooms.length !== visibleItems.length) {
     lojaZooms = new Array(visibleItems.length).fill(1);
@@ -1199,10 +1190,9 @@ function updateLojaZooms(visibleItems, selectedIndex) {
   }
 }
 
-// Exemplo: adicione imgWidth e imgHeight nos itens que quiser customizar
-// {
-//   nome: 'Botas do Vento',
-//   ...
-//   imgWidth: 80,
-//   imgHeight: 80
-// },
+
+
+
+
+
+

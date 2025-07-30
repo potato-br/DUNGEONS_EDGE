@@ -1,8 +1,8 @@
-// ==========================
-// ===== COLISÕES =====
-// ==========================
+
+
+
 function rectIntersect(a, b) {
-  // Sempre usa a hitbox se existir, nunca o retângulo padrão
+  
   function getRect(obj) {
     if (obj && obj.hitbox && typeof obj.hitbox.width === 'number' && typeof obj.hitbox.height === 'number') {
       return {
@@ -39,7 +39,7 @@ function checkSerraCollision() {
     }
   }
   if (hit) {
-    aplicarInvulnerabilidade(1000, true); // Ativa invulnerabilidade antes de processar o dano
+    aplicarInvulnerabilidade(1000, true); 
     live--;
     if (live < 0) {
       gameOver();
@@ -47,20 +47,20 @@ function checkSerraCollision() {
   }
 }
 
-// Adicione esta função para tratar queda no void corretamente:
+
 function checkVoidFall() {
     if (player.y > screenHeight && !isRespawning && gameState === "jogando") {
       
-        // Cavaleiro's void resurrection ability
+        
         if (activeCharacter === 'Roderick, o Cavaleiro' && CAVALEIRO.voidResurrectionAvailable) {
-          // Usa função padronizada
+          
           const now = performance.now();
           if (handleCavaleiroVoidResurrection(now)) {
             respawnPlayer();
             return;
           }
         } 
-        // Normal void fall handling
+        
         live--;
         if (live < 0) {
           gameOver();
@@ -75,7 +75,7 @@ function checkVoidFall() {
 function checkEnemyCollision() {
     if (isRespawning || (typeof DASH !== 'undefined' && DASH.isInvulnerable) || (typeof DASH !== 'undefined' && DASH.isDashing)) return;
     
-    // Check for enemy collisions
+    
     let hit = false;
     for (let i = 0; i < enemies.length; i++) {
         if (rectIntersect(player, enemies[i])) {
@@ -86,20 +86,24 @@ function checkEnemyCollision() {
 
     if (!hit) return;
 
-    // Handle Valthor, o Mago's ability
+    
     if (activeCharacter === 'Valthor, o Mago') {
         live--;
         if (live < 0) {
             gameOver();
         } else {
-            // Clear ALL enemies
+            
             enemies.length = 0;
-            // Block enemy spawning for 8 seconds
-            lastEnemyAllowedTime = performance.now() + 8000;
-            // Apply longer invulnerability with less blinks
-            aplicarInvulnerabilidade(6000, true); // 6 segundos de invulnerabilidade, 12 piscadas
 
-            // Create magic blast effect
+            morcegos.length = 0;
+
+            lastMorcegoAllowedTime = performance.now() + 8000; 
+            
+            lastEnemyAllowedTime = performance.now() + 8000;
+            
+            aplicarInvulnerabilidade(6000, true); 
+
+            
             for (let i = 0; i < 30; i++) {
                 createParticles(
                     player.x + player.width/2,
@@ -119,11 +123,11 @@ function checkEnemyCollision() {
         return;
     }
 
-  // Sistema da bomba de fumaça do Ninja
+  
   if (activeCharacter === 'Kuroshi, o Ninja') {
       ninjasmokebomb();
       if (ninjasmokebomb() === true) {
-        // Se a bomba de fumaça está em cooldown, toma dano normalmente
+        
         live--;
         if (live < 0) {
           gameOver();
@@ -138,7 +142,7 @@ function checkEnemyCollision() {
   if (live < 0) {
     gameOver();
   } else {
-    aplicarInvulnerabilidade(1200, true); // Ativa invulnerabilidade antes de processar o dano
+    aplicarInvulnerabilidade(1200, true); 
   }
 }
 

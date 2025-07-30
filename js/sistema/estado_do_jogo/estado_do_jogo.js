@@ -1,23 +1,23 @@
-// ==========================
-// ===== ESTADO DO JOGO =====
-// ==========================
+
+
+
 let serras = [];
 const lateralImages = [];
 let plataformas = [];
 let keys = {};
 let isGameOver = false;
 let gameState = "tutorial";
-let firstGamePlay = true; // Will be true every time page loads
+let firstGamePlay = true; 
 let backgroundY = 0;
 let money = 0;
 let enemySpawnInterval = 100;
 let lastEnemySpawn = 0;
-let live = 0; // Vida inicial do jogador
+let live = 0; 
 let liveupgrade = 0;
-// Armazena os corações que estão sendo animados
+
 let animatingHearts = [];
-let previousLive = 0; // Para detectar quando perdeu vida
-let frameCount = 0; // Track frame count for animations and timing
+let previousLive = 0; 
+let frameCount = 0; 
 let isloja = false;
 const backgroundSpeed = 0.5;
 let maxPlataformas = 15;
@@ -31,7 +31,7 @@ const fpsInterval = 1000 / targetFPS;
 let lastFrameTime = performance.now();
 const FINAL_DEPTH = 250000;
 
-// Referência ao input do jogador usando o novo sistema
+
 const input = {
   get left() { return inputManager.isLeft(); },
   get right() { return inputManager.isRight(); },
@@ -41,7 +41,7 @@ const input = {
   get dash() { return inputManager.isDash(); }
 };
 
-// Os estados do jogo agora são verificados diretamente no gameLoop em Reset_e_Loop.js
+
 
 if (typeof player !== 'undefined') {
   player.visible = true;

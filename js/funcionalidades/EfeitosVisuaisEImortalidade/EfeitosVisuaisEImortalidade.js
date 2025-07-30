@@ -1,6 +1,6 @@
-// ==========================
-// ===== EFEITOS VISUAIS E IMORTALIDADE =====
-// ==========================
+
+
+
 
 let invulnEndTime = 0;
 let isBlinking = false;
@@ -11,7 +11,7 @@ function aplicarInvulnerabilidade(tempoMs, comPiscadas = false) {
     const now = performance.now();
     DASH.isInvulnerable = true;
     DASH.invulnEndTime = now + tempoMs;
-    // --- INTEGRAÇÃO NINJA: seta flag de invulnerabilidade por dano ---
+    
     if (activeCharacter === 'Kuroshi, o Ninja' && !DASH.isDashing && !NINJA.smokeBombActive) {
         NINJA.invulneravelPorDano = true;
     }
@@ -30,7 +30,7 @@ function checarInvulnerabilidade() {
         DASH.isInvulnerable = false;
         pararPiscar();
         player.visible = true;
-        // --- INTEGRAÇÃO NINJA: limpa flag de invulnerabilidade por dano ---
+        
         if (activeCharacter === 'Kuroshi, o Ninja') {
             NINJA.invulneravelPorDano = false;
         }
@@ -63,7 +63,7 @@ function onPauseTogglePiscada(paused) {
     } else if (!paused && isBlinking && blinkPauseData && typeof blinkPauseData.pauseTime !== 'undefined') {
         const pauseDuration = performance.now() - blinkPauseData.pauseTime;
         blinkPauseData.blinkStart += pauseDuration;
-        // Calcula o tempo restante de piscadas
+        
         const remainingPiscadas = blinkPauseData.piscadas - blinkPauseData.blinkCount;
         if (remainingPiscadas > 0) {
             blinkTimer = setInterval(() => {

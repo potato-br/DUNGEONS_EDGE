@@ -1,6 +1,6 @@
-// ==========================
-// ===== PLATFORM FACTORY =====
-// ==========================
+
+
+
 
 class PlatformFactory {
     constructor() {
@@ -15,7 +15,7 @@ class PlatformFactory {
             FANTASMA: 'fantasma'
         };
 
-        // Base specifications for normal platforms
+        
         this.platformnormalSpecs = {
             normal: {
                 width: 120,
@@ -35,11 +35,11 @@ class PlatformFactory {
                 height: 25,
                 color: '#ff9933',
                 maxHits: 3,
-                breakDelay: 1500,    // Increased time before platform starts falling
-                fallSpeed: 3,        // Reduced initial fall speed for smoother fall
-                respawnTime: 500,    // Increased respawn time
-                warningTime: 800,    // Time to show warning effects before breaking
-                shakeMagnitude: 2    // How much the platform shakes before breaking
+                breakDelay: 1500,    
+                fallSpeed: 3,        
+                respawnTime: 500,    
+                warningTime: 800,    
+                shakeMagnitude: 2    
             },
             movel: {
                 width: 120,
@@ -50,52 +50,52 @@ class PlatformFactory {
             },            fantasma: {
                 width: 120,
                 height: 25,
-                color: '#87CEFA', // Cor azul claro (Light Sky Blue)
+                color: '#87CEFA', 
                 maxHits: 3,
-                fadeTime: 120, // Tempo mais rápido de fade
-                fadeInTime: 30, // Tempo para aparecer
-                fadeOutTime: 60, // Tempo para desaparecer
-                pulseSpeed: 0.08, // Velocidade da pulsação
-                pulseIntensity: 0.4, // Intensidade da pulsação
-                particleFrequency: 0.15 // Frequência de partículas espectrais
+                fadeTime: 120, 
+                fadeInTime: 30, 
+                fadeOutTime: 60, 
+                pulseSpeed: 0.08, 
+                pulseIntensity: 0.4, 
+                particleFrequency: 0.15 
             }
         };
 
-        // Specifications for large platforms
+        
         this.platformgrandeSpecs = {            
             normal: {
-                width: 300, // Fixed width for large platforms
-                height: 60, // Fixed height for large platforms
+                width: 300, 
+                height: 60, 
                 color: '#9933ff',
                 maxHits: 7
             },
             escorregadia: {
-                width: 300, // Fixed width for large platforms
-                height: 60, // Fixed height for large platforms
+                width: 300, 
+                height: 60, 
                 color: '#33ccff',
                 maxHits: 3,
                 friction: 0.98
             },
             quebravel: {
-                width: 300, // Fixed width for large platforms
-                height: 50, // Fixed height for large platforms
+                width: 300, 
+                height: 50, 
                 color: '#ff9933',
                 maxHits: 3,
-                breakTime: 2000,     // Longer break time for large platforms
-                warningTime: 1200,   // Longer warning time for large platforms
-                shakeMagnitude: 3    // More intense shaking for large platforms
+                breakTime: 2000,     
+                warningTime: 1200,   
+                shakeMagnitude: 3    
             },            
             fantasma: {
-                width: 300, // Special flag for dynamic width
-                height: 50, // Fixed height for large platforms
-                color: '#E6E6FA', // Cor mais espectral
+                width: 300, 
+                height: 50, 
+                color: '#E6E6FA', 
                 maxHits: 3,
-                fadeTime: 150, // Tempo maior para plataformas grandes
+                fadeTime: 150, 
                 fadeInTime: 40,
                 fadeOutTime: 80,
-                pulseSpeed: 0.06, // Pulsação mais lenta para plataformas grandes
+                pulseSpeed: 0.06, 
                 pulseIntensity: 0.5,
-                particleFrequency: 0.25 // Mais partículas em plataformas grandes
+                particleFrequency: 0.25 
             }
         };
 
@@ -104,49 +104,49 @@ class PlatformFactory {
             grande: this.platformgrandeSpecs
         };
 
-        // Define thresholds for when each platform type becomes available
+        
         this.normalCategoryThresholds = {
-            [this.platformTypes.NORMAL]:0,           // Always available
-            [this.platformTypes.ESCORREGADIA]: 20000,   // Available after some progress
-            [this.platformTypes.QUEBRAVEL]: 40000,     // Available later in game
-            [this.platformTypes.MOVEL]: 10000,         // Available even later
-            [this.platformTypes.FANTASMA]: 70000,   // Disponível após 10000 pontos
+            [this.platformTypes.NORMAL]:0,           
+            [this.platformTypes.ESCORREGADIA]: 20000,   
+            [this.platformTypes.QUEBRAVEL]: 40000,     
+            [this.platformTypes.MOVEL]: 10000,         
+            [this.platformTypes.FANTASMA]: 70000,   
         };
 
         this.grandeCategoryThresholds = {
-            [this.platformTypes.NORMAL]: 15000,         // Large normal platforms available after some time
-            [this.platformTypes.ESCORREGADIA]: 30000,  // Large ice platforms available mid-game
-            [this.platformTypes.QUEBRAVEL]: 60000,     // Large breakable platforms available late-game
-            [this.platformTypes.FANTASMA]: 75000,  // Plataformas fantasma grandes após 15000 pontos
+            [this.platformTypes.NORMAL]: 15000,         
+            [this.platformTypes.ESCORREGADIA]: 30000,  
+            [this.platformTypes.QUEBRAVEL]: 60000,     
+            [this.platformTypes.FANTASMA]: 75000,  
         };
     }    
 
     createPlatform(type, x, y) {
         
         
-        // Get current depth
+        
         const depth = typeof depthPoints !== 'undefined' ? depthPoints : 0;
 
-        // Get platform specifications based on type
+        
         let specs;
         let baseType = type;
         let isLargePlatform = type === this.platformTypes.GRANDE;
 
         if (isLargePlatform) {
-            // For large platforms, we need to randomize the subtype
+            
             const availableTypes = this.getAvailableTypes(true, depth);
             const subType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
             specs = this.platformgrandeSpecs[subType] || this.platformgrandeSpecs.normal;
-            baseType = subType; // Use the subtype as the actual type
+            baseType = subType; 
             
         } else {
             specs = this.platformnormalSpecs[type] || this.platformnormalSpecs.normal;
-        }        // Create base platform
+        }        
         const canvas = document.getElementById('gameCanvas');
-        // Define dynamic width based on platform type
+        
         const dynamicWidth = baseType === this.platformTypes.QUEBRAVEL ? 
-            Math.min(500, canvas.width - 40) : // Smaller width for breakable platforms
-            Math.min(620, canvas.width - 40);  // Larger width for other platforms
+            Math.min(500, canvas.width - 40) : 
+            Math.min(620, canvas.width - 40);  
 
         const platform = {
             type: baseType,
@@ -162,7 +162,7 @@ class PlatformFactory {
 
         
 
-        // Set platform-specific properties
+        
         if (platform.type === this.platformTypes.ESCORREGADIA) {
             platform.isSlippery = true;
             platform.friction = isLargePlatform ? 
@@ -197,7 +197,7 @@ class PlatformFactory {
     }
 
     _getRandomX(width, platformType) {
-        // Special margin only for breakable platforms
+        
         const margin = platformType === this.platformTypes.QUEBRAVEL ? 20 : 0;
         
         const leftPosition = margin;
@@ -217,15 +217,15 @@ class PlatformFactory {
     _getNextY() {
         const lastPlatform = plataformas[plataformas.length - 1];
         const baseY = lastPlatform ? lastPlatform.y + lastPlatform.height : this.screenHeight - 150;
-        // Espaçamento inicial
+        
         const minSpacing = 170;
         const maxSpacing = 250;
-        // Aumenta o espaçamento de acordo com a profundidade, mas de forma bem lenta
+        
         const depth = typeof depthPoints !== 'undefined' ? depthPoints : 0;
-        // O espaçamento só começa a aumentar de verdade depois de 10.000 pontos
-        const slowMultiplier = 1 + Math.min(0.5, Math.max(0, (depth - 10000) / 50000)); // máximo 1.5x, começa só após 10k
+        
+        const slowMultiplier = 1 + Math.min(0.5, Math.max(0, (depth - 10000) / 50000)); 
         const spacing = (minSpacing + Math.random() * (maxSpacing - minSpacing)) * slowMultiplier;
-        // Limite absoluto de 350px
+        
         return baseY + Math.min(spacing, 350);
     }
 

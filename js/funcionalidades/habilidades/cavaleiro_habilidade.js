@@ -1,10 +1,10 @@
-// Habilidade: Escudo do Cavaleiro
+
 function handleCavaleiroShield(now) {
-    if (CAVALEIRO.shieldActive || CAVALEIRO.shieldCooldown) return true; // já ativo ou em cooldown, toma dano
+    if (CAVALEIRO.shieldActive || CAVALEIRO.shieldCooldown) return true; 
     CAVALEIRO.shieldActive = true;
     CAVALEIRO.shieldCooldown = false;
     aplicarInvulnerabilidade(CAVALEIRO.SHIELD_DURATION);
-    // Efeito visual do escudo
+    
     for (let i = 0; i < 2; i++) {
         setTimeout(() => {
             createParticles(
@@ -22,21 +22,21 @@ function handleCavaleiroShield(now) {
             );
         }, i * 1000);
     }
-    // Inicia timers
+    
     CAVALEIRO.shieldCooldownStart = now + CAVALEIRO.SHIELD_DURATION;
     activeAbilityTimers.shield.startTime = now;
     activeAbilityTimers.shield.duration = CAVALEIRO.SHIELD_DURATION;
-    return false; // Não toma dano agora
+    return false; 
 }
 
-// Habilidade: Ressurreição do Cavaleiro (Alma Reerguida)
+
 function handleCavaleiroVoidResurrection(now) {
-    if (!CAVALEIRO.voidResurrectionAvailable) return false; // já usada, não ressuscita
+    if (!CAVALEIRO.voidResurrectionAvailable) return false; 
     CAVALEIRO.voidResurrectionAvailable = false;
     CAVALEIRO.voidResurrectionLastUsed = now;
     activeAbilityTimers.voidRes.startTime = now;
     activeAbilityTimers.voidRes.duration = CAVALEIRO.VOID_RESURRECTION_COOLDOWN;
-    // Efeito visual de ressurreição
+    
     createParticles(
         player.x + player.width/2,
         player.y + player.height/2,
@@ -50,5 +50,5 @@ function handleCavaleiroVoidResurrection(now) {
             gravity: -0.1
         }
     );
-    return true; // Ressuscita
+    return true; 
 }

@@ -1,7 +1,7 @@
-// ==========================
-// ===== CARREGAMENTO DE IMAGENS =====
-// ==========================
-// Plataformas
+
+
+
+
 const plataformaNormalImg = new Image();
 plataformaNormalImg.src = "./images/plataformas/plataforamas normais/plataformanormal.PNG";
 
@@ -46,7 +46,7 @@ plataformafanstamagrandeImg.onerror = () => {
     
 };
 
-// Serras
+
 const serraSpritesheet = new Image();
 serraSpritesheet.src = "./images/personagens e inimigos/serra/serra_spritesheet.png";
 const serraSpriteFrameWidth = 173.8;
@@ -58,42 +58,42 @@ serraSpritesheet.onload = () => {
 };
 let serraFrame = 0;
 
-// Jogador
-// Spritesheets dos personagens
+
+
 const playerSprites = {
     'O Errante de Eldoria': {
         sprite: new Image(),
         config: [
-            { frameWidth: 15, frameHeight: 20, frames: 2, offsetX: 0, offsetY: 0.8 }, // Linha 1 - Correndo
-            { frameWidth: 17, frameHeight: 20, frames: 1, offsetX: 0, offsetY: -1.2},   // Linha 2 - Parado
-            { frameWidth: 18.1, frameHeight: 20, frames: 2, offsetX: 2, offsetY: -2.2}  // Linha 3 - Idle
+            { frameWidth: 15, frameHeight: 20, frames: 2, offsetX: 0, offsetY: 0.8 }, 
+            { frameWidth: 17, frameHeight: 20, frames: 1, offsetX: 0, offsetY: -1.2},   
+            { frameWidth: 18.1, frameHeight: 20, frames: 2, offsetX: 2, offsetY: -2.2}  
         ],
         path: "./images/personagens e inimigos/normal/player_spritesheet.png"
     },
     'Kuroshi, o Ninja': {
         sprite: new Image(),
         config: [
-            { frameWidth: 15, frameHeight: 20, frames: 2, offsetX: 0, offsetY: 0.8 }, // Linha 1 - Correndo
-            { frameWidth: 17, frameHeight: 20, frames: 1, offsetX: 0, offsetY: -1.2},   // Linha 2 - Parado
-            { frameWidth: 18.1, frameHeight: 20, frames: 2, offsetX: 2, offsetY: -2.2 }  // Linha 3 - Idle
+            { frameWidth: 15, frameHeight: 20, frames: 2, offsetX: 0, offsetY: 0.8 }, 
+            { frameWidth: 17, frameHeight: 20, frames: 1, offsetX: 0, offsetY: -1.2},   
+            { frameWidth: 18.1, frameHeight: 20, frames: 2, offsetX: 2, offsetY: -2.2 }  
         ],
         path: "./images/personagens e inimigos/ninja/ninja 1.png"
     },
     'Valthor, o Mago': {
         sprite: new Image(),
         config: [
-            { frameWidth: 15, frameHeight: 20, frames: 2, offsetX: 0, offsetY: 0.8 }, // Linha 1 - Correndo
-            { frameWidth: 17, frameHeight: 20, frames: 1, offsetX: 0, offsetY: -1.2},   // Linha 2 - Parado
-            { frameWidth: 18.1, frameHeight: 20, frames: 2, offsetX: 2, offsetY: -2.2 }  // Linha 3 - Idle
+            { frameWidth: 15, frameHeight: 20, frames: 2, offsetX: 0, offsetY: 0.8 }, 
+            { frameWidth: 17, frameHeight: 20, frames: 1, offsetX: 0, offsetY: -1.2},   
+            { frameWidth: 18.1, frameHeight: 20, frames: 2, offsetX: 2, offsetY: -2.2 }  
         ],
         path: "./images/personagens e inimigos/mago/mago 1.png"
     },
     'Roderick, o Cavaleiro': {
         sprite: new Image(),
         config: [
-            { frameWidth: 15, frameHeight: 20, frames: 2, offsetX: 0, offsetY: 0.8 }, // Linha 1 - Correndo
-            { frameWidth: 17, frameHeight: 20, frames: 1, offsetX: 0, offsetY: -1.2},   // Linha 2 - Parado
-            { frameWidth: 18.1, frameHeight: 20, frames: 2, offsetX: 2, offsetY: -2.2 }  // Linha 3 - Idle
+            { frameWidth: 15, frameHeight: 20, frames: 2, offsetX: 0, offsetY: 0.8 }, 
+            { frameWidth: 17, frameHeight: 20, frames: 1, offsetX: 0, offsetY: -1.2},   
+            { frameWidth: 18.1, frameHeight: 20, frames: 2, offsetX: 2, offsetY: -2.2 }  
         ],
         path: "./images/personagens e inimigos/cavaleiro/cavaleiro 1.png"
     }
@@ -123,16 +123,16 @@ let playerFrameRow = 0;
 let playerFrameOffsetX = currentSpriteConfig[0].offsetX;
 let playerFrameOffsetY = currentSpriteConfig[0].offsetY;
 
-// FPS específico para cada linha/estado do player
+
 const PLAYER_ANIMATION_FPS = {
-    'O Errante de Eldoria': [5, 1, 1], // [andar, parado, idle]
-    'Kuroshi, o Ninja': [8, 1, 1.5], // Ninja tem animação mais rápida
-    'Valthor, o Mago': [4, 1, 1.2], // Mago tem animação mais suave
-    'Roderick, o Cavaleiro': [3, 1, 0.8], // Cavaleiro tem animação mais lenta e pesada
-    'default': [5, 1, 1] // Fallback para outros personagens
+    'O Errante de Eldoria': [5, 1, 1], 
+    'Kuroshi, o Ninja': [8, 1, 1.5], 
+    'Valthor, o Mago': [4, 1, 1.2], 
+    'Roderick, o Cavaleiro': [3, 1, 0.8], 
+    'default': [5, 1, 1] 
 };
 
-const PLAYER_ANIMATION_DELAY = {}; // Will be populated for each character
+const PLAYER_ANIMATION_DELAY = {}; 
 Object.entries(PLAYER_ANIMATION_FPS).forEach(([char, fps]) => {
     PLAYER_ANIMATION_DELAY[char] = fps.map(fps => Math.round(60 / fps));
 });
@@ -145,18 +145,18 @@ function updatePlayerAnimation() {
     if (!playerSpriteLoaded) return;
 
     frameTimer++;
-    // Use character-specific animation delay or fallback to default
+    
     const characterDelays = PLAYER_ANIMATION_DELAY[activeCharacter] || PLAYER_ANIMATION_DELAY['default'];
     const delay = characterDelays[playerFrameRow] || 12;
     
     if (frameTimer >= delay) {
         frameTimer = 0;
-        // Use the number of frames in current row
+        
         frameIndex = (frameIndex + 1) % playerFrameCount;
     }
 }
 
-// Função para atualizar linha e tamanho do frame do player
+
 function setPlayerSpriteRow(row) {
     playerFrameRow = row;
     const config = currentSpriteConfig[row];
@@ -168,35 +168,35 @@ function setPlayerSpriteRow(row) {
     if (frameIndex >= playerFrameCount) frameIndex = 0;
 }
 
-// Função para trocar o sprite do personagem
+
 function setCharacterSprite(characterName) {
     
     
-    // Verifica se o personagem existe
+    
     if (!playerSprites[characterName]) {
         
         return false;
     }
     
-    // Verifica se o sprite foi carregado
+    
     if (!spriteLoadStatus[characterName]) {
         
         return false;
     }
     
     try {
-        // Salva configuração atual
+        
         const currentRow = playerFrameRow;
         
-        // Atualiza referências
+        
         playerSprite = playerSprites[characterName].sprite;
         currentSpriteConfig = playerSprites[characterName].config;
         
-        // Reseta estados de animação
+        
         frameIndex = 0;
         frameTimer = 0;
         
-        // Restaura a linha de animação
+        
         setPlayerSpriteRow(currentRow);
         
         
@@ -207,7 +207,7 @@ function setCharacterSprite(characterName) {
     }
 }
 
-// Status de carregamento dos sprites
+
 const spriteLoadStatus = {
     'O Errante de Eldoria': false,
     'Kuroshi, o Ninja': false,
@@ -215,22 +215,22 @@ const spriteLoadStatus = {
     'Roderick, o Cavaleiro': false
 };
 
-// Carrega todos os spritesheets
+
 Object.entries(playerSprites).forEach(([name, data]) => {
 
     
-    // Cria uma nova imagem para o personagem
+    
     data.sprite = new Image();
     
     data.sprite.onload = () => {
         
         spriteLoadStatus[name] = true;
-        // Se for o personagem O Errante de Eldoria, inicializa o jogo
+        
         if (name === 'O Errante de Eldoria') {
             playerSpriteLoaded = true;
         }
         
-        // Verifica se todos os sprites foram carregados
+        
         const allLoaded = Object.values(spriteLoadStatus).every(status => status);
         if (allLoaded) {
             
@@ -242,32 +242,32 @@ Object.entries(playerSprites).forEach(([name, data]) => {
         
     };
     
-    // Inicia o carregamento da imagem
+    
     data.sprite.src = data.path;
 });
 
-// Inicializa com o sprite do Errante de Eldoria
+
 playerSprite.src = playerSprites['O Errante de Eldoria'].path;
 playerSprite.onload = () => {
-     // Debug log
+     
     FRAME_WIDTH = playerSprite.naturalWidth / SPRITE_COLS;
     FRAME_HEIGHT = playerSprite.naturalHeight / SPRITE_ROWS;
     playerSpriteLoaded = true;
 };
 
-// Backgrounds
+
 const backgroundImages = [];
 for (let i = 1; i <= 4; i++) {
   const img = new Image();
   img.src = `./images/imagens de fundo/fundos do jogo/imagemfundo${i}.jpg`;
   backgroundImages.push(img);
 }
-const mainBg = backgroundImages[0]; // imagem principal
+const mainBg = backgroundImages[0]; 
 let currentBg = mainBg;
 let nextBg = mainBg;
 let trocaCount = 0;
 
-// NOVO: Imagens das laterais (pode ser o mesmo conjunto, mas permite expandir)
+
 
 for (let i = 1; i <= 4; i++) {
   const img = new Image();
@@ -277,39 +277,39 @@ for (let i = 1; i <= 4; i++) {
 let currentLateralLeft = lateralImages[0];
 let currentLateralRight = lateralImages[0];
 
-// Função para sortear laterais sem repetir o fundo central
+
 function sortearLaterais(bgCentral) {
-  // Filtra para não repetir o fundo central
+  
   const disponiveis = lateralImages.filter(img => img.src !== bgCentral.src);
-  // Sorteia esquerda
+  
   let idx = Math.floor(Math.random() * disponiveis.length);
   let lateral = disponiveis[idx];
-  // Ambas as laterais podem ser iguais
+  
   return [lateral, lateral];
 }
 
-// Função para resetar laterais e fundo para a primeira imagem
+
 function resetarBackgroundsELaterais() {
   currentBg = mainBg;
   nextBg = mainBg;
   currentLateralLeft = lateralImages[0];
   currentLateralRight = lateralImages[0];
-  // Também reseta os próximos backgrounds laterais
+  
   nextLateralLeftBg = lateralImages[0];
   nextLateralRightBg = lateralImages[0];
 }
 
-// Carregamento de sprites de inimigos
+
 const inimigoImages = [];
 inimigoImages[0] = new Image();
 inimigoImages[0].src = "./images/personagens e inimigos/aranha/arranha_spritsheet.png";
 
-// Para adicionar mais inimigos no futuro, basta seguir o padrão:
-// inimigoImages[1] = new Image();
-// inimigoImages[1].src = "images/inimigoB.png";
-// ...etc...
 
-// Atalho para debug visual do sprite (F3)
+
+
+
+
+
 window.spriteDebug = false;
 document.addEventListener('keydown', function(e) {
     if (e.code === 'F12') {
@@ -317,11 +317,11 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Moedas
+
 const moedaSprite = new Image();
 moedaSprite.src = './images/variados/moeda_spritesheet.png';
 
-// Imagem da habilidade do Ninja
+
 const ninjaAbilityIcon = new Image();
 
 ninjaAbilityIcon.src = './images/UI/bomba de fumaça.png';
@@ -330,7 +330,7 @@ ninjaAbilityIcon.onload = () => {
     ninjaAbilityIconLoaded = true;
 };
 
-// Imagens das habilidades dos personagens
+
 const mageAbilityIcon = new Image();
 mageAbilityIcon.src = './images/UI/devastaçao mistica.png';
 let mageAbilityIconLoaded = false;

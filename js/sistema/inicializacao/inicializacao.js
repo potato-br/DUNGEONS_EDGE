@@ -1,4 +1,4 @@
-// Função utilitária para transição de tela preta com texto
+
 function showLoadingTransition(callback) {
   let blackScreen = document.createElement('div');
   blackScreen.id = 'blackScreenTransition';
@@ -24,11 +24,11 @@ function showLoadingTransition(callback) {
         if (blackScreen.parentNode) blackScreen.parentNode.removeChild(blackScreen);
       }, 400);
     });
-  }, 100); // Pequeno delay para garantir o fade
+  }, 100); 
 }
 
-// Garante que o menu/canvas já existem antes de rodar qualquer lógica
-// (menu_inicial.js deve ser o PRIMEIRO script incluído no HTML)
+
+
 
 document.addEventListener('DOMContentLoaded', function () {
     aplicarEstilosMenuInicial();

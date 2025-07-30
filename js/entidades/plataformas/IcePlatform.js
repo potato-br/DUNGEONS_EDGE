@@ -1,8 +1,8 @@
-// ==========================
-// ===== PLATAFORMAS DE GELO =====
-//
-// Toda a física de gelo agora é centralizada em funcionalidades/ice_physics.js
-// Este arquivo serve apenas para desenhar a plataforma de gelo.
+
+
+
+
+
 
 function drawIcePlatform(ctx, platform, img) {
     if (img.complete) {

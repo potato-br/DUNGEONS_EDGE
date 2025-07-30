@@ -1,14 +1,14 @@
-// Intro e tutorial com efeito de digitação
-// State variables
+
+
 let introActive = false;
 let introStep = 0;
 let currentText = '';
 let textIndex = 0;
 let lastTypingTime = 0;
-const TYPING_DELAY = 50; // milliseconds between each character
-const PHRASE_DELAY = 2000; // milliseconds to wait after completing a phrase
+const TYPING_DELAY = 50; 
+const PHRASE_DELAY = 2000; 
 
-// The phrases to display
+
 const introPhrases = [
     "A dungeon nunca repousa... e talvez você também não devesse.",
     "Antigos poderes, antes esquecidos, despertam lentamente com a sua presença.",
@@ -36,7 +36,7 @@ function startIntroTutorial() {
     }, 1300);
 }
 
-// Função para exibir a tela de loading
+
 function showLoadingScreen(callback) {
     let blackScreen = document.createElement('div');
     blackScreen.id = 'loadingScreen';
@@ -55,7 +55,7 @@ function showLoadingScreen(callback) {
     blackScreen.innerHTML = '<span style="color:white;font-size:2.5rem;font-family:PixelFont;">Carregando...</span>';
     document.body.appendChild(blackScreen);
 
-    // Força o reflow para a animação funcionar
+    
     blackScreen.offsetHeight;
     blackScreen.style.opacity = '1';
 
@@ -74,35 +74,36 @@ function showLoadingScreen(callback) {
     }, 400);
 }
 
-// Adiciona o event listener para teclas
+
 document.addEventListener('keydown', function(e) {
     if (!introActive) return;
     
-    // If current text is still typing, complete it instantly
+    
     if (introStep < introPhrases.length && textIndex < introPhrases[introStep].length) {
         currentText = introPhrases[introStep];
         textIndex = introPhrases[introStep].length;
         return;
     }
-    // If we're in tutorial text and it's not complete, complete it
+    
     else if (introStep === introPhrases.length && textIndex < tutorialText.length) {
         currentText = tutorialText;
         textIndex = tutorialText.length;
         return;
     }
-    // If current text is complete, move to next step
+    
     else if (introStep < introPhrases.length) {
         introStep++;
         textIndex = 0;
         currentText = '';
         return;
     }
-    // If tutorial text is complete and Enter is pressed, go to shop
+    
     else if (introStep === introPhrases.length && textIndex >= tutorialText.length && e.key === 'Enter') {
         introActive = false;
         showLoadingScreen((removeLoading) => {
             resetGame({ pauseOnStart: false, showShop: true });
             setTimeout(removeLoading, 300);
+             updateBodyStyles(true);
         });
     }
 });
@@ -110,15 +111,15 @@ document.addEventListener('keydown', function(e) {
 function updateIntroTutorial(currentTime) {
     if (!introActive) return;
 
-    // Regular typing effect
+    
     if (introStep < introPhrases.length) {
-        // Typing the current phrase
+        
         if (textIndex < introPhrases[introStep].length && currentTime - lastTypingTime >= TYPING_DELAY) {
             currentText += introPhrases[introStep][textIndex];
             textIndex++;
             lastTypingTime = currentTime;
         }
-        // Phrase complete, wait before moving to next
+        
         else if (textIndex >= introPhrases[introStep].length && currentTime - lastTypingTime >= PHRASE_DELAY) {
             introStep++;
             textIndex = 0;
@@ -126,7 +127,7 @@ function updateIntroTutorial(currentTime) {
             lastTypingTime = currentTime;
         }
     }
-    // Show tutorial text after all phrases
+    
     else if (introStep === introPhrases.length) {
         if (textIndex < tutorialText.length && currentTime - lastTypingTime >= TYPING_DELAY) {
             currentText += tutorialText[textIndex];
@@ -137,20 +138,20 @@ function updateIntroTutorial(currentTime) {
 }
 
 function drawIntroTutorial() {
-    // Clear the screen with black background
+    
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Set text properties
+    
     ctx.fillStyle = 'white';
     ctx.font = '24px PixelFont';
     ctx.textAlign = 'center';
 
-    // Draw the current text
+    
     if (introStep < introPhrases.length) {
         ctx.fillText(currentText, canvas.width / 2, canvas.height / 2);
     } else {
-        // Draw tutorial text with line breaks
+        
         const lines = currentText.split('\n');
         lines.forEach((line, index) => {
             ctx.fillText(line, canvas.width / 2, canvas.height / 3 + index * 30);

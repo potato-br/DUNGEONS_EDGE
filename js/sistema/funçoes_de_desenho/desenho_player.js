@@ -15,11 +15,11 @@ function drawPlayer() {
     const dx = player.x + player.width/2 - dw/2 + offsetX;
     const dy = player.y + player.height/2 - dh/2 + offsetY;
     ctx.save();
-    // NÃO desenha aura se estiver respawnando
+    
     if (isRespawning) {
         if (!player.visible) return;
         ctx.restore();
-        // Desenha apenas o player sem aura
+        
         ctx.drawImage(
             playerSprite,
             sx, sy, playerFrameWidth, playerFrameHeight,
@@ -59,13 +59,13 @@ function drawPlayer() {
                     particleSize: 6,
                     rayWidth: 5,
                     drawSpecial: (ctx) => {
-                        // 1. Égide Lunar Mística
+                        
                         const shieldLayers = 4;
                         for(let layer = 0; layer < shieldLayers; layer++) {
                             const layerRadius = radius * (0.9 - layer * 0.05);
                             const segments = 36 + layer * 8;
                             
-                            // Aumenta a intensidade do brilho quando toma dano
+                            
                             const damageIntensity = (typeof DASH !== 'undefined' && DASH.isInvulnerable) ? 1.5 : 1.0;
                             
                             for(let i = 0; i < segments; i++) {
@@ -73,20 +73,20 @@ function drawPlayer() {
                                 const segmentAngle = angle - now * (0.001 + layer * 0.0005);
                                 const pulseOffset = Math.sin(now * 0.003 + layer * Math.PI / 3) * radius * 0.04;
                                 
-                                // Pontos do escudo com variação de brilho
+                                
                                 const x = centerX + Math.cos(segmentAngle) * (layerRadius + pulseOffset);
                                 const y = centerY + Math.sin(segmentAngle) * (layerRadius + pulseOffset);
                                 
-                                // Cores celestiais melhoradas com intensidade baseada no dano
-                                const baseColor = layer === 0 ? '240, 248, 255' : // Branco lunar puro
-                                                layer === 1 ? '135, 206, 250' : // Azul celestial
-                                                layer === 2 ? '70, 130, 180' : // Azul místico
-                                                '25, 25, 112'; // Azul noturno
+                                
+                                const baseColor = layer === 0 ? '240, 248, 255' : 
+                                                layer === 1 ? '135, 206, 250' : 
+                                                layer === 2 ? '70, 130, 180' : 
+                                                '25, 25, 112'; 
                                 
                                 const opacity = (0.9 - layer * 0.15 + Math.sin(now * 0.002 + i) * 0.2) * damageIntensity;
                                 ctx.fillStyle = `rgba(${baseColor}, ${opacity})`;
                                 
-                                // Desenha segmento do escudo em pixel art
+                                
                                 const segmentSize = pixelSize * (1.8 - layer * 0.2);
                                 ctx.fillRect(
                                     Math.floor(x / pixelSize) * pixelSize - segmentSize/2,
@@ -94,7 +94,7 @@ function drawPlayer() {
                                     segmentSize, segmentSize
                                 );
                                 
-                                // Adiciona conectores entre segmentos com efeito de energia lunar
+                                
                                 if (i % 2 === 0 && layer < 3) {
                                     const nextAngle = ((i + 1) / segments) * Math.PI * 2;
                                     const nextX = centerX + Math.cos(nextAngle) * (layerRadius + pulseOffset);
@@ -103,7 +103,7 @@ function drawPlayer() {
                                     const midX = (x + nextX) / 2;
                                     const midY = (y + nextY) / 2;
                                     
-                                    // Conectores com brilho pulsante intensificado durante dano
+                                    
                                     const connectorOpacity = opacity * (0.7 + Math.sin(now * 0.004 + i) * 0.3) * damageIntensity;
                                     ctx.fillStyle = `rgba(${baseColor}, ${connectorOpacity})`;
                                     ctx.fillRect(
@@ -115,11 +115,11 @@ function drawPlayer() {
                             }
                         }
 
-                        // Só desenha os símbolos lunares se não estiver tomando dano
+                        
                         if (activeCharacter === 'Roderick, o Cavaleiro' && typeof CAVALEIRO !== 'undefined' && CAVALEIRO.shieldActive) {
-                            // 2. Símbolos Lunares Aprimorados (8x8 pixels para mais detalhes)
+                            
                             const lunarSymbols = [
-                                [ // Lua Cheia com Aura
+                                [ 
                                     [0,1,1,1,1,1,1,0],
                                     [1,1,1,1,1,1,1,1],
                                     [1,1,0,1,1,0,1,1],
@@ -129,7 +129,7 @@ function drawPlayer() {
                                     [1,1,1,1,1,1,1,1],
                                     [0,1,1,1,1,1,1,0]
                                 ],
-                                [ // Lua Crescente com Estrelas
+                                [ 
                                     [0,0,1,1,1,1,0,0],
                                     [0,1,1,0,0,1,1,0],
                                     [1,1,0,0,1,0,1,1],
@@ -139,7 +139,7 @@ function drawPlayer() {
                                     [0,1,1,0,0,1,1,0],
                                     [0,0,1,1,1,1,0,0]
                                 ],
-                                [ // Eclipse Lunar
+                                [ 
                                     [0,0,1,1,1,1,0,0],
                                     [0,1,1,0,0,1,1,0],
                                     [1,1,0,1,1,0,1,1],
@@ -149,7 +149,7 @@ function drawPlayer() {
                                     [0,1,1,0,0,1,1,0],
                                     [0,0,1,1,1,1,0,0]
                                 ],
-                                [ // Lua Minguante com Estrelas
+                                [ 
                                     [0,0,1,1,1,1,0,0],
                                     [0,1,1,0,0,1,1,0],
                                     [1,1,0,1,0,0,1,1],
@@ -159,7 +159,7 @@ function drawPlayer() {
                                     [0,1,1,0,0,1,1,0],
                                     [0,0,1,1,1,1,0,0]
                                 ],
-                                [ // Estrela Lunar
+                                [ 
                                     [0,0,1,0,0,1,0,0],
                                     [0,1,1,1,1,1,1,0],
                                     [1,1,0,1,1,0,1,1],
@@ -171,23 +171,23 @@ function drawPlayer() {
                                 ]
                             ];
 
-                            // Desenhar os símbolos lunares em posições orbitais
+                            
                             const symbolSize = 8;
                             const symbolScale = pixelSize * 0.8;
                             const symbolCount = lunarSymbols.length;
 
                             const orbits = [
-                                radius * 0.45, // Órbita interna
-                                radius * 0.5,  // Órbita média-interna
-                                radius * 0.55, // Órbita média
-                                radius * 0.6,  // Órbita média-externa
-                                radius * 0.65  // Órbita externa
+                                radius * 0.45, 
+                                radius * 0.5,  
+                                radius * 0.55, 
+                                radius * 0.6,  
+                                radius * 0.65  
                             ];
 
-                            // Desenha os símbolos em órbitas com conexões místicas
+                            
                             for(let i = 0; i < symbolCount; i++) {
                                 const baseAngle = (i / symbolCount) * Math.PI * 2;
-                                // Velocidades de rotação ligeiramente diferentes para cada símbolo
+                                
                                 const rotationSpeed = 0.0005 * (1 + (i % 3) * 0.1);
                                 const angle = baseAngle + now * rotationSpeed;
                                 
@@ -197,7 +197,7 @@ function drawPlayer() {
                                 const orbitX = centerX + Math.cos(angle) * orbitRadius;
                                 const orbitY = centerY + Math.sin(angle) * orbitRadius;
                                 
-                                // Desenha conexões místicas entre símbolos
+                                
                                 if (i > 0) {
                                     const prevX = centerX + Math.cos(baseAngle - (2 * Math.PI / symbolCount) + now * rotationSpeed) * orbits[i-1];
                                     const prevY = centerY + Math.sin(baseAngle - (2 * Math.PI / symbolCount) + now * rotationSpeed) * orbits[i-1];
@@ -205,7 +205,7 @@ function drawPlayer() {
                                     ctx.beginPath();
                                     ctx.moveTo(orbitX, orbitY);
                                     
-                                    // Curva Bezier para conexão mais suave
+                                    
                                     const controlX = (orbitX + prevX) / 2 - Math.sin(angle) * 20;
                                     const controlY = (orbitY + prevY) / 2 + Math.cos(angle) * 20;
                                     
@@ -219,7 +219,7 @@ function drawPlayer() {
                                     ctx.stroke();
                                 }
 
-                                // Desenha o símbolo com efeito de brilho
+                                
                                 ctx.save();
                                 ctx.globalAlpha = 0.8 + Math.sin(now * 0.003 + i * Math.PI/3) * 0.2;
                                 
@@ -229,7 +229,7 @@ function drawPlayer() {
                                             const px = orbitX + (x - symbolSize/2) * symbolScale;
                                             const py = orbitY + (y - symbolSize/2) * symbolScale;
                                             
-                                            // Cor variável para cada símbolo com base em sua posição
+                                            
                                             const hue = (240 + Math.sin(now * 0.001 + i * Math.PI/2) * 20);
                                             const brightness = 75 + Math.sin(now * 0.002 + i) * 10;
                                             ctx.fillStyle = `hsla(${hue}, 80%, ${brightness}%, ${0.7 + Math.sin(now * 0.004 + x * y) * 0.3})`;
@@ -260,9 +260,9 @@ function drawPlayer() {
                         rays: 'rgba(148, 0, 211, 0.8)'
                     },
                     drawSpecial: (ctx) => {
-                        // Prioridade das auras: Bomba de fumaça > Dash > Dano
+                        
                         if (typeof NINJA !== 'undefined' && NINJA.smokeBombActive) {
-                            // Efeito bomba de fumaça (pixel art)
+                            
                             const smokeRadius = Math.max(dw, dh) * (0.7 + Math.sin(performance.now()*0.002)*0.05);
                             const smokeLayers = 5;
                             const pixelSize = 10;
@@ -286,7 +286,7 @@ function drawPlayer() {
                                     ctx.restore();
                                 }
                             }
-                            // Pequenas partículas de fumaça pixeladas flutuando
+                            
                             const smokeParticles = 18;
                             for (let i = 0; i < smokeParticles; i++) {
                                 const angle = (i / smokeParticles) * Math.PI * 2 + performance.now()*0.0007;
@@ -303,9 +303,9 @@ function drawPlayer() {
                                 );
                                 ctx.restore();
                             }
-                        // Efeito parcial da aura do ninja (sem relâmpagos) quando toma dano
+                        
                         } else if (typeof NINJA !== 'undefined' && NINJA.invulneravelPorDano) {
-                            // Aura roxa pixel art sem relâmpagos/arcos
+                            
                             const shadowRadius = Math.max(dw, dh) * 0.62;
                             const pulse = 0.09 + Math.sin(performance.now()*0.002) * 0.09;
                             const pixelSizeShadow = 6;
@@ -331,7 +331,7 @@ function drawPlayer() {
                                     );
                                 }
                             }
-                            // Círculo de energia pixelado (sem arcos/relâmpagos)
+                            
                             const energyCircleRadius = Math.max(dw, dh) * 0.41 + Math.sin(performance.now()*0.002) * 1.5;
                             const pixelSizeCircle = 5;
                             for (let a = 0; a < 36; a++) {
@@ -346,15 +346,15 @@ function drawPlayer() {
                                 );
                             }
                         } else {
-                            // Aura roxa pixel art aprimorada (aura padrão do ninja)
+                            
                             const shadowRadius = Math.max(dw, dh) * 0.62;
                             const pulse = 0.09 + Math.sin(performance.now()*0.002) * 0.09;
                             const pixelSizeShadow = 6;
                             const shadowLayers = [
-                                { mult: 1.0, color: '138,43,226', alpha: 0.38 }, // Roxo claro
-                                { mult: 0.88, color: '75,0,130', alpha: 0.28 },  // Roxo médio
-                                { mult: 0.76, color: '40,0,80', alpha: 0.18 },   // Roxo escuro
-                                { mult: 1.13, color: '200,120,255', alpha: 0.13 } // Contorno mágico
+                                { mult: 1.0, color: '138,43,226', alpha: 0.38 }, 
+                                { mult: 0.88, color: '75,0,130', alpha: 0.28 },  
+                                { mult: 0.76, color: '40,0,80', alpha: 0.18 },   
+                                { mult: 1.13, color: '200,120,255', alpha: 0.13 } 
                             ];
                             for (let l = 0; l < shadowLayers.length; l++) {
                                 const layer = shadowLayers[l];
@@ -372,7 +372,7 @@ function drawPlayer() {
                                     );
                                 }
                             }
-                            // Círculo de energia pixelado (ajustado)
+                            
                             const energyCircleRadius = Math.max(dw, dh) * 0.41 + Math.sin(performance.now()*0.002) * 1.5;
                             const pixelSizeCircle = 5;
                             for (let a = 0; a < 36; a++) {
@@ -386,7 +386,7 @@ function drawPlayer() {
                                     pixelSizeCircle, pixelSizeCircle
                                 );
                             }
-                            // Arcos elétricos pixelados (ajustado)
+                            
                             const arcPoints = 6;
                             for(let i=0; i<arcPoints; i++) {
                                 const angle1 = (i / arcPoints) * Math.PI * 2 + performance.now()*0.0012;
@@ -410,7 +410,7 @@ function drawPlayer() {
                                     );
                                 }
                             }
-                            // Raios elétricos pixelados (ajustado)
+                            
                             const lightningCount = 7;
                             const pixelSizeLightning = 5;
                             for(let i = 0; i < lightningCount; i++) {
@@ -438,7 +438,7 @@ function drawPlayer() {
                                             pixelSizeLightning, pixelSizeLightning
                                         );
                                     }
-                                    // Ramificações pixeladas
+                                    
                                     if ((j === 2 || j === 3) && Math.random() > 0.3) {
                                         for(let b=0; b<2; b++) {
                                             const branchAngle = angle + (b ? 1 : -1) * (Math.PI/4 + Math.sin(performance.now()*0.002 + i + b) * 0.2);
@@ -463,7 +463,7 @@ function drawPlayer() {
                                     prevY = y1;
                                 }
                             }
-                            // Faíscas rápidas pixeladas (inalteradas)
+                            
                             const sparkCount = 7;
                             const pixelSizeSpark = 5;
                             for(let i=0; i<sparkCount; i++) {
@@ -499,31 +499,31 @@ function drawPlayer() {
                     particleSize: 5,
                     rayWidth: 4,
                     drawSpecial: (ctx) => {
-                        // Runas mais complexas e dinâmicas
+                        
                         if (MAGO.magicBlastActive){
                         const runePatterns = [
-                            [ // Runa de Poder
+                            [ 
                                 [0,1,0,1,0],
                                 [1,0,1,0,1],
                                 [0,1,1,1,0],
                                 [0,0,1,0,0],
                                 [0,1,1,1,0]
                             ],
-                            [ // Runa de Proteção
+                            [ 
                                 [1,1,1,1,1],
                                 [1,0,0,0,1],
                                 [1,0,1,0,1],
                                 [1,0,0,0,1],
                                 [1,1,1,1,1]
                             ],
-                            [ // Runa de Energia
+                            [ 
                                 [0,1,1,1,0],
                                 [1,0,1,0,1],
                                 [1,1,0,1,1],
                                 [1,0,1,0,1],
                                 [0,1,1,1,0]
                             ],
-                            [ // Runa de Sabedoria
+                            [ 
                                 [1,0,1,0,1],
                                 [0,1,1,1,0],
                                 [1,1,0,1,1],
@@ -533,7 +533,7 @@ function drawPlayer() {
                         
                         ];
                         
-                        // Círculo rúnico central com runas girando
+                        
                         const runeCount = 6;
                         for(let r = 0; r < runeCount; r++) {
                             const runeAngle = (r / runeCount) * Math.PI * 2 + now * 0.001;
@@ -541,7 +541,7 @@ function drawPlayer() {
                             const runeX = centerX + Math.cos(runeAngle) * runeRadius;
                             const runeY = centerY + Math.sin(runeAngle) * runeRadius;
                             
-                            // Seleciona e desenha uma runa
+                            
                             const runePattern = runePatterns[Math.floor((now / 1000 + r) % runePatterns.length)];
                             const runeSize = pixelSize * 0.8;
                             
@@ -556,11 +556,11 @@ function drawPlayer() {
                                         const py = (i - 2) * runeSize;
                                         const opacity = 0.8 + Math.sin(now * 0.003 + r + i + j) * 0.2;
                                         
-                                        // Efeito de brilho pulsante
+                                        
                                         ctx.fillStyle = `rgba(147, 112, 219, ${opacity})`;
                                         ctx.fillRect(px, py, runeSize, runeSize);
                                         
-                                        // Adiciona pequenos pixels de energia
+                                        
                                         if(Math.random() > 0.8) {
                                             ctx.fillStyle = 'rgba(230, 230, 250, 0.9)';
                                             ctx.fillRect(px + runeSize/4, py + runeSize/4, 
@@ -572,7 +572,7 @@ function drawPlayer() {
                             ctx.restore();
                         }
                     } 
-                        // Círculo de energia rúnica
+                        
                         for(let i = 0; i < pixelRows; i++) {
                             for(let j = 0; j < pixelCols; j++) {
                                 const px = centerX - radius + j * pixelSize;
@@ -589,7 +589,7 @@ function drawPlayer() {
                                         ctx.fillStyle = `rgba(147, 112, 219, ${opacity})`;
                                         ctx.fillRect(px, py, pixelSize, pixelSize);
                                         
-                                        // Adiciona conexões de energia entre runas próximas
+                                        
                                         if(Math.random() > 0.7) {
                                             const lineAngle = Math.random() * Math.PI * 2;
                                             const lineLength = pixelSize * 2;
@@ -606,7 +606,7 @@ function drawPlayer() {
                             }
                         }
                         
-                        // Brilho mágico intenso com variação de cor
+                        
                         const glowColor = Math.sin(now * 0.001) > 0 ? 
                             'rgba(147, 112, 219, 1)' : 
                             'rgba(216, 191, 216, 1)';
@@ -616,7 +616,7 @@ function drawPlayer() {
                 };
                 break;
 
-            default: // O Errante de Eldoria
+            default: 
                 config = {
                     colors: {
                         primary: 'rgba(255, 215, 0, 0.5)',
@@ -631,12 +631,12 @@ function drawPlayer() {
                     particleSize: 5,
                     rayWidth: 4,
                     drawSpecial: (ctx) => {
-                        // Aura aprimorada: mais camadas, brilho dinâmico e partículas extras
+                        
                         const spiralCount = 3;
                         const pointsPerSpiral = 20;
-                        const baseHue = 46; // dourado
+                        const baseHue = 46; 
                         const now2 = performance.now();
-                        // Camadas de aura dourada com brilho dinâmico
+                        
                         for (let layer = 0; layer < 3; layer++) {
                             const layerRadius = radius * (0.77 + layer * 0.09 + Math.sin(now2*0.001+layer)*0.015);
                             const layerAlpha = 0.20 - layer*0.06 + Math.sin(now2*0.002+layer)*0.03;
@@ -658,7 +658,7 @@ function drawPlayer() {
                                 ctx.restore();
                             }
                         }
-                        // Espiral aprimorada com partículas maiores e brilho
+                        
                         for(let s = 0; s < spiralCount; s++) {
                             const spiralOffset = (s / spiralCount) * Math.PI * 2;
                             const spiralSpeed = 0.002 * (s + 1);
@@ -681,7 +681,7 @@ function drawPlayer() {
                                     size, size
                                 );
                                 ctx.restore();
-                                // Pequenos brilhos conectando pontos
+                                
                                 if(i > 0 && Math.random() > 0.7) {
                                     const smallSize = pixelSize / 2;
                                     ctx.save();
@@ -696,7 +696,7 @@ function drawPlayer() {
                                 }
                             }
                         }
-                        // Explosões de luz dourada aprimoradas
+                        
                         if(Math.random() > 0.92) {
                             const burstX = centerX + (Math.random() - 0.5) * radius * 0.8;
                             const burstY = centerY + (Math.random() - 0.5) * radius * 0.8;
@@ -717,7 +717,7 @@ function drawPlayer() {
                                 ctx.restore();
                             }
                         }
-                        // Pequenas partículas douradas flutuando ao redor
+                        
                         for (let i = 0; i < 8; i++) {
                             const angle = (i / 8) * Math.PI * 2 + now2*0.0011;
                             const dist = radius * 0.9 + Math.sin(now2*0.002 + i)*8;
@@ -738,7 +738,7 @@ function drawPlayer() {
                 break;
         }
 
-        // Base wave effect (modificado para cada personagem)
+        
         ctx.beginPath();
         for(let i = 0; i < pixelRows; i++) {
             for(let j = 0; j < pixelCols; j++) {
@@ -749,7 +749,7 @@ function drawPlayer() {
                 if (dist < radius) {
                     let waveEffect = 0;
                     
-                    // Efeito de onda personalizado por personagem
+                    
                     switch(activeCharacter) {
                         case 'Kuroshi, o Ninja':
                             waveEffect = Math.sin(dist * 0.2 + now * 0.006) * 
@@ -775,12 +775,12 @@ function drawPlayer() {
             }
         }
 
-        // Efeitos especiais do personagem
+        
         config.drawSpecial(ctx);
 
         ctx.restore();
     }
-    // Só desenha o sprite do personagem se player.visible for true
+    
     if (!player.visible) return;
     if (!player.facingRight) {
         ctx.translate(dx + dw/2, dy + dh/2);

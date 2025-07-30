@@ -1,6 +1,6 @@
-// ==========================
-// ===== CERRAS SUBINDO =====
-// ==========================
+
+
+
 
 let lastSerraAllowedTime = 0;
 
@@ -14,20 +14,20 @@ function getRandomSerraSide() {
 }
 
 function spawnCerras() {
-  // Só permite spawn se as imagens das serras estiverem carregadas
+  
   if (typeof serrasCarregadas !== 'undefined' && !serrasCarregadas) return;
   if (typeof lastSerraAllowedTime !== 'undefined' && performance.now() < lastSerraAllowedTime) return;
   if (typeof lastEnemyAllowedTime !== 'undefined' && performance.now() < lastEnemyAllowedTime) return;
 
   const now = performance.now();
 
-  // Só permite uma cerra na tela por vez
+  
   if (serras.length === 0 && (now - lastSerraSpawn > nextSerraDelay)) {
     const side = getRandomSerraSide();
     const serraSpeed = -2 * gameSpeed;
     if (side === 'left') {
       serras.push({
-        x: gamePlayArea.x,  // Alinha com borda esquerda da área jogável
+        x: gamePlayArea.x,  
         y: screenHeight,
         width: 110,
         height: 110,
@@ -42,7 +42,7 @@ function spawnCerras() {
       });
     } else {
       serras.push({
-        x: gamePlayArea.x + gamePlayArea.width - 110, // Alinha com borda direita da área jogável
+        x: gamePlayArea.x + gamePlayArea.width - 110, 
         y: screenHeight,
         width: 110,
         height: 110,
@@ -73,7 +73,7 @@ function updateCerras() {
 
 function drawCerras() {
   if (typeof serrasCarregadas !== 'undefined' && !serrasCarregadas) {
-    // Fallback: desenha um círculo simples para depuração
+    
     serras.forEach(serra => {
       ctx.save();
       ctx.translate(serra.x + serra.width / 2, serra.y + serra.height / 2);
@@ -94,17 +94,17 @@ function drawCerras() {
       ctx.rotate(Math.PI / 2);
     }
     if (typeof serrasCarregadas !== 'undefined' && serrasCarregadas) {
-      // Desenha o frame atual da spritesheet
+      
       ctx.drawImage(
         serraSpritesheet,
-        (serraFrame % serraSpriteTotalFrames) * serraSpriteFrameWidth, // sx
-        0, // sy
-        serraSpriteFrameWidth, // sw
-        serraSpriteFrameHeight, // sh
-        -serra.width / 2, // dx
-        -serra.height / 2, // dy
-        serra.width, // dw
-        serra.height // dh
+        (serraFrame % serraSpriteTotalFrames) * serraSpriteFrameWidth, 
+        0, 
+        serraSpriteFrameWidth, 
+        serraSpriteFrameHeight, 
+        -serra.width / 2, 
+        -serra.height / 2, 
+        serra.width, 
+        serra.height 
       );
     } else {
       ctx.fillStyle = "#888";

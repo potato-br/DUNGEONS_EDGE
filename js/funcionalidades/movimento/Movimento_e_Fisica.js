@@ -1,6 +1,6 @@
-// ==========================
-// ===== MOVIMENTO E FÍSICA =====
-// ==========================
+
+
+
 
 function movePlayer() {
     plataformas.forEach(p => p.isColliding = false);
@@ -268,7 +268,7 @@ function checkFallingPlatform(player, platform, platBox) {
 }
 
 function jump() {
-    // Se não tem pulos disponíveis, mostra dica
+    
     if (player.maxJumps === 0) {
         createParticles(
             player.x + player.width/2,
@@ -284,14 +284,14 @@ function jump() {
         );
         return;
     }
-    // Check if we can jump and haven't exceeded max jumps
+    
     if (player.jumpCount < player.maxJumps) {
-        // Always set consistent initial velocity
+        
         player.velocityY = player.jumpPower;
         player.isJumping = true;
         player.jumpCount++;
 
-        // Criar efeito de partículas no pulo
+        
         createParticles(
             player.x + player.width/2,
             player.y + player.height,

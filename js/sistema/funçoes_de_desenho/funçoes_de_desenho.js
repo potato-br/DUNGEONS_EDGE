@@ -1,16 +1,16 @@
-// ==========================
-// ===== FUNÇÕES DE DESENHO =====
-// ==========================
+
+
+
 
 let parallaxOffset = 0;
 let gradientAngle = 110;
 let parallaxSpeed = 0.2;
 
-// Variáveis para transição das laterais
+
 let currentLateralLeftBg = lateralImages[0];
 let nextLateralLeftBg = lateralImages[0];
-let currentLateralRightBg = lateralImages[0];  // Agora começa com o background 0
-let nextLateralRightBg = lateralImages[0];     // Agora começa com o background 0
+let currentLateralRightBg = lateralImages[0];  
+let nextLateralRightBg = lateralImages[0];     
 let lateralBackgroundY = 0;
 let lateralTransitionSpeed = 0.7; 
 let lateralTrocaCount = 0;
@@ -23,15 +23,15 @@ function drawlateral() {
     if (gameState === 'jogando' && !isPaused && !isRespawning) {
         lateralBackgroundY -= lateralTransitionSpeed * gameSpeed;
     }
-    gradientAngle = (gradientAngle + 0.3) % 360; // Reduzido a velocidade da animação
+    gradientAngle = (gradientAngle + 0.3) % 360; 
 
     const leftWidth = canvas.width * 0.38;
     const rightWidth = canvas.width * 0.38;
 
-    // Desenha backgrounds em um único contexto salvo
+    
     ctx.save();
 
-    // Desenha lado esquerdo
+    
     ctx.beginPath();
     ctx.rect(0, 0, leftWidth, canvas.height);
     ctx.clip();
@@ -42,7 +42,7 @@ function drawlateral() {
     }
     ctx.restore();
 
-    // Desenha lado direito
+    
     ctx.save();
     ctx.beginPath();
     ctx.rect(canvas.width - rightWidth, 0, rightWidth, canvas.height);
@@ -54,19 +54,19 @@ function drawlateral() {
     }
     ctx.restore();
 
-  // Check if we need to transition to next background
+  
   if (lateralBackgroundY <= -canvas.height) {
     lateralBackgroundY = 0;
     currentLateralLeftBg = nextLateralLeftBg;
     currentLateralRightBg = nextLateralRightBg;
     lateralTrocaCount++;
     
-    // Nova lógica para seleção de backgrounds com possibilidade de serem iguais
-    if (Math.random() < 0.4) { // 40% de chance de usar o background 0
+    
+    if (Math.random() < 0.4) { 
       nextLateralLeftBg = lateralImages[0];
       nextLateralRightBg = lateralImages[0];
     } else {
-      // Escolhe um background aleatório para cada lateral
+      
       const leftIdx = Math.floor(Math.random() * lateralImages.length);
       const rightIdx = Math.floor(Math.random() * lateralImages.length);
       nextLateralLeftBg = lateralImages[leftIdx];
@@ -74,20 +74,20 @@ function drawlateral() {
     }
   }
 
-  // Draw cone light effect
+  
   const centerX = (Math.sin(gradientAngle * Math.PI / 180) * canvas.width) + canvas.width / 2;
   const centerY = canvas.height / 2;
   const gradient = ctx.createRadialGradient(
-    centerX, centerY, 0,           // Inner circle
-    centerX, centerY, canvas.width  // Outer circle
+    centerX, centerY, 0,           
+    centerX, centerY, canvas.width  
   );
   
-  // Create cone effect with lighter falloff for mais visibilidade
-  gradient.addColorStop(0, 'rgba(0, 0, 0, 0.4)');   // Centro mais escuro
-  gradient.addColorStop(0.1, 'rgba(0, 0, 0, 0.5)');  // Inner cone mais escuro
-  gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.6)');  // Middle cone mais escuro
-  gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.7)');  // Outer cone mais escuro
-  gradient.addColorStop(1, 'rgba(0, 0, 0, 0.85)');   // Bordas mais escuras
+  
+  gradient.addColorStop(0, 'rgba(0, 0, 0, 0.4)');   
+  gradient.addColorStop(0.1, 'rgba(0, 0, 0, 0.5)');  
+  gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.6)');  
+  gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.7)');  
+  gradient.addColorStop(1, 'rgba(0, 0, 0, 0.85)');   
   
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -111,7 +111,7 @@ function drawBackground() {
 
   if (gameState === 'gameover') return;
   if (typeof isPaused !== 'undefined' && isPaused) return;
-  // Só move o background se não estiver respawnando
+  
   if (!isRespawning) {
     backgroundY -= backgroundSpeed;
   }
