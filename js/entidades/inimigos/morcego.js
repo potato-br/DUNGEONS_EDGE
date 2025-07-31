@@ -16,6 +16,18 @@ const MorcegoModo = {
 };
 
 const MODOS_POR_PROFUNDIDADE = [
+
+    /*{
+        profundidadeMin: 0,
+        profundidadeMax: Infinity,
+        modos: [
+            
+          { tipo: MorcegoModo.NORMAL},        
+            { tipo: MorcegoModo.ONDULADO},      
+            { tipo: MorcegoModo.KAMIKAZE},      
+            { tipo: MorcegoModo.TRANSPORTADOR}   
+        ]
+    },*/
    
     {
         profundidadeMin: 15000,
@@ -172,7 +184,10 @@ function updateMorcegoTransportador(morcego) {
     const dx = alvoX - morcego.x;
     const dy = alvoY - morcego.y;
     const dist = Math.sqrt(dx*dx + dy*dy);
-    const speed = 2 * gameSpeed;
+    let speed = 2 * gameSpeed;
+    // Limite máximo de movimento por frame para evitar bugs em FPS alto
+    const MAX_MOVE_PER_FRAME = 4; // pixels
+    if (speed > MAX_MOVE_PER_FRAME) speed = MAX_MOVE_PER_FRAME;
     if (dist > speed) {
         morcego.x += (dx/dist) * speed;
         morcego.y += (dy/dist) * speed;
@@ -267,7 +282,12 @@ function updateMorcegos() {
 function updateMorcegoKamikaze(morcego, index) {
     switch (morcego.estado) {
         case 'SUBINDO': {
-            morcego.y -= 2.5 * gameSpeed;
+            {
+                let move = 2.5 * gameSpeed;
+                const MAX_MOVE_PER_FRAME = 10; // pixels
+                if (move > MAX_MOVE_PER_FRAME) move = MAX_MOVE_PER_FRAME;
+                morcego.y -= move;
+            }
             if (morcego.y <= morcego.yInicial - 120) {
                 
                 const cx = player.x + player.width/2;
@@ -292,7 +312,9 @@ function updateMorcegoKamikaze(morcego, index) {
             let tx = morcego.transicaoDestino.x - morcego.x;
             let ty = morcego.transicaoDestino.y - morcego.y;
             let dist = Math.sqrt(tx*tx + ty*ty);
-            const speed = 6 * gameSpeed;
+            let speed = 6 * gameSpeed;
+            const MAX_MOVE_PER_FRAME = 10; // pixels
+            if (speed > MAX_MOVE_PER_FRAME) speed = MAX_MOVE_PER_FRAME;
             if (dist < speed) {
                 morcego.x = morcego.transicaoDestino.x;
                 morcego.y = morcego.transicaoDestino.y;
@@ -313,7 +335,12 @@ function updateMorcegoKamikaze(morcego, index) {
             
             const raio = morcego.raioOrbita || player.width * 2.2;
             const direcao = morcego.direcaoOrbita || 1;
-            morcego.anguloOrbita += 0.045 * gameSpeed * direcao; 
+            {
+                let angSpeed = 0.045 * gameSpeed * direcao;
+                const MAX_ANG_PER_FRAME = 0.09; // radianos
+                if (Math.abs(angSpeed) > MAX_ANG_PER_FRAME) angSpeed = MAX_ANG_PER_FRAME * Math.sign(angSpeed);
+                morcego.anguloOrbita += angSpeed;
+            }
             morcego.x = player.x + player.width/2 + Math.cos(morcego.anguloOrbita) * raio - morcego.width/2;
             morcego.y = player.y + player.height/2 + Math.sin(morcego.anguloOrbita) * raio - morcego.height/2;
             
@@ -385,8 +412,13 @@ function updateMorcegoKamikaze(morcego, index) {
                 const dist = Math.sqrt(dx*dx + dy*dy) || 1;
                 morcego._rasanteDir = { x: dx/dist, y: dy/dist };
             }
-            morcego.x += morcego._rasanteDir.x * morcego.velocidadeRasante;
-            morcego.y += morcego._rasanteDir.y * morcego.velocidadeRasante;
+            {
+                let move = morcego.velocidadeRasante;
+                const MAX_MOVE_PER_FRAME = 12; // pixels
+                if (move > MAX_MOVE_PER_FRAME) move = MAX_MOVE_PER_FRAME;
+                morcego.x += morcego._rasanteDir.x * move;
+                morcego.y += morcego._rasanteDir.y * move;
+            }
 
             
             if (
@@ -451,10 +483,11 @@ function checkColisaoMorcegoComPlayer(morcego, index) {
         return true;
     }
 
-    if (
-        (morcego.modo === MorcegoModo.KAMIKAZE || (morcego.modo === MorcegoModo.TRANSPORTADOR && morcego.estado === 'RASANTE'))
-        && morcego.estado !== 'RASANTE'
-    ) {
+    if (morcego.modo === MorcegoModo.TRANSPORTADOR && morcego.estado !== 'RASANTE') {
+        return false;
+    }
+
+    if (morcego.modo === MorcegoModo.KAMIKAZE && morcego.estado !== 'RASANTE') {
         return false;
     }
 
@@ -849,7 +882,15 @@ function tentarSpawnarMorcegoTipo(profundidadeAtual, modo) {
 function spawnMorcegos(profundidadeAtual) {
     if (profundidadeAtual < MODOS_POR_PROFUNDIDADE[0].profundidadeMin) return;
     
-    if (
+    const faixaAtual = MODOS_POR_PROFUNDIDADE.find(faixa => 
+        profundidadeAtual >= faixa.profundidadeMin && profundidadeAtual <= faixa.profundidadeMax
+    );
+    
+    if (!faixaAtual) return;
+    
+    const modosPermitidos = faixaAtual.modos.map(m => m.tipo);
+    
+    if (modosPermitidos.includes(MorcegoModo.NORMAL) &&
         (typeof isGameOver !== 'undefined' && isGameOver) ||
         profundidadeAtual - lastSpawnDepth.NORMAL >= MORCEGO_CONFIG.SPAWN_INTERVAL.NORMAL
     ) {
@@ -861,7 +902,7 @@ function spawnMorcegos(profundidadeAtual) {
         lastSpawnDepth.NORMAL = profundidadeAtual;
     }
     
-    if (
+    if (modosPermitidos.includes(MorcegoModo.ONDULADO) &&
         (typeof isGameOver !== 'undefined' && isGameOver) ||
         profundidadeAtual - lastSpawnDepth.ONDULADO >= MORCEGO_CONFIG.SPAWN_INTERVAL.ONDULADO
     ) {
@@ -873,7 +914,9 @@ function spawnMorcegos(profundidadeAtual) {
         lastSpawnDepth.ONDULADO = profundidadeAtual;
     }
     
-    if (profundidadeAtual - lastSpawnDepth.KAMIKAZE >= MORCEGO_CONFIG.SPAWN_INTERVAL.KAMIKAZE) {
+    if (modosPermitidos.includes(MorcegoModo.KAMIKAZE) &&
+        profundidadeAtual - lastSpawnDepth.KAMIKAZE >= MORCEGO_CONFIG.SPAWN_INTERVAL.KAMIKAZE
+    ) {
         if (morcegos.length < MORCEGO_CONFIG.MAX_MORCEGOS) {
             if (Math.random() < ajustaChancePorEfigie(MORCEGO_CONFIG.SPAWN_CHANCE.KAMIKAZE)) {
                 tentarSpawnarMorcegoTipo(profundidadeAtual, MorcegoModo.KAMIKAZE);
@@ -882,7 +925,9 @@ function spawnMorcegos(profundidadeAtual) {
         lastSpawnDepth.KAMIKAZE = profundidadeAtual;
     }
     
-    if (profundidadeAtual - lastSpawnDepth.TRANSPORTADOR >= MORCEGO_CONFIG.SPAWN_INTERVAL.TRANSPORTADOR) {
+    if (modosPermitidos.includes(MorcegoModo.TRANSPORTADOR) &&
+        profundidadeAtual - lastSpawnDepth.TRANSPORTADOR >= MORCEGO_CONFIG.SPAWN_INTERVAL.TRANSPORTADOR
+    ) {
         if (morcegos.length < MORCEGO_CONFIG.MAX_MORCEGOS) {
             if (Math.random() < ajustaChancePorEfigie(MORCEGO_CONFIG.SPAWN_CHANCE.TRANSPORTADOR)) {
                 tentarSpawnarMorcegoTipo(profundidadeAtual, MorcegoModo.TRANSPORTADOR);

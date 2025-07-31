@@ -75,7 +75,7 @@ const shopItems = [
       3: 3
     },
     disponivel: true,
-    efeito: () => { enemySpawnInterval += 70; },
+    efeito: () => { enemySpawnInterval += 170; },
     maxCompras: 11,
     compras: 0,
     exclusiveToCharacter: 'O Errante de Eldoria'

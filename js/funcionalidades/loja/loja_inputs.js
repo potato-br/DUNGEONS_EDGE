@@ -183,7 +183,7 @@ canvas.addEventListener('wheel', function(e) {
     scrollOffset = Math.min((shopItems.length * 45) - (LOJA_ITENS_POR_PAGINA * 45), scrollOffset + SCROLL_SPEED);
   }
   drawLoja();
-});
+},{ passive: false });
 
 canvas.addEventListener('mousemove', function(e) {
   if (!showCharacterSelect) return;
