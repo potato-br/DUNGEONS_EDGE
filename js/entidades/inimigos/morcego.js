@@ -79,7 +79,7 @@ const MORCEGO_CONFIG = {
         TRANSPORTADOR: 2
     },
     SPAWN_CHANCE: {
-        NORMAL: 1, 
+        NORMAL: 0.8, 
         ONDULADO: 0.8,
         KAMIKAZE: 0.6,
         TRANSPORTADOR: 0.5
@@ -447,7 +447,16 @@ function updateMorcegoKamikaze(morcego, index) {
             break;
         }
         case 'MORRENDO':
-            
+            // Partículas ao morrer
+            if (!morcego._particulasCriadas) {
+                createParticles(
+                    morcego.x + morcego.width/2,
+                    morcego.y + morcego.height/2,
+                    16,
+                    'rgba(180,0,180,0.8)'
+                );
+                morcego._particulasCriadas = true;
+            }
             const idx = morcegos.indexOf(morcego);
             if (idx !== -1) {
                 morcegos.splice(idx, 1);
@@ -477,6 +486,15 @@ function checkColisaoMorcegoComPlayer(morcego, index) {
         // Remover morcego
         const idx = morcegos.indexOf(morcego);
         if (idx !== -1) morcegos.splice(idx, 1);
+        if (!morcego._particulasCriadas) {
+                createParticles(
+                    morcego.x + morcego.width/2,
+                    morcego.y + morcego.height/2,
+                    16,
+                    'rgba(180,0,180,0.8)'
+                );
+                morcego._particulasCriadas = true;
+            }
         // Recupera os pulos do player
         if (typeof player.jumpCount !== 'undefined') player.jumpCount = 0;
         // Efeito opcional: som, partículas, etc.
@@ -591,8 +609,8 @@ function applyDanoJogador(morcego) {
 
 function drawEnemyTransportado(enemy, morcego) {
     const sprite = inimigoImages && inimigoImages[0];
-    const xOffset = 27; 
-    const yOffset = 15; 
+    const xOffset = 0; 
+    const yOffset = -9; 
     if (sprite && sprite.complete) {
         const SPRITE_WIDTH = sprite.width / 2;
         const SPRITE_HEIGHT = sprite.height;
@@ -684,7 +702,6 @@ function drawMorcego(morcego) {
       );
     }
     ctx.restore();
-    
     if (morcego.modo === MorcegoModo.TRANSPORTADOR && morcego.carregandoEnemy && morcego.enemy) {
       drawEnemyTransportado(morcego.enemy, morcego);
     }
@@ -699,7 +716,25 @@ function drawMorcego(morcego) {
       drawEnemyTransportado(morcego.enemy, morcego);
     }
   }
-  
+  // Exclamação para kamikaze em ALERTA
+  if (morcego.modo === MorcegoModo.KAMIKAZE && morcego.estado === 'ALERTA') {
+    drawExclamacaoPixelArt(
+      morcego.x + morcego.width/2,
+      morcego.y - 10
+    );
+  }
+  // Exclamação para transportador prestes a soltar aranha
+  if (
+    morcego.modo === MorcegoModo.TRANSPORTADOR &&
+    morcego.carregandoEnemy &&
+    typeof morcego.tempoSobreJogador === 'number' &&
+    morcego.tempoSobreJogador > 1.5 && morcego.tempoSobreJogador < 2
+  ) {
+    drawExclamacaoPixelArt(
+      morcego.x + morcego.width/2,
+      morcego.y - 10
+    );
+  }
   if (window.spriteDebug) {
     drawMorcegoDebug(morcego);
   }
@@ -707,13 +742,20 @@ function drawMorcego(morcego) {
 
 function drawExclamacaoPixelArt(cx, cy) {
     ctx.save();
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(cx-1, cy-7, 2, 5); 
-    ctx.fillRect(cx-1, cy-1, 2, 2); 
+    ctx.shadowColor = '#000';
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = '#FFD700'; // amarelo vibrante
+    ctx.fillRect(cx-2, cy-12, 4, 8); // haste
+    ctx.beginPath();
+    ctx.arc(cx, cy-2, 2, 0, 2*Math.PI);
+    ctx.fill(); // bolinha
+    ctx.shadowBlur = 0;
     ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(cx-1, cy-7, 2, 5);
-    ctx.strokeRect(cx-1, cy-1, 2, 2);
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(cx-2, cy-12, 4, 8);
+    ctx.beginPath();
+    ctx.arc(cx, cy-2, 2, 0, 2*Math.PI);
+    ctx.stroke();
     ctx.restore();
 }
 
@@ -943,21 +985,24 @@ function isPosicaoSegura(x, y, width, height) {
 
 function isPosicaoSeguraPlataformas(x, y, width, height) {
     for (const platform of plataformas) {
-        
-        const distanciaVertical = Math.abs(y - platform.y);
+        // Considera a posição futura da plataforma se ela estiver se movendo
+        const plataformaX = platform.velocityX ? platform.x + platform.velocityX : platform.x;
+        const plataformaY = platform.velocityY ? platform.y + platform.velocityY : platform.y;
+
+        const distanciaVertical = Math.abs(y - plataformaY);
         if (distanciaVertical < MORCEGO_CONFIG.MIN_DISTANCE_PLATFORM) return false;
-        
+
         if (platform.isGrande) {
             const centroMorcego = x + width / 2;
-            const centroPlataforma = platform.x + platform.width / 2;
+            const centroPlataforma = plataformaX + platform.width / 2;
             const distanciaHorizontal = Math.abs(centroMorcego - centroPlataforma);
             if (distanciaHorizontal < MORCEGO_CONFIG.MIN_DISTANCE_HORIZONTAL) return false;
         }
-        
-        if (x < platform.x + platform.width &&
-            x + width > platform.x &&
-            y < platform.y + platform.height &&
-            y + height > platform.y) return false;
+
+        if (x < plataformaX + platform.width &&
+            x + width > plataformaX &&
+            y < plataformaY + platform.height &&
+            y + height > plataformaY) return false;
     }
     return true;
 }
