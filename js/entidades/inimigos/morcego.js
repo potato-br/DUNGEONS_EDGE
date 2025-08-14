@@ -335,11 +335,11 @@ const MORCEGO_CONFIG = {
         AREA_PATRULHA: 100
     },
     SPAWN: {
-        PROFUNDIDADE: {
-            NORMAL: 0,
-            ONDULADO: 0,
-            KAMIKAZE: 1111111,
-            TRANSPORTADOR: 11111111
+       PROFUNDIDADE: {
+            NORMAL: 10000,
+            ONDULADO: 15000,
+            KAMIKAZE: 30000,
+            TRANSPORTADOR: 35000
         },
         LIMITE_POR_TIPO: {
             NORMAL: 2,
@@ -1264,4 +1264,5 @@ function criarAranhaTransportada(x, y) {
         ativaFisica: false
     };
 }
+
 
