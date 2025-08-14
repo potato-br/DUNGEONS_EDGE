@@ -329,8 +329,8 @@ const MORCEGO_CONFIG = {
         PROFUNDIDADE: {
             NORMAL: 10000,
             ONDULADO: 15000,
-            KAMIKAZE: 0,
-            TRANSPORTADOR: 0
+            KAMIKAZE: 30000,
+            TRANSPORTADOR: 35000
         },
         LIMITE_POR_TIPO: {
             NORMAL: 2,
@@ -1255,4 +1255,5 @@ function criarAranhaTransportada(x, y) {
         ativaFisica: false
     };
 }
+
 
