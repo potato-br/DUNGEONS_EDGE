@@ -9,11 +9,16 @@ function movePlayer() {
     let currentPlatform = null;
     let caindoComPlataforma = false;
     let plataformaCaindo = null;
+    
+    // Reset do estado de colisão lateral
+    player.emColisaoLateral = false;
 
+    // Primeiro verificamos colisões laterais para prevenir o teleporte
+    checarColisaoLateral();
+    // Depois aplicamos gravidade e outras colisões
     aplicarGravidade();
     checarColisaoTeto();
     checarColisaoChao();
-    checarColisaoLateral();
     checarPlataformasEspeciais();
     checarColisaoDuranteQueda();
 
@@ -45,8 +50,14 @@ function movePlayer() {
         input.jump.wasPressed = input.jump.pressed;
 
     function aplicarGravidade() {
-        player.velocityY += player.gravity;
-        if (player.velocityY > 15) player.velocityY = 15;
+        // Guarda a posição anterior
+        player.previousY = player.y;
+        
+        // Só aplica gravidade se não estiver subindo em colisão lateral
+        if (!player.emColisaoLateral || player.velocityY >= 0) {
+            player.velocityY += player.gravity;
+            if (player.velocityY > 15) player.velocityY = 15;
+        }
     }
 
     function checarColisaoTeto() {
@@ -59,12 +70,12 @@ function movePlayer() {
 
             for (const origin of headOrigins) {
                 const ray = raycast(origin.x, origin.y, 0, -1, Math.abs(player.velocityY) + 1, plataformas);
-                if (ray) {
+                if (ray && !ray.plataforma.falling) {
                     const platBox = getPlatformHitbox(ray.plataforma);
                     player.velocityY = 0;
                     player.y = platBox.y + platBox.h;
                     player.isJumping = false;
-                    player.jumpCount = player.maxJumps;
+                    
                     return;
                 }
             }
@@ -74,15 +85,21 @@ function movePlayer() {
 
     function checarColisaoChao() {
         if (player.velocityY >= 0) {
+            // Reduzindo a largura da hitbox de colisão dos pés
+            const hitboxWidth = player.width * 0.6; // 60% da largura do player
+            const hitboxOffset = (player.width - hitboxWidth) / 2;
+            
             const rayOrigins = [
-                { x: player.x + 1, y: player.y + player.height + 1 },
-                { x: player.x + player.width / 2, y: player.y + player.height + 1 },
-                { x: player.x + player.width - 1, y: player.y + player.height + 1 }
+                { x: player.x + hitboxOffset, y: player.y + player.height },
+                { x: player.x + player.width/2, y: player.y + player.height },
+                { x: player.x + player.width - hitboxOffset, y: player.y + player.height }
             ];
 
             for (const origin of rayOrigins) {
-                const ray = raycast(origin.x, origin.y, 0, 1, 14, plataformas);
+                const ray = raycast(origin.x, origin.y, 0, 1, 5, plataformas); // Reduzindo a distância do raycast de 14 para 5
                 if (ray) {
+                    // Ignora plataformas que estão caindo
+                    if (ray.plataforma.falling) continue;
                     onPlat = true;
                     currentPlatform = ray.plataforma;
                     player.y = getPlatformHitbox(currentPlatform).y - player.height;
@@ -98,20 +115,23 @@ function movePlayer() {
 
     function checarColisaoLateral() {
         const sideOriginsLeft = [
-            { x: player.x, y: player.y + 1 },
-            { x: player.x, y: player.y + player.height / 2 },
-            { x: player.x, y: player.y + player.height - 1 }
+            { x: player.x, y: player.y + player.height * 0.2 },
+            { x: player.x, y: player.y + player.height * 0.5 },
+            { x: player.x, y: player.y + player.height * 0.8 }
         ];
 
         const sideOriginsRight = [
-            { x: player.x + player.width, y: player.y + 1 },
-            { x: player.x + player.width, y: player.y + player.height / 2 },
-            { x: player.x + player.width, y: player.y + player.height - 1 }
+            { x: player.x + player.width, y: player.y + player.height * 0.2 },
+            { x: player.x + player.width, y: player.y + player.height * 0.5 },
+            { x: player.x + player.width, y: player.y + player.height * 0.8 }
         ];
 
+        let lateralCollision = false;
+
         for (const origin of sideOriginsLeft) {
-            const ray = raycast(origin.x, origin.y, -1, 0, 10, plataformas);
-            if (ray && player.velocityX < 0) {
+            const ray = raycast(origin.x, origin.y, -1, 0, 5, plataformas);
+            if (ray && !ray.plataforma.falling && player.velocityX < 0) {
+                lateralCollision = true;
                 player.velocityX = 0;
                 player.x = getPlatformHitbox(ray.plataforma).x + getPlatformHitbox(ray.plataforma).w;
                 break;
@@ -119,12 +139,18 @@ function movePlayer() {
         }
 
         for (const origin of sideOriginsRight) {
-            const ray = raycast(origin.x, origin.y, 1, 0, 10, plataformas);
-            if (ray && player.velocityX > 0) {
+            const ray = raycast(origin.x, origin.y, 1, 0, 5, plataformas);
+            if (ray && !ray.plataforma.falling && player.velocityX > 0) {
+                lateralCollision = true;
                 player.velocityX = 0;
                 player.x = getPlatformHitbox(ray.plataforma).x - player.width;
                 break;
             }
+        }
+
+        // Se houve colisão lateral e o jogador está subindo, mantenha a velocidade vertical
+        if (lateralCollision && player.velocityY < 0) {
+            player.velocityY = player.velocityY;
         }
     }
 
@@ -308,6 +334,7 @@ function jump() {
 }
 
 function raycast(x, y, dx, dy, length, plataformas) {
+    
     const steps = Math.ceil(length);
     for (let i = 1; i <= steps; i++) {
         const checkX = x + dx * i;
@@ -315,6 +342,9 @@ function raycast(x, y, dx, dy, length, plataformas) {
 
         for (const plataforma of plataformas) {
             if (plataforma.type === PLATFORM_TYPES.FANTASMA && !plataforma.visible) continue;
+            if (plataforma.falling) continue; 
+            if (plataforma.broken) continue;
+            // Ignora plataformas caindo em qualquer colisão
             const { x: px, y: py, w: pw, h: ph } = getPlatformHitbox(plataforma);
             if (checkX >= px && checkX <= px + pw &&
                 checkY >= py && checkY <= py + ph) {

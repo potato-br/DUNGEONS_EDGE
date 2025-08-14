@@ -63,14 +63,7 @@ class IcePhysics {
             
             this.iceVelocity *= this.momentumDecay;
 
-            if (player.isJumping) {
-                
-                if (input.right && this.iceVelocity < 0) {
-                    this.iceVelocity += this.airControl;
-                } else if (input.left && this.iceVelocity > 0) {
-                    this.iceVelocity -= this.airControl;
-                }
-            } else if (!justExited) {
+            if (!player.isJumping && !justExited) {
                 
                 if (input.right && this.iceVelocity < 0 ||
                     input.left && this.iceVelocity > 0) {

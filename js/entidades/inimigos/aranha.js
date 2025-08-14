@@ -146,12 +146,22 @@ function updateEnemies() {
         createParticles(e.x + e.width/2, e.y + e.height/2, 10, '#FF4444');
 
         
-        const breakableZone = screenHeight * 0.29;
+        const breakableZone = screenHeight * 0.45;
+        const breakableZonem = screenHeight * 0.15;
 
-       
+       if (platform.y < breakableZonem && platform.hitCount >= platform.maxHits && !platform.isInitial && platform.type === PLATFORM_TYPES.MOVEL) {
+          
+          
+          if (!platform.broken && !platform.brokenDone) {
+            platform.broken = true;
+            platform.breakAnimTime = 0;
+            platform.breakStartY = platform.y;
+          }
+          
+        }
 
         
-        if (platform.y < breakableZone && platform.hitCount >= platform.maxHits && !platform.isInitial) {
+        if (platform.y < breakableZone && platform.hitCount >= platform.maxHits && !platform.isInitial && platform.type !== PLATFORM_TYPES.MOVEL) {
           
           
           if (!platform.broken && !platform.brokenDone) {

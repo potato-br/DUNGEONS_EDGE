@@ -25,50 +25,46 @@ function movePlataformas() {
 
     
 
+
     for (let i = plataformas.length - 1; i >= 0; i--) {
         const plat = plataformas[i];
-        
-        
+
+        // Se a plataforma está na parte de cima da tela (y < 0), quebra automaticamente
+        if (!plat.broken && !plat.brokenDone && !plat.isInitial && plat.y < 80) {
+            plat.broken = true;
+            plat.breakAnimTime = 0;
+            plat.breakStartY = plat.y;
+        }
+
         if (!plat.falling) {
             plat.y -= 1 * gameSpeed;
         }
 
-        
         switch (plat.type) {
             case PLATFORM_TYPES.QUEBRAVEL:
                 if (!plat.isInitial) {  
                     handleBreakablePlatform(plat);
-                    
                     if (plat.falling && plat.y > screenHeight + 100) {
-                        
                         plataformas.splice(i, 1);
                         continue;
                     }
                 }
                 break;
-                
             case PLATFORM_TYPES.ESCORREGADIA:
-                
                 break;
-                
             case PLATFORM_TYPES.MOVEL:
                 handleMovingPlatform(plat);
                 break;
-                
             case PLATFORM_TYPES.FANTASMA:
                 handleGhostPlatform(plat);
                 break;
-            
             case PLATFORM_TYPES.NORMAL:
                 if (plat.isInitial) {
-                    
                 }
                 break;
         }
 
-        
         if (plat.y + plat.height < -50) {
-            
             plataformas.splice(i, 1);
             continue;
         }
@@ -357,14 +353,6 @@ function drawPlataformas() {
             ctx.drawImage(img, platform.x, platform.y, platform.width, platform.height);
         }
 
-        if (platform.y < window.innerHeight / 3) {
-            const blink = Math.floor(time * 5) % 2 === 0;
-            if (blink) {
-                ctx.globalAlpha = 0.2;
-                ctx.fillStyle = 'rgba(99, 11, 5, 0.72)';
-                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-            }
-        }
 
         ctx.restore();
     }

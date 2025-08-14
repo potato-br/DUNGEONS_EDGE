@@ -7,18 +7,8 @@ function handleMovingPlatform(platform, canvas = document.getElementById('gameCa
         initializeMovingPlatform(platform);
     }
 
-    
-    if (platform.broken) {
-        if (!platform.falling) {
-            platform.falling = true;
-            platform.currentFallSpeed = 2;
-        }
-        platform.y += platform.currentFallSpeed;
-        platform.currentFallSpeed += 0.5; 
-        return;
-    }
+   
 
-    
     platform.x += platform.moveSpeed * 0.5; 
 
     

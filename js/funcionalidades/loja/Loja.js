@@ -1,6 +1,5 @@
 
 
-
 let selectedElement = {
   type: 'dungeon', 
   index: -1 
@@ -500,11 +499,7 @@ function drawActiveCharacterViewer() {
 
 function drawDungeonButton() {
   
-  const btnW = Math.max(180, Math.min(canvas.width * 0.22, 350));
-  const btnH = Math.max(36, Math.min(canvas.height * 0.055, 60));
-  const margin = Math.max(12, canvas.width * 0.015);
-  const btnX = canvas.width - btnW - margin;
-  const btnY = margin;
+  const { x: btnX, y: btnY, w: btnW, h: btnH } = getDungeonBtnRect();
 
   ctx.save();
   ctx.globalAlpha = 0.97;
@@ -585,13 +580,14 @@ function drawLoja() {
       item.requiredDepth : nearest, null);
 
   
-  const margin = Math.max(12, canvas.width * 0.015);
+  // Texto de profundidade alinhado ao botão de dungeon
+  const { x: dungeonBtnX, y: dungeonBtnY, w: dungeonBtnW, h: dungeonBtnH } = getDungeonBtnRect();
   const profFontSize = Math.max(14, Math.min(canvas.width * 0.017, 22));
   ctx.font = `bold ${profFontSize}px PixelFont`;
-  ctx.textAlign = 'right';
+  ctx.textAlign = 'center';
   ctx.fillStyle = 'white';
-  const profX = canvas.width - margin;
-  const profY = startY + lineHeight * 2;
+  const profX = dungeonBtnX + dungeonBtnW/2;
+  const profY = dungeonBtnY + dungeonBtnH + profFontSize + 80;
   ctx.fillText(`⬇⬇⬇ Profundidade atual: ${depthPoints}m`, profX, profY);
   if (nextSecretDepth) {
     ctx.font = `bold ${Math.max(12, Math.floor(profFontSize * 0.8))}px PixelFont`;
@@ -1189,6 +1185,7 @@ function updateLojaZooms(visibleItems, selectedIndex) {
     lojaWobbles = new Array(visibleItems.length).fill(0);
   }
 }
+
 
 
 

@@ -40,12 +40,8 @@ canvas.addEventListener('click', function(e) {
   }
 
   
-  const dungeonBtnX = canvas.width - 220;
-  const dungeonBtnY = 20;
-  const dungeonBtnW = 200;
-  const dungeonBtnH = 40;
-
-  
+  // Botão de dungeon agora usa a mesma função do desenho
+  const { x: dungeonBtnX, y: dungeonBtnY, w: dungeonBtnW, h: dungeonBtnH } = getDungeonBtnRect();
   if (mx >= dungeonBtnX && mx <= dungeonBtnX + dungeonBtnW &&
       my >= dungeonBtnY && my <= dungeonBtnY + dungeonBtnH) {
     closeShop();
@@ -74,24 +70,23 @@ canvas.addEventListener('click', function(e) {
       return;
     }
   }
-});
-
-canvas.addEventListener('mousemove', function(e) {
-  if (gameState !== 'loja') return;
+  {
+    // Botão de personagem já usa getCharacterBtnRect(), que é proporcional ao canvas
+    const { x, y, w, h } = getCharacterBtnRect();
+    if (mx >= x && mx <= x + w && my >= y && my <= y + h) {
+      showCharacterSelect = true;
+      selectedCharacterModalIndex = 0;
+      drawLoja();
+      return;
+    }
+  }
   
-  
-  const rect = canvas.getBoundingClientRect();  const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-  const my = (e.clientY - rect.top) * (canvas.height / rect.height);
-  
-  
-  const dungeonBtnX = canvas.width - 220;
-  const dungeonBtnY = 20;
-  const dungeonBtnW = 200;
-  const dungeonBtnH = 40;
+  // Botão de dungeon agora usa a mesma função do desenho
+  const { x: dungeonBtnX2, y: dungeonBtnY2, w: dungeonBtnW2, h: dungeonBtnH2 } = getDungeonBtnRect();
   const wasHovered = isDungeonButtonHovered;
   isDungeonButtonHovered = (
-    mx >= dungeonBtnX && mx <= dungeonBtnX + dungeonBtnW &&
-    my >= dungeonBtnY && my <= dungeonBtnY + dungeonBtnH
+    mx >= dungeonBtnX2 && mx <= dungeonBtnX2 + dungeonBtnW2 &&
+    my >= dungeonBtnY2 && my <= dungeonBtnY2 + dungeonBtnH2
   );
   if (wasHovered !== isDungeonButtonHovered) {
     drawLoja();
@@ -126,19 +121,13 @@ window.addEventListener('keydown', function(e) {
 
 canvas.addEventListener('mousemove', function(e) {
   if (gameState !== 'loja' || showCharacterSelect) return;
-  
-  
+
   const rect = canvas.getBoundingClientRect();
   const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
   const my = (e.clientY - rect.top) * (canvas.height / rect.height);
-  
-  
-  const dungeonBtnX = canvas.width - 220;
-  const dungeonBtnY = 20;
-  const dungeonBtnW = 200;
-  const dungeonBtnH = 40;
 
-  
+  // Usar getDungeonBtnRect para hover
+  const { x: dungeonBtnX, y: dungeonBtnY, w: dungeonBtnW, h: dungeonBtnH } = getDungeonBtnRect();
   if (mx >= dungeonBtnX && mx <= dungeonBtnX + dungeonBtnW &&
       my >= dungeonBtnY && my <= dungeonBtnY + dungeonBtnH) {
     selectedElement = { type: 'dungeon', index: -1 };
@@ -156,7 +145,7 @@ canvas.addEventListener('mousemove', function(e) {
       drawLoja();
       return;
     }
-    
+
     for (let i = 0; i < lojaOptionRects.length; i++) {
       const r = lojaOptionRects[i];
       if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
@@ -590,4 +579,13 @@ function ensureSelectedItemVisible() {
   scrollOffset = Math.max(0, Math.min(scrollOffset, Math.max(0, (totalRows - visibleRows) * (itemSize + itemGap))));
 }
 
+// Retorna o retângulo do botão de dungeon, igual ao de personagem
+function getDungeonBtnRect() {
+  const btnW = Math.max(180, Math.min(canvas.width * 0.22, 350));
+  const btnH = Math.max(36, Math.min(canvas.height * 0.055, 60));
+  const margin = Math.max(12, canvas.width * 0.015);
+  const btnX = canvas.width - btnW - margin;
+  const btnY = margin;
+  return { x: btnX, y: btnY, w: btnW, h: btnH };
+}
 

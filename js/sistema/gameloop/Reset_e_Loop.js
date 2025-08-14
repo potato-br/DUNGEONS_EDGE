@@ -8,6 +8,7 @@ function resetGame({ pauseOnStart = true, showShop = false, il = true,  } = {}) 
   serras = [];
 
   morcegos.length = 0;
+  SpawnSystem.inicializar();
   currentLateralLeftBg = lateralImages[0];
   nextLateralLeftBg = lateralImages[0];
   currentLateralRightBg =  lateralImages[0];
@@ -138,7 +139,7 @@ function update(now) {
   checkMoedaCollision();
 
   updateMorcegos(); 
-  spawnMorcegos(depthPoints); 
+  atualizarSpawnMorcegos(depthPoints); 
 
   if (gameState !== 'gameover') {
     

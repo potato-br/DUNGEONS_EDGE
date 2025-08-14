@@ -165,14 +165,6 @@ function drawPlataformas() {
         } else {
             ctx.drawImage(img, platform.x, platform.y, platform.width, platform.height);
         }
-        if (platform.type !== PLATFORM_TYPES.QUEBRAVEL && platform.y < window.innerHeight / 3) {
-            const blink = Math.floor(time * 5) % 2 === 0;
-            if (blink) {
-                ctx.globalAlpha = 0.2;
-                ctx.fillStyle = 'rgba(99, 11, 5, 0.72)';
-                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-            }
-        }
         if (
             platform.broken &&
             !platform.falling &&

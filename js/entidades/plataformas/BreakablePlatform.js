@@ -3,32 +3,31 @@
 
 
 function handleBreakablePlatform(platform) {
-    
+    // Só ativa a lógica se a plataforma estiver acima de uma parte da tela (exemplo: y > 0)
+    // Altere o valor do limite conforme necessário
+    const Y_LIMITE = 0; // pode ser, por exemplo, 0 ou outro valor como 50
+    if (platform.y < Y_LIMITE) return;
+
     if (platform.isInitial) {
-        
         return;
     }
 
-    
     if (!platform.initialized) {
         initializeBreakablePlatform(platform);
     }
 
-    
     platform._updatedThisFrame = false;
-    
+
     if (platform.falling) {
         updateFallingPlatform(platform);
         return;
     }
 
-    
     if (platform.breaking) {
         updateBreakingPlatform(platform);
         return;
     }
 
-    
     checkPlatformSupport(platform);
 }
 
@@ -43,14 +42,16 @@ function initializeBreakablePlatform(platform) {
 }
 
 function updateFallingPlatform(platform) {
-    
     if (platform._updatedThisFrame) return;
     platform._updatedThisFrame = true;
-    
+
+    // Inicia o contador de tempo de queda se não existir
+    if (platform.fallTime === undefined) platform.fallTime = 0;
+    platform.fallTime++;
+
     platform.currentFallSpeed = platform.isGrande ? 2 : 3;
     platform.y += platform.currentFallSpeed;
-    
-    
+
     if (Math.random() < 0.2) {
         createParticles(
             platform.x + Math.random() * platform.width,
@@ -60,7 +61,13 @@ function updateFallingPlatform(platform) {
         );
     }
 
-    
+    // Após 1 segundo (60 frames), quebra a plataforma automaticamente
+    if (platform.fallTime >= 40) {
+        platform.broken = true;
+        platform.falling = false;
+        platform.fallTime = 0;
+        createParticles(platform.x + platform.width/2, platform.y, 15, '#ff0000');
+    }
 }
 
 function updateBreakingPlatform(platform) {
