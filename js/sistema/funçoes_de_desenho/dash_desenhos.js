@@ -20,7 +20,7 @@ function drawDashUI() {
             let lastDashTime = 0;
             if (activeCharacter === 'O Errante de Eldoria') {
                 dashCooldown = typeof DASH !== 'undefined' && DASH.cooldown;
-                dashCooldownTime = typeof DASH !== 'undefined' && DASH.cooldownTime ? DASH.cooldownTime : 1000;
+                dashCooldownTime = typeof DASH !== 'undefined' && (DASH.dashRechargeTime || DASH.cooldownTime) ? (DASH.dashRechargeTime || DASH.cooldownTime) : 1000;
                 lastDashTime = typeof DASH !== 'undefined' && DASH.lastDashTime ? DASH.lastDashTime : 0;
             }
             const isAvailable = activeCharacter === 'Kuroshi, o Ninja' ? 

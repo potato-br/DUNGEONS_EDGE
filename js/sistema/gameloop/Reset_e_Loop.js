@@ -50,6 +50,9 @@ function resetGame({ pauseOnStart = true, showShop = false, il = true,  } = {}) 
   } else {
     live = 0; 
   }
+  // Ensure UI doesn't animate from previous character's life count
+  if (typeof previousLive !== 'undefined') previousLive = live;
+  if (typeof animatingHearts !== 'undefined') animatingHearts = [];
   enemies = [];
   moedas = []; 
   createInitialPlataforma();
@@ -63,6 +66,7 @@ function resetGame({ pauseOnStart = true, showShop = false, il = true,  } = {}) 
     firstGamePlay = false; 
     lastEnemyAllowedTime = performance.now() + 2000;
     lastSerraAllowedTime = lastEnemyAllowedTime + 1000; 
+    moneytime = lastEnemyAllowedTime;
     if (pauseOnStart) {
       pausar();
     }
