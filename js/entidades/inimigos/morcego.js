@@ -46,32 +46,30 @@ class Hitbox {
 
 const CollisionSystem = {
     checkMorcegoCollisions(morcego, index) {
-        if (isRespawning || (typeof DASH !== 'undefined' && DASH.isInvulnerable)) return false;
-        
         
         if (morcego.modo === MorcegoModo.TRANSPORTADOR && morcego.carregandoEnemy) return false;
-        
-        
         if (morcego.modo === MorcegoModo.KAMIKAZE && morcego.estado !== MorcegoEstado.RASANTE) return false;
 
-        
-        if (this.checkPlayerCollision(morcego, index)) return true;
-
-        
-        return this.checkPlatformCollisions(morcego);
-    },
-
-    checkPlayerCollision(morcego, index) {
         if (!morcego.hitbox.intersects(morcego, player)) return false;
 
         
-        if (this.checkCavaleiroStomp(morcego)) {
+        
+        
+        
+        
+        
+        const stompResult = this.checkCavaleiroStomp(morcego);
+        
+        if (stompResult) {
+            
             this.destroyMorcego(morcego);
             if (typeof player.jumpCount !== 'undefined') player.jumpCount = 0;
             return true;
         }
 
         
+        if (isRespawning || (typeof DASH !== 'undefined' && DASH.isInvulnerable)) return false;
+
         if (morcego.modo === MorcegoModo.KAMIKAZE) {
             morcego.estado = MorcegoEstado.MORRENDO;
         }
@@ -81,11 +79,18 @@ const CollisionSystem = {
     },
 
     checkCavaleiroStomp(morcego) {
-        return (
+        
+        
+        
+        
+        
+        const result = (
             activeCharacter === 'Roderick, o Cavaleiro' &&
             player.velocityY > 0 &&
-            (player.y + player.height - player.velocityY) <= morcego.y + 8
+            Math.abs((player.y + player.height - player.velocityY) - morcego.y) < 25
         );
+        
+        return result;
     },
 
     checkPlatformCollisions(morcego) {
@@ -143,6 +148,14 @@ function atualizarSpawnMorcegos(profundidadeAtual) {
         if ((tipo === MorcegoModo.KAMIKAZE || tipo === MorcegoModo.TRANSPORTADOR) && (gameState === 'gameover')) {
             return false;
         }
+        
+        if (typeof MAGO !== 'undefined' && MAGO.magicBlastActive) {
+            return false;
+        }
+        const now = performance.now();
+
+         if (now < lastEnemyAllowedTime) return;
+
         return SpawnSystem.podeSpawnarTipo(tipo, profundidadeAtual);
     });
 
@@ -323,8 +336,8 @@ const MORCEGO_CONFIG = {
     },
     SPAWN: {
         PROFUNDIDADE: {
-            NORMAL: 10000,
-            ONDULADO: 15000,
+            NORMAL: 0,
+            ONDULADO: 0,
             KAMIKAZE: 0,
             TRANSPORTADOR: 0
         },
@@ -674,7 +687,7 @@ const estadoKamikaze = {
         const tx = morcego.transicaoDestino.x - morcego.x;
         const ty = morcego.transicaoDestino.y - morcego.y;
         const dist = Math.sqrt(tx*tx + ty*ty);
-    let speed = 6;
+    let speed = 9;
 
         if (dist < speed) {
             morcego.x = morcego.transicaoDestino.x;
@@ -710,7 +723,7 @@ const estadoKamikaze = {
 
         
         if (morcego.tempoEstado > morcego.tempoAguardar) {
-            // Verifica se está dentro da área de jogo
+            
             const dentroArea = (
                 morcego.x + morcego.width > gamePlayArea.x &&
                 morcego.x < gamePlayArea.x + gamePlayArea.width &&
@@ -724,8 +737,8 @@ const estadoKamikaze = {
                 };
                 this.mudarEstado(morcego, MorcegoEstado.alerta);
             } else {
-                // Se estiver fora da área, adiciona mais tempo em órbita
-                morcego.tempoAguardar += 30; // Adiciona 30 frames
+                
+                morcego.tempoAguardar += 30; 
             }
         }
     },

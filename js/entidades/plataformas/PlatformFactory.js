@@ -159,6 +159,8 @@ class PlatformFactory {
             color: specs.color,
             isGrande: isLargePlatform
         };
+    // ensure no stale ignore flag
+    platform.ignoreCollisionUntil = 0;
 
         
 
