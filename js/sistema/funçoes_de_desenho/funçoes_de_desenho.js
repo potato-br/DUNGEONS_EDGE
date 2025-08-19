@@ -10,7 +10,7 @@ let parallaxSpeed = 0.2;
 const AMBIENT_TIME_TO_MAX = 120; // seconds to reach full ambient effect (tunable)
 const DEPTH_TO_MAX = 30000; // depth (meters) to normalize darkness effect (user requested slower fade)
 const AMBIENT_MAX_ALPHA = 0.85; // cap for bottom alpha (increased so scene can get darker)
-// use window.ambientDarknessTime (seconds) to accumulate time while playing
+// use ambientDarknessTime (seconds) to accumulate time while playing
 
 
 let currentLateralLeftBg = lateralImages[0];
@@ -120,7 +120,7 @@ function drawBackground() {
         // compute normalized depth factor (0..1)
         const depthFactor = Math.max(0, Math.min(1, (typeof depthPoints !== 'undefined' ? depthPoints : 0) / DEPTH_TO_MAX));
         // compute normalized time factor (0..1) using global ambientDarknessTime in seconds (de-emphasized)
-        const ambientTime = (typeof window.ambientDarknessTime === 'number') ? window.ambientDarknessTime : 0;
+    const ambientTime = (typeof ambientDarknessTime === 'number') ? ambientDarknessTime : 0;
         const timeFactor = Math.max(0, Math.min(1, ambientTime / AMBIENT_TIME_TO_MAX));
 
         // prioritize depth; time has a small influence to allow slow progression but depth drives the effect

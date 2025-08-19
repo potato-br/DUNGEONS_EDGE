@@ -49,7 +49,7 @@ function resetGame({ pauseOnStart = true, showShop = false, il = true,  } = {}) 
   depthPoints = 0;
   trocaCount = 0;
   // ambient darkness timer (seconds) - reset so light returns on restart
-  try { window.ambientDarknessTime = 0; } catch (e) {}
+  try { ambientDarknessTime = 0; } catch (e) {}
   
   
   if (activeCharacter === 'Kuroshi, o Ninja') {
@@ -84,12 +84,12 @@ function resetGame({ pauseOnStart = true, showShop = false, il = true,  } = {}) 
       // prefer global saved start depth if present
       const globalSaved = _charData.__global && _charData.__global.savedStartDepth;
       const savedDepth = globalSaved || characterData[activeCharacter]?.savedStartDepth;
-    if (typeof savedDepth === 'number' && savedDepth > 0) {
+  if (typeof savedDepth === 'number' && savedDepth > 0) {
       // apply starting depth and increment the background/time accumulators so visual gradient
       // reflects the depth immediately
       depthPoints = savedDepth;
         // mark that this run used a saved start depth; if it was global, consume it from global
-        window.currentRunUsedSavedStart = true;
+        currentRunUsedSavedStart = true;
         try {
           if (globalSaved) delete _charData.__global.savedStartDepth;
           else delete characterData[activeCharacter].savedStartDepth;
@@ -99,7 +99,32 @@ function resetGame({ pauseOnStart = true, showShop = false, il = true,  } = {}) 
       lastSerraAllowedTime = lastEnemyAllowedTime + 1000;
       moneytime = lastEnemyAllowedTime;
       // also advance ambient darkness timer a little so background gradient responds
-      try { window.ambientDarknessTime = Math.min((window.ambientDarknessTime || 0) + 10, AMBIENT_TIME_TO_MAX); } catch (e) {}
+      try { ambientDarknessTime = Math.min((ambientDarknessTime || 0) + 10, AMBIENT_TIME_TO_MAX); } catch (e) {}
+      // If Plataformas exposes savedStartRamp, configure it so the gameSpeed will
+      // ramp up from the normal starting speed to the depth-based speed over time.
+      try {
+        if (typeof savedStartRamp !== 'undefined') {
+          // target gameSpeed based on depth
+          const target = typeof computeGameSpeedForDepth === 'function' ? computeGameSpeedForDepth(depthPoints) : 1;
+          // allow global override via savedStartRampConfig (var in global scope)
+          const cfg = (typeof savedStartRampConfig !== 'undefined' ? savedStartRampConfig : null) || {};
+          const minD = typeof cfg.minDuration === 'number' ? cfg.minDuration : 1200;
+          const maxD = typeof cfg.maxDuration === 'number' ? cfg.maxDuration : 8000;
+          const scale = typeof cfg.scaleMsPerDepthDiv10 === 'number' ? cfg.scaleMsPerDepthDiv10 : 200;
+
+          savedStartRamp.active = true;
+          savedStartRamp.startTime = performance.now();
+          // ramp duration scales with depth to feel natural; clamp using config
+          savedStartRamp.duration = Math.min(maxD, Math.max(minD, Math.floor((depthPoints / 10) * scale)));
+          savedStartRamp.startGameSpeed = 1;
+          savedStartRamp.targetGameSpeed = target;
+
+          // debug log on activation
+          try {
+            if (cfg.debug) console.log('[savedStartRamp] activated', { depthPoints, duration: savedStartRamp.duration, target });
+          } catch (e) {}
+        }
+      } catch (e) {}
     } else {
       lastEnemyAllowedTime = performance.now() + DEFAULT_SPAWN_GRACE;
       lastSerraAllowedTime = lastEnemyAllowedTime + 1000;
@@ -173,9 +198,9 @@ function gameLoop(now = performance.now()) {
     // advance ambient darkness timer while actually playing (not paused, not respawning, in 'jogando')
     try {
       if (!isPaused && !isRespawning && gameState === 'jogando') {
-        window.ambientDarknessTime = (window.ambientDarknessTime || 0) + (elapsed / 1000);
+        ambientDarknessTime = (ambientDarknessTime || 0) + (elapsed / 1000);
         // clamp to reasonable max
-        window.ambientDarknessTime = Math.min(window.ambientDarknessTime, AMBIENT_TIME_TO_MAX * 2);
+        ambientDarknessTime = Math.min(ambientDarknessTime, AMBIENT_TIME_TO_MAX * 2);
       }
     } catch (e) {}
     updatePlayerAnimation();
@@ -285,11 +310,11 @@ function gameOver() {
     // If the player used a saved-start item this run, consuming it should remove the
     // global saved depth for everyone (one died with it -> all lose it).
     try {
-      if (window.currentRunUsedSavedStart && _charData && _charData.__global && _charData.__global.savedStartDepth) {
+      if (currentRunUsedSavedStart && _charData && _charData.__global && _charData.__global.savedStartDepth) {
         delete _charData.__global.savedStartDepth;
       }
     } catch (e) {}
     // clear runtime flag
-    window.currentRunUsedSavedStart = false;
+    currentRunUsedSavedStart = false;
   }
 }

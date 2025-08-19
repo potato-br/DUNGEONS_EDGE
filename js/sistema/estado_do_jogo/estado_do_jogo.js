@@ -46,3 +46,4 @@ const input = {
 if (typeof player !== 'undefined') {
   player.visible = true;
 }
+

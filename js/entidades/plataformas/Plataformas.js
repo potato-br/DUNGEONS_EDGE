@@ -8,18 +8,78 @@ const PLATFORM_TYPES = platformFactory.platformTypes;
 
 let gameSpeed = 1;
 
+// Default global configuration for the saved-start ramp. You can override this
+// at runtime by setting `savedStartRampConfig = { minDuration, maxDuration, scaleMsPerDepthDiv10, debug }`.
+if (typeof savedStartRampConfig === 'undefined') {
+    var savedStartRampConfig = {
+        minDuration: 1000,
+        maxDuration: 20000,
+        // how many ms to add per 10 depth points (used to compute a base duration)
+        scaleMsPerDepthDiv10: 200,
+        debug: true
+    };
+}
+
+// When player starts using a saved-start-depth, we want visuals to reflect the depth
+// immediately but the game speed should ramp up from the normal starting speed
+// to the speed that would normally correspond to that depth. This object holds
+// ramp runtime data and is toggled from Reset_e_Loop when a saved start is used.
+let savedStartRamp = {
+    active: false,
+    startTime: 0,
+    duration: 0,
+    targetGameSpeed: 1,
+    startGameSpeed: 1
+    ,
+    // internal last-log timestamp to avoid spamming console
+    _lastLog: 0
+};
+
+function computeGameSpeedForDepth(depth) {
+    if (depth > 100) {
+        const steps = Math.floor((depth - 100) / 100);
+        let gs = 1 + steps * 0.01;
+        if (gs > 5.5) gs = 5.5;
+        return gs;
+    }
+    return 1;
+}
+
 
 function updateGameSpeed() {
-    
-    if (depthPoints > 100) {
-        const steps = Math.floor((depthPoints - 100) / 100);
-        // Use a curve that starts slower and accelerates faster as depth increases.
-        // Apply a sqrt curve to make initial progress slow, then grow faster as steps increase.
-        const baseFactor = Math.sqrt(Math.max(0, steps)) * 0.02; // tuned multiplier
-        gameSpeed = 1 + baseFactor;
-        if (gameSpeed > 5.5) gameSpeed = 5.5;
+    // compute what the gameSpeed would be for the current depth
+    const depthBasedSpeed = computeGameSpeedForDepth(depthPoints);
+
+    if (savedStartRamp && savedStartRamp.active) {
+        // Ramp from savedStartRamp.startGameSpeed to savedStartRamp.targetGameSpeed
+        const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+        const elapsed = now - savedStartRamp.startTime;
+        const t = Math.min(1, Math.max(0, savedStartRamp.duration > 0 ? elapsed / savedStartRamp.duration : 1));
+        // ease-out quad for a snappier acceleration: ease = 1 - (1-t)^2
+        const ease = 1 - Math.pow(1 - t, 2);
+        gameSpeed = savedStartRamp.startGameSpeed + (savedStartRamp.targetGameSpeed - savedStartRamp.startGameSpeed) * ease;
+        // optional debug logging (throttled)
+        try {
+            const cfg = (typeof savedStartRampConfig !== 'undefined' ? savedStartRampConfig : null);
+            if (cfg && cfg.debug) {
+                if (now - (savedStartRamp._lastLog || 0) > 500) {
+                    console.log('[savedStartRamp] progress', { t: Number(t.toFixed(3)), gameSpeed: Number(gameSpeed.toFixed(3)), target: savedStartRamp.targetGameSpeed });
+                    savedStartRamp._lastLog = now;
+                }
+            }
+        } catch (e) {}
+        // once ramp finished, deactivate and fall back to depth-based calculation
+        if (t >= 1) {
+            savedStartRamp.active = false;
+            // final log
+            try {
+                const cfg = (typeof savedStartRampConfig !== 'undefined' ? savedStartRampConfig : null);
+                if (cfg && cfg.debug) console.log('[savedStartRamp] finished', { finalGameSpeed: depthBasedSpeed });
+            } catch (e) {}
+            gameSpeed = depthBasedSpeed;
+        }
     } else {
-        gameSpeed = 1;
+        gameSpeed = depthBasedSpeed;
     }
 }
 

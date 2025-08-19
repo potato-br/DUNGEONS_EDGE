@@ -1272,4 +1272,3 @@ function criarAranhaTransportada(x, y) {
     };
 }
 
-
