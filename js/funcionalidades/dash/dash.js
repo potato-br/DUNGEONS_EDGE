@@ -9,7 +9,7 @@ const DASH = {
     cooldown: false,
     duration: 150, 
     speed: 10,
-    cooldownTime: 5000, 
+    dashRechargeTime: 5000, 
     lastDashTime: 0,
     extraInvuln: 1000, 
     extraInvulnMax: 3000, 
@@ -27,19 +27,19 @@ const DASH = {
 const CAVALEIRO = {
     shieldActive: false,
     shieldCooldown: false,
-    SHIELD_DURATION: 6000,
-    SHIELD_COOLDOWN: 8000,
+    SHIELD_DURATION: 12000,
+    SHIELD_COOLDOWN: 7000,
     shieldCooldownStart: null,
     voidResurrectionAvailable: true,
     voidResurrectionLastUsed: null,
-    VOID_RESURRECTION_COOLDOWN: 30000
+    VOID_RESURRECTION_COOLDOWN: 15000
 };
 
 
 const MAGO = {
     magicBlastActive: false,
     magicBlastCooldown: false,
-    MAGIC_BLAST_DURATION: 6000,
+    MAGIC_BLAST_DURATION: 8500,
     MAGIC_BLAST_COOLDOWN: 15000,
     MAGIC_INVULN_DURATION: 5500,
     magicBlastCooldownStart: null
@@ -50,8 +50,8 @@ const NINJA = {
     smokeBombActive: false,
     smokeBombCooldown: false,
     smokeBombTimer: 0,
-    NINJA_SMOKE_DURATION: 2000,
-    NINJA_SMOKE_COOLDOWN: 8000,
+    NINJA_SMOKE_DURATION: 3500,
+    NINJA_SMOKE_COOLDOWN: 7000,
     smokeBombCooldownStart: null,
     invulneravelPorDano: false 
 };
@@ -72,7 +72,7 @@ function onPauseToggle(paused) {
     if (paused) {
         pauseStartTime = performance.now();
         
-        if (CAVALEIRO.shieldActive && activeAbilityTimers.shield.startTime) {
+        if (CAVALEIRO.shieldActive && activeAbilityTimers.shield && activeAbilityTimers.shield.startTime) {
             activeAbilityTimers.shield.remainingTime = 
                 CAVALEIRO.SHIELD_DURATION - (pauseStartTime - activeAbilityTimers.shield.startTime);
         }
@@ -91,8 +91,9 @@ function onPauseToggle(paused) {
                 MAGO.MAGIC_BLAST_DURATION - (pauseStartTime - activeAbilityTimers.magicBlast.startTime);
         }
         if (NINJA.smokeBombActive) {
-            activeAbilityTimers.ninjaSmoke.remainingTime = 
-                NINJA.NINJA_SMOKE_DURATION - (pauseStartTime - activeAbilityTimers.ninjaSmoke.startTime);
+            // prefer recorded startTime, fallback to NINJA.smokeBombTimer if startTime not present
+            const start = (activeAbilityTimers.ninjaSmoke && activeAbilityTimers.ninjaSmoke.startTime) ? activeAbilityTimers.ninjaSmoke.startTime : (NINJA.smokeBombTimer || 0);
+            activeAbilityTimers.ninjaSmoke.remainingTime = Math.max(0, NINJA.NINJA_SMOKE_DURATION - (pauseStartTime - start));
         }
         
         if (DASH.isInvulnerable && typeof invulnEndTime !== 'undefined' && invulnEndTime > pauseStartTime) {
@@ -128,13 +129,10 @@ function onPauseToggle(paused) {
         if (player.lastDashRecharge) player.lastDashRecharge += pauseDuration;
         if (DASH.lastDashTime) DASH.lastDashTime += pauseDuration;
         
-        if (activeAbilityTimers.shield.remainingTime) {
-            
-            activeAbilityTimers.shield.startTime = performance.now();
-            
-            if (CAVALEIRO.shieldActive) {
-                CAVALEIRO.shieldCooldownStart = performance.now() + activeAbilityTimers.shield.remainingTime;
-            }
+        if (activeAbilityTimers.shield && activeAbilityTimers.shield.remainingTime) {
+            // restore a startTime so elapsed calculations resume correctly
+            activeAbilityTimers.shield.startTime = performance.now() - (CAVALEIRO.SHIELD_DURATION - activeAbilityTimers.shield.remainingTime);
+            // do not modify shieldCooldownStart here; it will be set when shield actually ends
         }
         if (activeAbilityTimers.shieldCooldown && activeAbilityTimers.shieldCooldown.remainingTime) {
             CAVALEIRO.shieldCooldownStart = performance.now() - (CAVALEIRO.SHIELD_COOLDOWN - activeAbilityTimers.shieldCooldown.remainingTime);
@@ -150,9 +148,11 @@ function onPauseToggle(paused) {
             activeAbilityTimers.magicBlast.startTime = performance.now() - 
                 (MAGO.MAGIC_BLAST_DURATION - activeAbilityTimers.magicBlast.remainingTime);
         }
-        if (activeAbilityTimers.ninjaSmoke.remainingTime) {
+        if (activeAbilityTimers.ninjaSmoke && activeAbilityTimers.ninjaSmoke.remainingTime) {
             activeAbilityTimers.ninjaSmoke.startTime = performance.now() - 
                 (NINJA.NINJA_SMOKE_DURATION - activeAbilityTimers.ninjaSmoke.remainingTime);
+            // clear remainingTime so drawing/logic use startTime and the timer continues to decay
+            activeAbilityTimers.ninjaSmoke.remainingTime = null;
         }
         
         if (typeof DASH.invulnEndTime !== 'undefined' && DASH.isInvulnerable && DASH.invulnEndTime) {
@@ -194,8 +194,12 @@ function updateCooldowns(now) {
         now = pauseStartTime;
     }
     
-    if (DASH.cooldown && now - DASH.lastDashTime >= DASH.cooldownTime) {
-        DASH.cooldown = false;
+    if (DASH.cooldown) {
+        // Use the character-specific recharge time when available (Errante), otherwise fallback to DASH.dashRechargeTime
+        const cooldownTime = (typeof player !== 'undefined' && typeof player.dashRechargeTime !== 'undefined') ? player.dashRechargeTime : DASH.dashRechargeTime;
+        if (now - DASH.lastDashTime >= cooldownTime) {
+            DASH.cooldown = false;
+        }
     }
     
     if (activeCharacter === 'Kuroshi, o Ninja' && player.currentDashes < player.maxDashes) {
@@ -208,9 +212,18 @@ function updateCooldowns(now) {
     
     if (NINJA.smokeBombActive) {
         if (!DASH.isInvulnerable) {
+            // end active smoke and start cooldown
             NINJA.smokeBombActive = false;
             NINJA.smokeBombCooldown = true;
             NINJA.smokeBombTimer = now;
+            // clear active timer and set cooldown timer entry for pause/resume bookkeeping
+            if (typeof activeAbilityTimers !== 'undefined') {
+                if (activeAbilityTimers.ninjaSmoke) {
+                    activeAbilityTimers.ninjaSmoke.startTime = null;
+                    activeAbilityTimers.ninjaSmoke.remainingTime = null;
+                }
+                activeAbilityTimers.ninjaSmokeCooldown = { remainingTime: NINJA.NINJA_SMOKE_COOLDOWN };
+            }
         }
     }
     if (NINJA.smokeBombCooldown && now - NINJA.smokeBombTimer >= NINJA.NINJA_SMOKE_COOLDOWN) {
@@ -452,7 +465,9 @@ function handleDash(now) {
             if (activeCharacter === 'Kuroshi, o Ninja') {
                 invulnDuration = DASH.duration + 1000;
             } else {
-                invulnDuration = DASH.duration + DASH.extraInvuln;
+                // prefer per-character extra invulnerability if defined
+                const extra = (typeof player !== 'undefined' && typeof player.dashExtraInvuln !== 'undefined') ? player.dashExtraInvuln : DASH.extraInvuln;
+                invulnDuration = DASH.duration + extra;
             }
             aplicarInvulnerabilidade(invulnDuration);
             handleDash.dashInitialDirection = player.facingRight ? 1 : -1;
@@ -466,14 +481,16 @@ function handleDash(now) {
     for (let i = DASH.trailStack.length - 1; i >= 0; i--) {
         const trail = DASH.trailStack[i];
         const elapsed = now - trail.endTime;
-        if (elapsed > DASH.extraInvuln) {
+        const extra = (typeof player !== 'undefined' && typeof player.dashExtraInvuln !== 'undefined') ? player.dashExtraInvuln : DASH.extraInvuln;
+        if (elapsed > extra) {
             DASH.trailStack.splice(i, 1);
         }
     }
     
     if (!DASH.isDashing && !DASH.trailActive && DASH.trailPoints.length > 0 && DASH.endTime) {
         const elapsed = now - DASH.endTime;
-        if (elapsed > DASH.extraInvuln) {
+        const extra = (typeof player !== 'undefined' && typeof player.dashExtraInvuln !== 'undefined') ? player.dashExtraInvuln : DASH.extraInvuln;
+        if (elapsed > extra) {
             DASH.trailPoints = [];
             DASH.startPoint = null;
         }

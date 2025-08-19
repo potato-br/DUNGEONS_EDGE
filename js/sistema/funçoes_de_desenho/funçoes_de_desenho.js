@@ -6,6 +6,12 @@ let parallaxOffset = 0;
 let gradientAngle = 110;
 let parallaxSpeed = 0.2;
 
+// Ambient darkness / gradient overlay configuration
+const AMBIENT_TIME_TO_MAX = 120; // seconds to reach full ambient effect (tunable)
+const DEPTH_TO_MAX = 30000; // depth (meters) to normalize darkness effect (user requested slower fade)
+const AMBIENT_MAX_ALPHA = 0.85; // cap for bottom alpha (increased so scene can get darker)
+// use window.ambientDarknessTime (seconds) to accumulate time while playing
+
 
 let currentLateralLeftBg = lateralImages[0];
 let nextLateralLeftBg = lateralImages[0];
@@ -108,6 +114,44 @@ function drawBackground() {
   ctx.drawImage(currentBg, gamePlayArea.x, backgroundY, gamePlayArea.width, screenHeight);
   ctx.drawImage(nextBg, gamePlayArea.x, backgroundY + screenHeight, gamePlayArea.width, screenHeight);
   ctx.restore();
+
+    // Ambient overlay: vertical gradient from top (light) to bottom (dark)
+    try {
+        // compute normalized depth factor (0..1)
+        const depthFactor = Math.max(0, Math.min(1, (typeof depthPoints !== 'undefined' ? depthPoints : 0) / DEPTH_TO_MAX));
+        // compute normalized time factor (0..1) using global ambientDarknessTime in seconds (de-emphasized)
+        const ambientTime = (typeof window.ambientDarknessTime === 'number') ? window.ambientDarknessTime : 0;
+        const timeFactor = Math.max(0, Math.min(1, ambientTime / AMBIENT_TIME_TO_MAX));
+
+        // prioritize depth; time has a small influence to allow slow progression but depth drives the effect
+        const overallFactor = Math.max(0, Math.min(1, depthFactor * 0.98 + timeFactor * 0.02));
+
+        // stronger mid and base alphas driven primarily by depth
+        const alphaMid = Math.max(0.05, Math.min(0.7, depthFactor * 0.6 + timeFactor * 0.02));
+        const alphaBase = Math.max(0.2, Math.min(AMBIENT_MAX_ALPHA, depthFactor * 0.9 + timeFactor * 0.05));
+
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        // top: darkens progressively (less than bottom) so the whole scene gains atmosphere
+        // topAlpha grows with combined but remains below the bottom alpha to keep contrast
+        // top now darkens with depth (overallFactor) so it stops being too bright when scene darkens
+    // make top darker with depth: higher multiplier and slightly higher minimum
+    const topAlpha = Math.max(0.08, Math.min(0.95, overallFactor * 0.9 + timeFactor * 0.05));
+        // bring the mid stop a bit closer to the top so the fade happens earlier
+        const midStop = 0.25;
+        // use slightly different tones so top/mid/bottom don't all share the exact same black
+    grad.addColorStop(0, `rgba(10,12,18, ${topAlpha})`); // darker cool tone at top
+        grad.addColorStop(midStop, `rgba(10,12,16, ${alphaMid})`); // near-black desaturated mid
+        // bottom: stronger darkness controlled by depth/time but capped so BG remains visible
+        grad.addColorStop(1, `rgba(0,0,0, ${alphaBase})`); // deepest black at bottom
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.fillStyle = grad;
+        ctx.fillRect(gamePlayArea.x, 0, gamePlayArea.width, canvas.height);
+        ctx.restore();
+    } catch (e) {
+        // non-critical: if something fails, skip ambient overlay
+    }
 
   if (gameState === 'gameover') return;
   if (typeof isPaused !== 'undefined' && isPaused) return;

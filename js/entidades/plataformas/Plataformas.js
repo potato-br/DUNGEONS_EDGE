@@ -13,7 +13,10 @@ function updateGameSpeed() {
     
     if (depthPoints > 100) {
         const steps = Math.floor((depthPoints - 100) / 100);
-        gameSpeed = 1 + steps * 0.01;
+        // Use a curve that starts slower and accelerates faster as depth increases.
+        // Apply a sqrt curve to make initial progress slow, then grow faster as steps increase.
+        const baseFactor = Math.sqrt(Math.max(0, steps)) * 0.02; // tuned multiplier
+        gameSpeed = 1 + baseFactor;
         if (gameSpeed > 5.5) gameSpeed = 5.5;
     } else {
         gameSpeed = 1;
@@ -34,6 +37,7 @@ function movePlataformas() {
             plat.broken = true;
             plat.breakAnimTime = 0;
             plat.breakStartY = plat.y;
+            if (typeof onPlatformBroken === 'function') onPlatformBroken(plat);
         }
 
         if (!plat.falling) {
