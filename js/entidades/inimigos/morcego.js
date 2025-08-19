@@ -336,10 +336,10 @@ const MORCEGO_CONFIG = {
     },
     SPAWN: {
         PROFUNDIDADE: {
-            NORMAL: 10000000,
-            ONDULADO: 1111111110,
-            KAMIKAZE: 1111111110,
-            TRANSPORTADOR: 1111111110
+            NORMAL: 10000,
+            ONDULADO: 15000,
+            KAMIKAZE: 30000,
+            TRANSPORTADOR: 35000
         },
         LIMITE_POR_TIPO: {
             NORMAL: 2,
@@ -1271,4 +1271,5 @@ function criarAranhaTransportada(x, y) {
         ativaFisica: false
     };
 }
+
 
