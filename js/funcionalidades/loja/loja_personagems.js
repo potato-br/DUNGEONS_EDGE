@@ -13,15 +13,21 @@ function getUnlockedCharacters() {
   const unlocked = ['O Errante de Eldoria'];
   
   
-  for (let character in characterData) {
-    const purchases = characterData[character].purchases;
-    
-    ['Kuroshi, o Ninja', 'Roderick, o Cavaleiro', 'Valthor, o Mago'].forEach(charName => {
-      if (purchases[charName] && purchases[charName] > 0 && !unlocked.includes(charName)) {
-        unlocked.push(charName);
+  // Check global-aware purchase counts so characters bought by any profile count as unlocked
+  ['Kuroshi, o Ninja', 'Roderick, o Cavaleiro', 'Valthor, o Mago'].forEach(charName => {
+    try {
+      const count = (typeof getPurchasesCountByName === 'function') ? getPurchasesCountByName(charName) : (characterData.__global?.purchases?.[charName] || 0);
+      if (count > 0 && !unlocked.includes(charName)) unlocked.push(charName);
+    } catch (e) {
+      // fallback: if helper not available yet, inspect characterData entries
+      for (let character in characterData) {
+        const purchases = characterData[character]?.purchases || {};
+        if (purchases[charName] && purchases[charName] > 0 && !unlocked.includes(charName)) {
+          unlocked.push(charName);
+        }
       }
-    });
-  }
+    }
+  });
   
   return unlocked;
 }
@@ -302,3 +308,28 @@ if (showCharacterSelect) return;
   ctx.fillText(iconStats[2].value, cx + 18, iconY + iconSpacing);
   ctx.restore();
 }
+
+function drawActiveCharacterViewer() {
+  const nome = activeCharacter || 'O Errante de Eldoria';
+  const cx = 190, cy = 190, scale = 3.7;
+  
+  ctx.save();
+  ctx.globalAlpha = 0.97;
+  ctx.fillStyle = 'rgba(40, 40, 60, 0)';
+  ctx.strokeStyle = '#ffd700';
+  ctx.lineWidth = 4;
+  
+  ctx.restore();
+  
+  drawCharacterIdlePreview(nome, cx, cy-10, scale, true);
+  
+  ctx.save();
+  ctx.font = 'bold 22px PixelFont';
+  ctx.fillStyle = '#ffd700';
+  ctx.textAlign = 'center';
+  ctx.shadowColor = '#000';
+  ctx.shadowBlur = 8;
+  ctx.fillText(nome, cx, cy+65);
+  ctx.restore();
+}
+

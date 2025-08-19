@@ -105,7 +105,7 @@ heartSprite.onload = () => {
     heartSpriteLoaded = true;
 };
 heartSprite.onerror = (error) => {
-    console.error('Erro ao carregar sprite dos corações:', error);
+    
 };
 heartSprite.src = './images/UI/coraçoes.png';
 

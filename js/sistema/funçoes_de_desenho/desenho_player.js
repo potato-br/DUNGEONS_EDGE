@@ -782,6 +782,73 @@ function drawPlayer() {
     }
     
     if (!player.visible) return;
+    // draw mage ethereal cable if applicable
+    try {
+        if (activeCharacter === 'Valthor, o Mago' && typeof magoCableTarget !== 'undefined' && magoCableTarget) {
+            const plat = magoCableTarget;
+            const platBox = getPlatformHitbox(plat);
+            const startX = dx + dw/2;
+            const startY = dy + dh/2;
+            const endX = platBox.x + platBox.w/2;
+            const endY = platBox.y + platBox.h/2;
+
+            // draw a pixel-art-ish dotted cable with small rectangles
+            const dist = Math.hypot(endX - startX, endY - startY);
+            const segments = Math.max(6, Math.floor(dist / 12));
+            for (let i = 0; i <= segments; i++) {
+                const t = i / segments;
+                // small sine wobble for ethereal feel
+                const wobble = Math.sin(performance.now() * 0.005 + i) * 3;
+                const x = startX + (endX - startX) * t + Math.cos(t * Math.PI * 2) * wobble;
+                const y = startY + (endY - startY) * t + Math.sin(t * Math.PI * 2) * wobble;
+                const size = 4;
+                ctx.save();
+                ctx.globalAlpha = 0.9 - Math.abs(0.5 - t) * 0.8;
+                ctx.fillStyle = `rgba(160, 120, 255, ${0.9 - Math.abs(0.5 - t) * 0.6})`;
+                ctx.fillRect(Math.floor(x) - size/2, Math.floor(y) - size/2, size, size);
+                ctx.restore();
+            }
+
+            // Add end particles: small pulsing squares at both ends
+            const now = performance.now();
+            const endParticle = (cx, cy, seed) => {
+                for (let p = 0; p < 6; p++) {
+                    const ang = (p / 6) * Math.PI * 2 + seed;
+                    const r = 6 + Math.abs(Math.sin(now * 0.007 + p + seed) * 4);
+                    const px = cx + Math.cos(ang) * r;
+                    const py = cy + Math.sin(ang) * r;
+                    ctx.save();
+                    ctx.globalAlpha = 0.7 + 0.3 * Math.sin(now * 0.01 + p + seed);
+                    ctx.fillStyle = `rgba(220,200,255,0.9)`;
+                    ctx.fillRect(Math.floor(px) - 2, Math.floor(py) - 2, 4, 4);
+                    ctx.restore();
+                }
+            };
+            endParticle(startX, startY, 0.1);
+            endParticle(endX, endY, 2.3);
+
+            // Thin glow line (back layer)
+            ctx.save();
+            const glowGrad = ctx.createLinearGradient(startX, startY, endX, endY);
+            glowGrad.addColorStop(0, 'rgba(180,150,255,0.12)');
+            glowGrad.addColorStop(0.5, 'rgba(200,180,255,0.18)');
+            glowGrad.addColorStop(1, 'rgba(180,150,255,0.12)');
+            ctx.strokeStyle = glowGrad;
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+            for (let i = 0; i <= segments; i++) {
+                const t = i / segments;
+                const wobble = Math.sin(now * 0.003 + t * Math.PI * 6) * 6 * (1 - Math.abs(0.5 - t) * 2);
+                const x = startX + (endX - startX) * t + Math.cos(t * Math.PI * 4) * wobble;
+                const y = startY + (endY - startY) * t + Math.sin(t * Math.PI * 4) * wobble;
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+    } catch (e) {
+        // ignore drawing errors
+    }
     if (!player.facingRight) {
         ctx.translate(dx + dw/2, dy + dh/2);
         ctx.scale(-1, 1);
