@@ -1,7 +1,3 @@
-
-
-
-
 function createEnemy() {
   
   const width = 32;  
@@ -39,6 +35,14 @@ function createEnemy() {
     isDetached: false, 
     detachDistance: 200 + Math.random() * 100, 
     initialY: -height, 
+  webAlpha: 1, // opacity of the web line (1 = visible, 0 = gone)
+  webFade: false, // whether the web is currently fading out
+  webFadeStart: 0,
+  webFadeDuration: 600 + Math.random() * 400, // ms
+  // wobble params for the web rope (visual oscillation)
+  webWobbleAmount: 1 + Math.random() * 2,
+  webWobbleSpeed: 0.003 + Math.random() * 0.006,
+  webWobbleSeed: Math.random() * 1000,
   };
 }
 
@@ -46,6 +50,51 @@ function createEnemy() {
 
 
 const particles = [];
+
+// web ghosts: keep rope visuals after enemy removed so fade can finish
+const webGhosts = [];
+
+// helper to draw the rope given start/end and alpha
+function drawRopeFor(startX, endX, endY, swingOffset, swingAmplitude, alpha, wobbleAmount = 1, wobbleSpeed = 0.005, wobbleSeed = 0) {
+  if (!alpha || alpha <= 0) return;
+  const prevAlpha = ctx.globalAlpha || 1;
+  ctx.globalAlpha = prevAlpha * alpha;
+
+  const startY = 0;
+  const blockSize = 3;
+  const totalHeight = Math.max(blockSize, Math.round(endY - startY));
+  const blocks = Math.max(1, Math.ceil(totalHeight / blockSize));
+  const baseColor = '#CFCFCF';
+  const highlightColor = 'rgba(255,255,255,0.35)';
+  const shadowColor = 'rgba(0,0,0,0.25)';
+
+  const now = performance.now();
+  for (let i = 0; i < blocks; i++) {
+    const t = i / Math.max(1, blocks - 1);
+    const cx = startX + (endX - startX) * t;
+    // per-block wobble: combine swingOffset with a time-based sine seeded offset
+    const phase = (t * 6) + (swingOffset || 0) + wobbleSeed + (now * wobbleSpeed);
+    const wobble = Math.round(Math.sin(phase) * wobbleAmount);
+    const qx = Math.round((cx + wobble) / blockSize) * blockSize;
+    const y = startY + i * blockSize;
+
+    ctx.fillStyle = baseColor;
+    ctx.fillRect(qx - Math.floor(blockSize / 2), Math.round(y), blockSize, blockSize);
+
+    const sparkleInterval = 6;
+    if (i % sparkleInterval === Math.floor((swingOffset || 0) % sparkleInterval)) {
+      ctx.fillStyle = highlightColor;
+      ctx.fillRect(qx - Math.floor(blockSize / 4), Math.round(y + 1), Math.max(1, Math.floor(blockSize / 2)), Math.max(1, Math.floor(blockSize / 2)));
+    }
+  }
+
+  const shadowY = Math.round(endY + 2);
+  const shadowXcenter = Math.round(endX / blockSize) * blockSize;
+  ctx.fillStyle = shadowColor;
+  ctx.fillRect(shadowXcenter - blockSize, shadowY, blockSize * 2, Math.max(1, Math.floor(blockSize / 2)));
+
+  ctx.globalAlpha = prevAlpha;
+}
 
 function createParticles(x, y, count, color) {
   for (let i = 0; i < count; i++) {
@@ -85,6 +134,8 @@ function drawParticles() {
 function updateEnemies() {
   if (isRespawning) return;
   const now = performance.now();
+  // global cooldown to avoid multiple spider sfx when many detach at once
+  if (typeof window !== 'undefined' && window.__lastSpiderSfxTime === undefined) window.__lastSpiderSfxTime = 0;
   
   updateParticles(); 
 
@@ -93,8 +144,18 @@ function updateEnemies() {
 
     
     if (!e.isDetached && (e.y - e.initialY) >= e.detachDistance) {
-      e.isDetached = true;
-      e.speedY = 2 + Math.random() * 3; 
+  e.isDetached = true;
+  e.speedY = 2 + Math.random() * 3; 
+  // spawn a few small particles when the spider detaches
+  createParticles(e.x + e.width/2, e.y + e.height/2, 2 + Math.floor(Math.random() * 2), '#FFFFFF');
+  // start web fadeout instead of instantly removing the rope
+  e.webFade = true;
+    e.webFadeStart = now || performance.now();
+    // capture fixed web coordinates so the rope stays in place while fading
+    e.webStartX = e.baseX + e.width / 2;
+    e.webEndX = e.x + e.width / 2;
+    e.webEndY = e.y + 4;
+    e.webFixed = true;
     }
 
     if (!e.isDetached) {
@@ -122,6 +183,18 @@ function updateEnemies() {
     } else {
       
       e.y += e.speedY;
+    }
+
+    // progress web fade if active
+    if (e.webFade) {
+      const elapsed = now - (e.webFadeStart || now);
+      e.webAlpha = Math.max(0, 1 - (elapsed / (e.webFadeDuration || 600)));
+      // when fully faded, ensure webAlpha is 0 (rope no longer drawn)
+      if (e.webAlpha <= 0) {
+        e.webAlpha = 0;
+        // keep webFade false to stop further work
+        e.webFade = false;
+      }
     }
 
     
@@ -154,8 +227,10 @@ function updateEnemies() {
           
           if (!platform.broken && !platform.brokenDone) {
             platform.broken = true;
+             try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('platform_break_sfx'); } catch (e) {}
             platform.breakAnimTime = 0;
             platform.breakStartY = platform.y;
+            if (typeof onPlatformBroken === 'function') onPlatformBroken(platform);
           }
           
         }
@@ -166,8 +241,10 @@ function updateEnemies() {
           
           if (!platform.broken && !platform.brokenDone) {
             platform.broken = true;
+             try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('platform_break_sfx'); } catch (e) {}
             platform.breakAnimTime = 0;
             platform.breakStartY = platform.y;
+            if (typeof onPlatformBroken === 'function') onPlatformBroken(platform);
           }
           
         }
@@ -176,9 +253,43 @@ function updateEnemies() {
     }
 
     
-    if (removeEnemy || e.y > screenHeight) {
+  if (removeEnemy || e.y > screenHeight) {
+      // if removed while web still visible, create a ghost to finish fade
+      if ((e.webAlpha === undefined ? 1 : e.webAlpha) > 0) {
+        webGhosts.push({
+            startX: (e.webStartX !== undefined ? e.webStartX : (e.baseX + e.width / 2)),
+            endX: (e.webEndX !== undefined ? e.webEndX : (e.x + e.width / 2)),
+            endY: (e.webEndY !== undefined ? e.webEndY : (e.y + 4)),
+          swingOffset: e.swingOffset,
+          alpha: e.webAlpha === undefined ? 1 : e.webAlpha,
+          initialAlpha: e.webAlpha === undefined ? 1 : e.webAlpha,
+          // copy wobble params so the ghost rope retains same motion
+          wobbleAmount: e.webWobbleAmount || 1,
+          wobbleSpeed: e.webWobbleSpeed || 0.005,
+          wobbleSeed: e.webWobbleSeed || 0,
+          startTime: now,
+          duration: e.webFadeDuration || 600
+        });
+      }
+  try {
+    // play death SFX only when removed due to collision/platform (removeEnemy === true)
+    if (removeEnemy) {
+      if (typeof AudioManager !== 'undefined' && AudioManager) {
+        try { if (typeof AudioManager.playWithFade === 'function') AudioManager.playWithFade('enemy_death_sfx', 250, { volume: 0.04 }); else if (typeof AudioManager.play === 'function') AudioManager.play('enemy_death_sfx', { volume: 0.04 }); } catch (e) {}
+      }
+    }
+  } catch (err) {}
       enemies.splice(i, 1);
     }
+  }
+
+  // update webGhosts fade
+  for (let gi = webGhosts.length - 1; gi >= 0; gi--) {
+    const g = webGhosts[gi];
+    const elapsed = now - g.startTime;
+    const t = Math.min(1, elapsed / g.duration);
+    g.alpha = Math.max(0, (g.initialAlpha || g.alpha) * (1 - t));
+    if (g.alpha <= 0) webGhosts.splice(gi, 1);
   }
 }
 
@@ -191,6 +302,31 @@ function spawnEnemies(now) {
     const count = 2 + Math.floor(Math.random() * 4);
     for (let i = 0; i < count; i++) {
       enemies.push(createEnemy());
+      try {
+        const VOL = 0.02;
+        // schedule a per-enemy delayed spawn sound (random delay up to 1000ms)
+        const enemyRef = enemies[enemies.length - 1];
+        const delay = Math.random() * 1000; // 0 .. 1000 ms
+        enemyRef._spawnSoundDelay = delay;
+        enemyRef._spawnSoundTimeout = setTimeout(() => {
+          try {
+            // ensure enemy still exists (wasn't removed)
+            if (!enemies.includes(enemyRef)) return;
+            if (typeof AudioManager !== 'undefined' && AudioManager.assets && AudioManager.assets['spider_sfx']) {
+              const asset = AudioManager.assets['spider_sfx'];
+              const src = asset.src || (asset.currentSrc || (asset.getAttribute && asset.getAttribute('src')));
+              if (src) {
+                const a = new Audio(src);
+                a.volume = VOL;
+                a.play().catch(()=>{});
+              } else {
+                try { AudioManager.play('spider_sfx'); } catch (e) {}
+                try { asset.volume = VOL; } catch (e) {}
+              }
+            }
+          } catch (err) {}
+        }, delay);
+      } catch (err) {}
     }
     lastEnemySpawn = now;
   }
@@ -199,16 +335,22 @@ function spawnEnemies(now) {
 function drawEnemies() {
   drawParticles();
 
-  enemies.forEach(e => {
-    if (!e.isDetached) {
-      ctx.beginPath();
-      ctx.strokeStyle = '#CCCCCC';
-      ctx.lineWidth = 2;
-      ctx.moveTo(e.baseX + e.width / 2, 0);
-      ctx.lineTo(e.x + e.width / 2, e.y + 4);
-      ctx.stroke();
-    }
+  // draw any web ghosts (fading ropes left behind by detached/removed enemies)
+  for (let gi = 0; gi < webGhosts.length; gi++) {
+    const g = webGhosts[gi];
+  drawRopeFor(g.startX, g.endX, g.endY, g.swingOffset, 0, g.alpha, g.wobbleAmount, g.wobbleSpeed, g.wobbleSeed);
+  }
 
+  enemies.forEach(e => {
+    // draw per-enemy rope/web while visible. If the web was fixed at detach,
+    // use the fixed coordinates so the rope doesn't follow the falling spider.
+    const webAlpha = (e.webAlpha === undefined ? 1 : e.webAlpha);
+    if (webAlpha > 0) {
+      const startX = (e.webStartX !== undefined ? e.webStartX : (e.baseX + e.width / 2));
+      const endX = (e.webEndX !== undefined ? e.webEndX : (e.x + e.width / 2));
+      const endY = (e.webEndY !== undefined ? e.webEndY : (e.y + 4));
+  drawRopeFor(startX, endX, endY, e.swingOffset, e.swingAmplitude, webAlpha, e.webWobbleAmount, e.webWobbleSpeed, e.webWobbleSeed);
+    }
     const sprite = inimigoImages[0]; 
     if (sprite && sprite.complete) {
       const SPRITE_WIDTH = sprite.width / 2;  

@@ -47,9 +47,15 @@ function updateFallingPlatform(platform) {
 
     // Inicia o contador de tempo de queda se não existir
     if (platform.fallTime === undefined) platform.fallTime = 0;
+    // Não usamos gameSpeed para contar os frames até "broken" (manter mesma contagem),
+    // mas usamos gameSpeed para modificar a velocidade visual de queda.
     platform.fallTime++;
 
-    platform.currentFallSpeed = platform.isGrande ? 2 : 3;
+    const speed = (typeof gameSpeed === 'number') ? gameSpeed : 1;
+    // Use a moderated fall multiplier so very large gameSpeed values don't make fall
+    // visually instantaneous. We use sqrt and clamp to keep increases reasonable.
+    const fallMult = Math.min(Math.sqrt(speed), 2);
+    platform.currentFallSpeed = platform.fallSpeed * fallMult;
     platform.y += platform.currentFallSpeed;
 
     if (Math.random() < 0.2) {
@@ -64,6 +70,7 @@ function updateFallingPlatform(platform) {
     // Após 1 segundo (60 frames), quebra a plataforma automaticamente
     if (platform.fallTime >= 40) {
         platform.broken = true;
+         try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('platform_break_sfx'); } catch (e) {}
         platform.falling = false;
         platform.fallTime = 0;
         createParticles(platform.x + platform.width/2, platform.y, 15, '#ff0000');
@@ -71,9 +78,14 @@ function updateFallingPlatform(platform) {
 }
 
 function updateBreakingPlatform(platform) {
-    platform.breakTime = (platform.breakTime || 0) + 1;
+    // Use gameSpeed to speed up the breaking progression, but cap the increment
+    // so very large gameSpeed values don't immediately skip to falling.
+    const speed = (typeof gameSpeed === 'number') ? gameSpeed : 1;
+    const breakIncr = Math.min(Math.max(speed, 1), 6); // between 1 and 6
+    platform.breakTime = (platform.breakTime || 0) + breakIncr;
     
-    const maxBreakTime = platform.isGrande ? 150 : 140;
+    // Give larger platforms a bit more time before they transition to falling.
+    const maxBreakTime = platform.isGrande ? 200 : 200;
     
     
     
@@ -92,7 +104,9 @@ function updateBreakingPlatform(platform) {
     if (platform.breakTime > maxBreakTime) {
         platform.falling = true;
         platform.breaking = false;
-        platform.currentFallSpeed = platform.fallSpeed;
+    // When the platform starts falling, apply the moderated fall multiplier.
+    const fallMult = Math.min(Math.sqrt((typeof gameSpeed === 'number') ? gameSpeed : 1), 2);
+    platform.currentFallSpeed = platform.fallSpeed * fallMult;
         
         createParticles(platform.x + platform.width/2, platform.y, 10, '#ff6600');
     }

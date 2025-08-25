@@ -14,7 +14,7 @@ function showLoadingTransition(callback) {
   blackScreen.style.justifyContent = 'center';
   blackScreen.style.alignItems = 'center';
   blackScreen.style.transition = 'opacity 0.4s';
-  blackScreen.innerHTML = '<span style="color:white;font-size:2.5rem;font-family:PixelFont;letter-spacing:2px;">Carregando...</span>';
+blackScreen.innerHTML = '<span style="color:white;font-size:2.5rem;font-family:PixelFont;letter-spacing:2px;">Carregando...</span>';
   document.body.appendChild(blackScreen);
 
   setTimeout(() => {
@@ -31,7 +31,9 @@ function showLoadingTransition(callback) {
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    aplicarEstilosMenuInicial();
+  aplicarEstilosMenuInicial();
+  // preload default audio assets (place files under media/audio/)
+  try { if (typeof AudioManager !== 'undefined' && typeof AudioManager.loadDefaults === 'function') AudioManager.loadDefaults(); } catch (e) {}
     setupMenuInicial(function () {
         showLoadingTransition(function (removeTransition) {
             startIntroTutorial();
