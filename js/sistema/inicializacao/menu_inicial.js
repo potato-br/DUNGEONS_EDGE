@@ -24,6 +24,36 @@ function setupMenuInicial(onStart) {
 
         menu.style.opacity = '0';
         menu.style.display = 'flex';
+    try {
+        if (typeof AudioManager !== 'undefined') {
+            // prefer menu_music loaded by AudioManager.loadDefaults
+            const name = 'menu_music';
+            try {
+                // start music and fade-in from 0 -> default over ~800ms
+                if (typeof AudioManager.playMusic === 'function') {
+                    try { AudioManager.playMusic(name, { loop: true }); } catch (e) {}
+                    try {
+                        const a = AudioManager.assets && AudioManager.assets[name];
+                        if (a) {
+                            try { a.volume = 0; } catch (e) {}
+                            const target = (typeof AudioManager.getDefaultMusicVolume === 'function') ? AudioManager.getDefaultMusicVolume() : 0.6;
+                            const dur = 800;
+                            const start = performance.now();
+                            const step = (now) => {
+                                const t = Math.min(1, (now - start) / dur);
+                                try { a.volume = target * t; } catch (e) {}
+                                if (t < 1) requestAnimationFrame(step);
+                            };
+                            requestAnimationFrame(step);
+                        }
+                    } catch (e) {}
+                }
+                else if (AudioManager.ensureMusicPlaying) {
+                    try { AudioManager.ensureMusicPlaying(name, { loop: true }); } catch (e) {}
+                }
+            } catch (e) {}
+        }
+    } catch (e) {}
         menu.style.transform = 'scale(0.5) rotate(-15deg) translateY(100px)';
         menu.style.transition = 'all 2s cubic-bezier(0.34, 1.56, 0.64, 1)';
         menu.style.filter = 'brightness(0) blur(10px)';
@@ -85,6 +115,12 @@ function setupMenuInicial(onStart) {
         if (!menuReady) return; 
         menu.style.display = 'none';
         document.getElementById('gameCanvas').style.display = 'block';
+    // Só troca para gameplay_music ao iniciar o jogo
+    try {
+        if (typeof AudioManager !== 'undefined' && AudioManager.stopMusic) {
+            AudioManager.stopMusic();
+        }
+    } catch (e) {}
         if (typeof onStart === 'function') onStart();
     };
 
