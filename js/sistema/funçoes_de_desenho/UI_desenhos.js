@@ -44,7 +44,7 @@ switch (activeCharacter) {
     break;
     case 'Kuroshi, o Ninja':
     x = 40;
-    y = 30;
+    y = 40;
     heartSize = 52;
     break;
   default:

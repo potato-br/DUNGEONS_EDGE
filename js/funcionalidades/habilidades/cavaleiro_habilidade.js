@@ -3,7 +3,11 @@ function handleCavaleiroShield(now) {
     if (CAVALEIRO.shieldActive || CAVALEIRO.shieldCooldown) return true; 
     CAVALEIRO.shieldActive = true;
     CAVALEIRO.shieldCooldown = false;
+    // record activation time for a light shockwave visual
+    try { CAVALEIRO.activationPulseTime = now; } catch (e) {}
     aplicarInvulnerabilidade(CAVALEIRO.SHIELD_DURATION);
+    // play lunar aegis sfx
+    try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('knight_lunar_aegis_sfx'); } catch (e) {}
     
     for (let i = 0; i < 2; i++) {
         setTimeout(() => {
@@ -26,6 +30,31 @@ function handleCavaleiroShield(now) {
     CAVALEIRO.shieldCooldownStart = now + CAVALEIRO.SHIELD_DURATION;
     activeAbilityTimers.shield.startTime = now;
     activeAbilityTimers.shield.duration = CAVALEIRO.SHIELD_DURATION;
+    // small shockwave that damages/kills nearby enemies
+    try {
+        const shockRadius = 140; // light shock range
+        if (typeof enemies !== 'undefined' && Array.isArray(enemies)) {
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const e = enemies[i];
+                try {
+                    const ex = (e.x !== undefined) ? (e.x + (e.width||0)/2) : null;
+                    const ey = (e.y !== undefined) ? (e.y + (e.height||0)/2) : null;
+                    const px = player.x + player.width/2;
+                    const py = player.y + player.height/2;
+                    if (ex !== null && ey !== null) {
+                        const d = Math.hypot(ex - px, ey - py);
+                        if (d <= shockRadius) {
+                            // try to remove enemy cleanly if possible
+                            if (typeof e.destroy === 'function') {
+                                try { e.destroy(e); } catch (err) {}
+                            }
+                            enemies.splice(i, 1);
+                        }
+                    }
+                } catch (err) {}
+            }
+        }
+    } catch (e) {}
     return false; 
 }
 
@@ -34,6 +63,7 @@ function handleCavaleiroVoidResurrection(now) {
     if (!CAVALEIRO.voidResurrectionAvailable) return false; 
     CAVALEIRO.voidResurrectionAvailable = false;
     CAVALEIRO.voidResurrectionLastUsed = now;
+    if (!activeAbilityTimers.voidRes) activeAbilityTimers.voidRes = {};
     activeAbilityTimers.voidRes.startTime = now;
     activeAbilityTimers.voidRes.duration = CAVALEIRO.VOID_RESURRECTION_COOLDOWN;
     
@@ -50,5 +80,7 @@ function handleCavaleiroVoidResurrection(now) {
             gravity: -0.1
         }
     );
+    // play knight void resurrection sfx
+    try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('knight_void_res_sfx'); } catch (e) {}
     return true; 
 }
