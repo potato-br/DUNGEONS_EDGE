@@ -311,11 +311,51 @@ function setupMenuInicial(onStart) {
                                         // Those messages are only for immediate purchases and should not be
                                         // re-displayed when loading a saved game.
                                         try { purchaseHistory = []; } catch (e) { purchaseHistory = []; }
+
                                         if (s && typeof s._charData !== 'undefined') {
-                                            try { if (typeof characterData !== 'undefined') { Object.assign(characterData, s._charData); } else { window.characterData = s._charData; } } catch (e) {}
+                                            try {
+                                                if (typeof characterData !== 'undefined') {
+                                                    Object.assign(characterData, s._charData);
+                                                } else {
+                                                    window.characterData = s._charData;
+                                                }
+                                            } catch (e) {}
                                             // Rebind global shop state so global items/purchases are visible
                                             try { if (typeof rebindGlobalLojaState === 'function') rebindGlobalLojaState(); } catch (e) {}
                                         }
+
+                                        // Restore dynamic shop state (prices/counts) if present in the save
+                                        try {
+                                            if (s && typeof s.shopState === 'object' && s.shopState !== null && typeof shopItems !== 'undefined' && Array.isArray(shopItems)) {
+                                                shopItems.forEach(it => {
+                                                    try {
+                                                        const st = s.shopState[it.nome];
+                                                        if (st) {
+                                                            if (typeof st.preco !== 'undefined') it.preco = Number(st.preco) || it.preco;
+                                                            if (typeof st.priceIncrement !== 'undefined') it.priceIncrement = st.priceIncrement || it.priceIncrement || 0;
+                                                            if (typeof st.compras !== 'undefined') it.compras = Number(st.compras) || 0;
+                                                            if (typeof st.disponivel !== 'undefined') it.disponivel = !!st.disponivel;
+                                                        }
+                                                    } catch (e) {}
+                                                });
+                                                // Also apply to SECRET_ITEMS so secret entries (not yet pushed to shopItems)
+                                                try {
+                                                    if (typeof SECRET_ITEMS !== 'undefined' && Array.isArray(SECRET_ITEMS)) {
+                                                        SECRET_ITEMS.forEach(si => {
+                                                            try {
+                                                                const st2 = s.shopState[si.nome];
+                                                                if (st2) {
+                                                                    if (typeof st2.preco !== 'undefined') si.preco = Number(st2.preco) || si.preco;
+                                                                    if (typeof st2.priceIncrement !== 'undefined') si.priceIncrement = st2.priceIncrement || si.priceIncrement || 0;
+                                                                    if (typeof st2.compras !== 'undefined') si.compras = Number(st2.compras) || 0;
+                                                                    if (typeof st2.disponivel !== 'undefined') si.disponivel = !!st2.disponivel;
+                                                                }
+                                                            } catch (e) {}
+                                                        });
+                                                    }
+                                                } catch (e) {}
+                                            }
+                                        } catch (e) {}
                                     } catch (e) {}
 
                                     // Reset the game state first (so it doesn't later overwrite the restored depth),
@@ -327,6 +367,42 @@ function setupMenuInicial(onStart) {
                                             try { depthPoints = Number(s.profundidade) || 0; } catch (e) { depthPoints = depthPoints || 0; }
                                             try { if (typeof onDepthChange === 'function') onDepthChange(depthPoints); } catch (e) {}
                                         }
+                                    } catch (e) {}
+
+                                    // Apply saved item effects now that game and depth are initialized.
+                                    try {
+                                        if (typeof window.__appliedShopEffects === 'undefined') window.__appliedShopEffects = {};
+                                        const applyEffectsForList = (list) => {
+                                            if (!list || !Array.isArray(list)) return;
+                                            list.forEach(it => {
+                                                try {
+                                                    const compras = (typeof getPurchasesCountByName === 'function') ? (getPurchasesCountByName(it.nome) || (it.compras || 0)) : (it.compras || 0);
+                                                    const already = window.__appliedShopEffects[it.nome] || 0;
+                                                    const toApply = Math.max(0, Number(compras) - Number(already || 0));
+                                                    if (toApply > 0) {
+                                                        for (let k = 0; k < toApply; k++) {
+                                                            try { if (typeof it.efeito === 'function') it.efeito(); } catch (e) {}
+                                                        }
+                                                        window.__appliedShopEffects[it.nome] = Number(compras) || 0;
+                                                    }
+                                                } catch (e) {}
+                                            });
+                                        };
+                                        try { applyEffectsForList(shopItems); } catch (e) {}
+                                        try { applyEffectsForList(typeof SECRET_ITEMS !== 'undefined' ? SECRET_ITEMS : []); } catch (e) {}
+                                        // Sync runtime player/character stats back into characterData like in purchase flow
+                                        try {
+                                            if (!characterData[activeCharacter]) characterData[activeCharacter] = { stats: {} };
+                                            characterData[activeCharacter].stats = {
+                                                speed: player.speed,
+                                                maxJumps: player.maxJumps,
+                                                liveupgrade: liveupgrade,
+                                                moneyplus: moneyplus,
+                                                dashRechargeTime: player.dashRechargeTime || (characterData[activeCharacter].stats && characterData[activeCharacter].stats.dashRechargeTime) || 1000,
+                                                dashExtraInvuln: player.dashExtraInvuln || (characterData[activeCharacter].stats && characterData[activeCharacter].stats.dashExtraInvuln) || 0,
+                                                enemySpawnInterval: enemySpawnInterval
+                                            };
+                                        } catch (e) {}
                                     } catch (e) {}
 
                                     try { updateBodyStyles(true); } catch (e) {}
@@ -578,6 +654,17 @@ function showSlotSelectionMenu() {
                                 try { saveObj._charData = JSON.parse(JSON.stringify(characterData)); } catch (e) { saveObj._charData = saveObj._charData || {}; }
                             }
                         } catch (e) { saveObj._charData = saveObj._charData || {}; }
+
+                        // Persist dynamic shop state (item prices and compra counts)
+                        try {
+                            const shopState = {};
+                            if (typeof shopItems !== 'undefined' && Array.isArray(shopItems)) {
+                                shopItems.forEach(it => {
+                                    try { shopState[it.nome] = { preco: it.preco, priceIncrement: it.priceIncrement || 0, compras: it.compras || 0, disponivel: !!it.disponivel }; } catch (e) {}
+                                });
+                            }
+                            saveObj.shopState = shopState;
+                        } catch (e) {}
 
                         // Persist using SaveManager when available, fallback to localStorage
                         try {
@@ -1010,6 +1097,37 @@ function openLoadMenu() {
                                 try { if (typeof characterData !== 'undefined') { Object.assign(characterData, loaded._charData); } else { window.characterData = loaded._charData; } } catch (e) {}
                                 try { if (typeof rebindGlobalLojaState === 'function') rebindGlobalLojaState(); } catch (e) {}
                             }
+                            // Restore dynamic shop state (prices/counts) if present in the save
+                            try {
+                                if (loaded && typeof loaded.shopState === 'object' && loaded.shopState !== null && typeof shopItems !== 'undefined' && Array.isArray(shopItems)) {
+                                    shopItems.forEach(it => {
+                                        try {
+                                            const st = loaded.shopState[it.nome];
+                                            if (st) {
+                                                if (typeof st.preco !== 'undefined') it.preco = Number(st.preco) || it.preco;
+                                                if (typeof st.priceIncrement !== 'undefined') it.priceIncrement = st.priceIncrement || it.priceIncrement || 0;
+                                                if (typeof st.compras !== 'undefined') it.compras = Number(st.compras) || 0;
+                                                if (typeof st.disponivel !== 'undefined') it.disponivel = !!st.disponivel;
+                                            }
+                                        } catch (e) {}
+                                    });
+                                    try {
+                                        if (typeof SECRET_ITEMS !== 'undefined' && Array.isArray(SECRET_ITEMS)) {
+                                            SECRET_ITEMS.forEach(si => {
+                                                try {
+                                                    const st2 = loaded.shopState[si.nome];
+                                                    if (st2) {
+                                                        if (typeof st2.preco !== 'undefined') si.preco = Number(st2.preco) || si.preco;
+                                                        if (typeof st2.priceIncrement !== 'undefined') si.priceIncrement = st2.priceIncrement || si.priceIncrement || 0;
+                                                        if (typeof st2.compras !== 'undefined') si.compras = Number(st2.compras) || 0;
+                                                        if (typeof st2.disponivel !== 'undefined') si.disponivel = !!st2.disponivel;
+                                                    }
+                                                } catch (e) {}
+                                            });
+                                        }
+                                    } catch (e) {}
+                                }
+                            } catch (e) {}
                         } catch (e) {}
 
                         // Reset game first, then apply saved depth so it isn't overwritten by reset logic

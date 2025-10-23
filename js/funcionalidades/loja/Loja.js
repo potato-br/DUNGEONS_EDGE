@@ -1267,6 +1267,17 @@ function attemptPurchase() {
               try { existing.recentPurchases = (typeof recentPurchases !== 'undefined') ? recentPurchases : (existing.recentPurchases || {}); } catch (e) {}
               // Do not persist transient UI messages into the save file.
               try { existing.purchaseHistory = []; } catch (e) {}
+              // Persist dynamic shop state (prices, increments, compras) so items keep their
+              // updated prices after loading a save.
+              try {
+                const shopState = {};
+                if (typeof shopItems !== 'undefined' && Array.isArray(shopItems)) {
+                  shopItems.forEach(it => {
+                    try { shopState[it.nome] = { preco: it.preco, priceIncrement: it.priceIncrement || 0, compras: it.compras || 0, disponivel: !!it.disponivel }; } catch (e) {}
+                  });
+                }
+                existing.shopState = shopState;
+              } catch (e) {}
               try { existing._charData = (typeof _charData !== 'undefined') ? _charData : (existing._charData || {}); } catch (e) {}
                             existing.modifiedAt = Date.now();
                             await SaveManager.saveSlot(lastSlot, existing);
@@ -1284,6 +1295,15 @@ function attemptPurchase() {
             try { existing.recentPurchases = (typeof recentPurchases !== 'undefined') ? recentPurchases : (existing.recentPurchases || {}); } catch (e) {}
             // Do not persist transient UI messages into the save file.
             try { existing.purchaseHistory = []; } catch (e) {}
+            try {
+              const shopState = {};
+              if (typeof shopItems !== 'undefined' && Array.isArray(shopItems)) {
+                shopItems.forEach(it => {
+                  try { shopState[it.nome] = { preco: it.preco, priceIncrement: it.priceIncrement || 0, compras: it.compras || 0, disponivel: !!it.disponivel }; } catch (e) {}
+                });
+              }
+              existing.shopState = shopState;
+            } catch (e) {}
             try { existing._charData = (typeof _charData !== 'undefined') ? _charData : (existing._charData || {}); } catch (e) {}
                         existing.modifiedAt = Date.now();
                         localStorage.setItem(`dungeons_edge_save_slot_${lastSlot}`, JSON.stringify(existing));

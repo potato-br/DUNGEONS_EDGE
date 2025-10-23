@@ -349,14 +349,13 @@ function resetGame({ pauseOnStart = true, showShop = false, il = true } = {}) {
     gameState = firstGamePlay ? 'tutorial' : 'jogando';
     firstGamePlay = false;
     _applySavedStartDepthIfAny(DEFAULT_SPAWN_GRACE);
+    // decrement temporary purchases for active character and global scope (only when actually entering gameplay)
+    try {
+      _decrementTemporaryPurchasesFor(characterData[activeCharacter]);
+      _decrementTemporaryPurchasesFor(characterData.__global);
+    } catch (e) {}
     if (pauseOnStart) pausar();
   }
-
-  // decrement temporary purchases for active character and global scope
-  try {
-    _decrementTemporaryPurchasesFor(characterData[activeCharacter]);
-    _decrementTemporaryPurchasesFor(characterData.__global);
-  } catch (e) {}
 }
 
 // rAF id so we can avoid duplicate loops and allow explicit stop/start
