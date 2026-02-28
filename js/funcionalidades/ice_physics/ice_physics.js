@@ -11,6 +11,9 @@ class IcePhysics {
         this.wasOnIce = false;
         this.airControl = 0.25;          
         this.momentumDecay = 0.995;     
+    // If momentum when leaving ice is below this threshold, consider it negligible
+    // and allow normal movement immediately.
+    this.exitMomentumThreshold = 1.5;
     }
 
     update(player, platform) {
@@ -19,15 +22,23 @@ class IcePhysics {
 
         
         const isIceNow = platform && (platform.isSlippery || platform.type === PLATFORM_TYPES.ESCORREGADIA);
-        
+
         const justExited = !isIceNow && this.wasOnIce;
 
-        
+        // When just exited, only force the player's velocity to the ice momentum
+        // if the momentum is above a small threshold. Otherwise clear ice momentum
+        // so regular input-driven movement takes effect immediately.
         if (justExited) {
-            player.velocityX = this.iceVelocity;
+            if (Math.abs(this.iceVelocity) >= (this.exitMomentumThreshold || 1)) {
+                // preserve sliding momentum when the player gained enough speed on ice
+                player.velocityX = this.iceVelocity;
+            } else {
+                // negligible momentum: drop it so normal movement applies
+                this.iceVelocity = 0;
+                // do not override player.velocityX here; allow input handler to set it next frame
+            }
         }
 
-        
         this.wasOnIce = isIceNow;
 
         if (isIceNow) {

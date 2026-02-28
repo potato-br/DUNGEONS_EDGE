@@ -44,7 +44,7 @@ switch (activeCharacter) {
     break;
     case 'Kuroshi, o Ninja':
     x = 40;
-    y = 30;
+    y = 40;
     heartSize = 52;
     break;
   default:
@@ -166,10 +166,14 @@ function drawMoney() {
   const metrics = ctx.measureText(text);
   const padding = 8;
   const height = 28;
+  
+  
   ctx.fillStyle = 'rgba(0,0,0,0.55)';
   ctx.beginPath();
   ctx.roundRect(x - metrics.width - padding, y - height + 8, metrics.width + 2 * padding, height, 8);
   ctx.fill();
+  
+  
   ctx.fillStyle = 'yellow';
   ctx.fillText(text, x, y);
   ctx.restore();
@@ -185,10 +189,13 @@ function drawDepthPoints() {
   const metrics = ctx.measureText(text);
   const padding = 8;
   const height = 28;
+  
+  
   ctx.fillStyle = 'rgba(0,0,0,0.55)';
   ctx.beginPath();
   ctx.roundRect(x - padding, y - height + 8, metrics.width + 2 * padding, height, 8);
   ctx.fill();
+  
   ctx.fillStyle = 'cyan';
   ctx.fillText(text, x, y);
   ctx.restore();
