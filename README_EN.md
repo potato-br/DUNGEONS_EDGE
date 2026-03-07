@@ -1,4 +1,4 @@
-
+🇺🇸 English | 🇧🇷 [Português](README_PT.md)
 # 🎮 Dungeons Edge
 
 **Dungeons Edge** is a 2D web game built with pure JavaScript. It started as a university assignment intended to be a collection of four small minigames. Due to tight deadlines and heavy workload, development became my sole responsibility — and the project evolved into something far more ambitious than the original assignment.
@@ -21,4 +21,10 @@ Because these solutions are integrated into the project, **continuing developmen
 - HTML5  
 - Pure JavaScript (Vanilla JS)  
 - Canvas API for 2D rendering
+
+## 🗺️Story
+
+Centuries ago the Kingdom of Eldoria lived in peace, guarded by walls and ancient magic. That peace was shattered when an ancient shadow was freed. One dark night the castle was breached and Princess Amélia was kidnapped, taken to a mysterious dungeon below the earth — a living labyrinth full of traps and terrible creatures.
+
+Legend speaks of heroes who can brave the dungeon and bring light back to the kingdom. Will you guide them? Make the right choices and rescue Amélia; fail and darkness will consume everything.
 
