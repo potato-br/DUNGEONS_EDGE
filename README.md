@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images\imagens de fundo\fundo do menuprincipal\meu-fundo.gif" alt="Menu principal" width="500"/>
+  <img src="media/fundo.gif" alt="Menu principal" width="500"/>
 </p>
 
 
