@@ -3,6 +3,7 @@
 
 
 
+
 const DASH = {
     isInvulnerable: false, 
     isDashing: false,
@@ -23,6 +24,11 @@ const DASH = {
     trailFadeFrame: 0
 };
 
+// Expor DASH para window (necessário para setActiveCharacter funcionar corretamente)
+if (typeof window !== 'undefined') {
+    window.DASH = DASH;
+}
+
 
 const CAVALEIRO = {
     shieldActive: false,
@@ -35,6 +41,11 @@ const CAVALEIRO = {
     VOID_RESURRECTION_COOLDOWN: 15000
 };
 
+// Expor CAVALEIRO para window
+if (typeof window !== 'undefined') {
+    window.CAVALEIRO = CAVALEIRO;
+}
+
 
 const MAGO = {
     magicBlastActive: false,
@@ -44,6 +55,11 @@ const MAGO = {
     MAGIC_INVULN_DURATION: 5500,
     magicBlastCooldownStart: null
 };
+
+// Expor MAGO para window
+if (typeof window !== 'undefined') {
+    window.MAGO = MAGO;
+}
 
 
 const NINJA = {
@@ -55,6 +71,11 @@ const NINJA = {
     smokeBombCooldownStart: null,
     invulneravelPorDano: false 
 };
+
+// Expor NINJA para window
+if (typeof window !== 'undefined') {
+    window.NINJA = NINJA;
+}
 
 
 let pauseStartTime = null;

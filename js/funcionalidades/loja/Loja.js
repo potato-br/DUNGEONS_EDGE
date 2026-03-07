@@ -1409,9 +1409,15 @@ function attemptPurchase() {
     if (isCharacter) {
       // switch active character without attempting to buy again
       try {
+        // Cham setActiveCharacter para aplicar corretamente as stats do personagem
+        if (typeof setActiveCharacter === 'function') {
+          setActiveCharacter(item.nome);
+        }
         activeCharacter = item.nome;
         if (typeof saveActiveCharacter === 'function') saveActiveCharacter(activeCharacter);
-      } catch (e) {}
+      } catch (e) {
+        console.error('Erro ao trocar de personagem:', e);
+      }
       updateShopAvailability();
       drawLoja();
       return;

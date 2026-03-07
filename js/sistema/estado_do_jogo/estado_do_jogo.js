@@ -1,6 +1,7 @@
 
 
 
+
 let serras = [];
 const lateralImages = [];
 let plataformas = [];
@@ -15,6 +16,20 @@ let lastEnemySpawn = 0;
 let live = 0; 
 let liveupgrade = 0;
 let moneytime = 0;
+
+// Expor variáveis globais para window (necessário para setActiveCharacter funcionar corretamente)
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'live', {
+    get: () => live,
+    set: (val) => { live = val; },
+    configurable: true
+  });
+  Object.defineProperty(window, 'liveupgrade', {
+    get: () => liveupgrade,
+    set: (val) => { liveupgrade = val; },
+    configurable: true
+  });
+}
 let animatingHearts = [];
 let previousLive = 0; 
 let frameCount = 0; 
