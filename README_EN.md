@@ -1,4 +1,9 @@
 🇺🇸 English | 🇧🇷 [Português](README_PT.md)
+
+<p align="center">
+  <img src="media/fundo.gif" alt="Menu principal" width="500"/>
+</p>
+
 # 🎮 Dungeons Edge
 
 **Dungeons Edge** is a 2D web game built with pure JavaScript. It started as a university assignment intended to be a collection of four small minigames. Due to tight deadlines and heavy workload, development became my sole responsibility — and the project evolved into something far more ambitious than the original assignment.
