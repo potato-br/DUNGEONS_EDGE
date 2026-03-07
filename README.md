@@ -2,7 +2,7 @@
   <img src="media/fundo.gif" alt="Menu principal" width="500"/>
 </p>
 
-## 🎮 Dungeons Edge
+#### 🎮 Dungeons Edge
 
 **Dungeons Edge** é um jogo 2D para web desenvolvido em JavaScript puro. Nasceu como parte de um trabalho universitário com a ideia inicial de ser uma coletânea de quatro minijogos. Com prazos curtos e muita demanda, o desenvolvimento ficou sob minha responsabilidade — e o projeto acabou evoluindo muito além do escopo acadêmico, mostrando potencial para se tornar uma experiência completa.
 
@@ -28,7 +28,7 @@ Devido à forma como essas soluções foram integradas, **continuar o desenvolvi
 - JavaScript (Vanilla JS)  
 - Canvas API para renderização 2D
   
-##🗺️ História
+#### 🗺️ História
 
 Há muitos séculos, o Reino de Eldoria viveu tempos de paz e prosperidade, protegido por muralhas e por uma magia ancestral. A tranquilidade, porém, foi quebrada quando uma antiga sombra foi libertada. Numa noite sombria, o castelo foi invadido e a princesa Amélia foi raptada, levada para uma dungeon misteriosa nas profundezas da terra — um labirinto vivo, cheio de armadilhas e criaturas sombrias.
 
