@@ -1,3 +1,5 @@
+🇧🇷 Português | 🇺🇸 [English](README_EN.md)
+
 <p align="center">
   <img src="media/fundo.gif" alt="Menu principal" width="500"/>
 </p>
