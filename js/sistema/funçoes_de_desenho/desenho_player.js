@@ -31,6 +31,67 @@ function drawPlayer() {
     if ((typeof DASH !== 'undefined' && DASH.isInvulnerable) && !(typeof DASH !== 'undefined' && DASH.isDashing) || (activeCharacter === 'Roderick, o Cavaleiro' && typeof CAVALEIRO !== 'undefined' && CAVALEIRO.shieldActive)) {
         ctx.save();
         const now = performance.now();
+
+                // draw ninja smoke at origin if present (smoke bomb placed on ground)
+                try {
+                    if (typeof NINJA !== 'undefined' && NINJA.smokeOrigin) {
+                        const nowT = performance.now();
+                        const start = (NINJA.smokeBombTimer || (activeAbilityTimers && activeAbilityTimers.ninjaSmoke && activeAbilityTimers.ninjaSmoke.startTime)) || 0;
+                        const dur = NINJA.NINJA_SMOKE_DURATION || 3500;
+                        const elapsed = Math.max(0, nowT - start);
+                        const active = NINJA.smokeBombActive && elapsed >= 0 && elapsed <= dur;
+                        const fading = !active && start > 0 && elapsed > dur && elapsed < dur + 1000;
+                        if (active || fading) {
+                            const p = Math.min(1, Math.max(0, elapsed / dur));
+                            const fadeP = fading ? Math.min(1, (elapsed - dur) / 1000) : 0;
+                            const ox = NINJA.smokeOrigin.x;
+                            const oy0 = NINJA.smokeOrigin.y;
+                            // make smoke rise: world-anchored upward offset based on elapsed
+                            const rise = (p * 60); // pixels to rise over duration
+                            const oy = oy0 - rise;
+                            const baseR = 40 + 120 * p; // larger radius for visibility
+                            const layers = 6;
+                            for (let l = 0; l < layers; l++) {
+                                const jitter = Math.sin(nowT*0.002 + l) * 6;
+                                const layerR = baseR * (1 - l*0.12) + jitter;
+                                const alpha = (0.5 - l*0.06) * (active ? (1 - p*0.6) : (1 - fadeP));
+                                ctx.save();
+                                ctx.globalAlpha = Math.max(0, alpha);
+                                ctx.fillStyle = `rgba(120,120,120,${Math.max(0, alpha)})`;
+                                ctx.shadowColor = `rgba(100,100,100,${Math.max(0, alpha*0.6)})`;
+                                ctx.shadowBlur = 18 - l*2;
+                                const seg = 24 + l*8;
+                                for (let a = 0; a < seg; a++) {
+                                    const ang = (a / seg) * Math.PI * 2 + nowT*0.0006 * (l%2 ? 1 : -1);
+                                    const rx = ox + Math.cos(ang) * layerR + Math.sin(nowT*0.002 + a)*8;
+                                    const ry = oy + Math.sin(ang) * layerR + Math.cos(nowT*0.002 + a)*8 - (l * 4);
+                                    const size = 10 + l*3;
+                                    ctx.fillRect(Math.floor(rx/size)*size - size/2, Math.floor(ry/size)*size - size/2, size, size);
+                                }
+                                ctx.restore();
+                            }
+
+                            // some larger smoke puffs as squares
+                            const puffCount = 14;
+                            for (let i = 0; i < puffCount; i++) {
+                                const angle = (i / puffCount) * Math.PI * 2 + performance.now()*0.0007;
+                                const dist = baseR * (0.4 + Math.sin(performance.now()*0.001 + i)*0.08);
+                                const px = ox + Math.cos(angle) * dist + Math.sin(performance.now()*0.002 + i)*6;
+                                const py = oy + Math.sin(angle) * dist - (p * 40) + Math.cos(performance.now()*0.002 + i)*6;
+                                ctx.save();
+                                ctx.globalAlpha = 0.4 * (1 - p) + Math.sin(performance.now()*0.003 + i)*0.05;
+                                ctx.fillStyle = 'rgba(180,180,180,0.95)';
+                                const s = 12 + Math.floor(Math.abs(Math.sin(performance.now()*0.002 + i))*8);
+                                ctx.fillRect(Math.floor(px / s) * s - s/2, Math.floor(py / s) * s - s/2, s, s);
+                                ctx.restore();
+                            }
+                        }
+                        // clear origin when long faded
+                        if (!NINJA.smokeBombActive && start > 0 && nowT - start > dur + 1500) {
+                            try { NINJA.smokeOrigin = null; } catch (e) {}
+                        }
+                    }
+                } catch (e) {}
         const baseIntensity = (Math.sin(now * 0.002) * 0.4 + 1.2);
         const fastPulse = (Math.sin(now * 0.006) * 0.4 + 1.1);
 
@@ -614,6 +675,77 @@ function drawPlayer() {
                         ctx.shadowBlur = 25;
                     }
                 };
+                // end config for mage
+                // add outer small helper to draw rune shockwave when mage triggers or takes damage
+                config.drawRuneShockwave = (ctx) => {
+                    try {
+                        if (typeof MAGO === 'undefined') return;
+                        const nowT = performance.now();
+                        const pulseTime = MAGO.activationPulseTime || 0;
+                        const dmgTime = MAGO.damagePulseTime || 0;
+                        const recentPulse = (nowT - pulseTime) < 900 && pulseTime > 0;
+                        const recentDmg = (nowT - dmgTime) < 900 && dmgTime > 0;
+                        if (!recentPulse && !recentDmg) return;
+
+                        const pulseOriginX = centerX;
+                        const pulseOriginY = centerY;
+                        const t = recentPulse ? (nowT - pulseTime) : (nowT - dmgTime);
+                        const duration = 800;
+                        const progress = Math.min(1, t / duration);
+
+                        const maxRadius = Math.max(dw, dh) * (1.6 + progress * 2.0);
+                        const pixelSizeRing = 6;
+
+                        // block-based pixel ring helper (no wobble)
+                        const drawPixelRing = (cx, cy, radius, thickness, pixelSize, baseColor, alphaMul) => {
+                            const circumference = Math.max(12, 2 * Math.PI * radius);
+                            const segments = Math.max(12, Math.floor(circumference / (pixelSize * 0.8)));
+                            for (let s = 0; s < segments; s++) {
+                                const ang = (s / segments) * Math.PI * 2 + (nowT * 0.0005);
+                                for (let layer = 0; layer < thickness; layer++) {
+                                    const r = radius + (layer - (thickness-1)/2) * pixelSize * 0.9;
+                                    const x = cx + Math.cos(ang) * r;
+                                    const y = cy + Math.sin(ang) * r;
+                                    const qx = Math.floor(x / pixelSize) * pixelSize - pixelSize/2;
+                                    const qy = Math.floor(y / pixelSize) * pixelSize - pixelSize/2;
+                                    ctx.fillStyle = baseColor.replace('%a%', (alphaMul).toFixed(3));
+                                    ctx.fillRect(qx, qy, pixelSize, pixelSize);
+                                }
+                            }
+                        };
+
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'lighter';
+
+                        // three concentric pixel rings with fading alpha
+                        const rings = 3;
+                        for (let ri = 0; ri < rings; ri++) {
+                            const ringProgress = Math.min(1, Math.max(0, (progress - ri * 0.18) / 0.6));
+                            if (ringProgress <= 0) continue;
+                            const ringRadius = maxRadius * (0.45 + ri * 0.18 + ringProgress * 0.8);
+                            const ringThickness = 2; // blocks
+                            const alpha = (0.9 - ri * 0.22) * (1 - ringProgress);
+                            drawPixelRing(pulseOriginX, pulseOriginY, ringRadius, ringThickness, pixelSizeRing, `rgba(160,120,255,%a%)`, alpha);
+                        }
+
+                        // rune-like small squares placed on an inner orbit (pixel-art glyphs)
+                        const innerCount = 8;
+                        const innerRadius = maxRadius * 0.6;
+                        const runeSize = Math.max(4, Math.floor(pixelSizeRing * 0.9 * (1 - progress + 0.4)));
+                        for (let i = 0; i < innerCount; i++) {
+                            const ang = (i / innerCount) * Math.PI * 2 + nowT * 0.001 * (i % 2 ? 1 : -1);
+                            const x = pulseOriginX + Math.cos(ang) * innerRadius;
+                            const y = pulseOriginY + Math.sin(ang) * innerRadius;
+                            ctx.save();
+                            ctx.globalAlpha = 0.9 * (1 - progress);
+                            ctx.fillStyle = `rgba(190,150,255,${0.95 * (1 - progress)})`;
+                            ctx.fillRect(Math.floor(x) - runeSize/2, Math.floor(y) - runeSize/2, runeSize, runeSize);
+                            ctx.restore();
+                        }
+
+                        ctx.restore();
+                    } catch (e) {}
+                };
                 break;
 
             default: 
@@ -776,12 +908,200 @@ function drawPlayer() {
         }
 
         
+        // draw optional rune shockwave (activation or damage)
+        if (typeof config.drawRuneShockwave === 'function') {
+            config.drawRuneShockwave(ctx);
+        }
+                // small forward dash shockwave for Ninja and Errante
+                try {
+                    const nowT = performance.now();
+                    // helper to draw a small forward dash shock (reusable for Ninja/Errante)
+                    // directional pixel-arc shock: draws a partial pixel-art ring (arc) in facing direction
+                    const drawForwardDashShock = (ox, oy, t, duration, sizeMul, baseColor, edgeColor, facingRight) => {
+                        const dur = duration || 300;
+                        const tt = t;
+                        if (tt < 0 || tt >= dur) return;
+                        const p = Math.min(1, tt / dur);
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'lighter';
+                        const radius = Math.max(dw, dh) * (sizeMul || (0.8 + p * 1.0));
+                        const thickness = 2; // block layers
+                        const pixelSizeArc = 6;
+                        // arc span in radians (e.g., 90 degrees)
+                        const arcSpan = Math.PI * 0.8; // about 144deg
+                        const centerAngle = facingRight ? 0 : Math.PI;
+                        const startAng = centerAngle - arcSpan/2;
+                        const endAng = centerAngle + arcSpan/2;
+                        const angularRange = endAng - startAng;
+                        // determine number of segments based on arc length
+                        const circumference = Math.max(12, radius * angularRange);
+                        const segments = Math.max(8, Math.floor(circumference / (pixelSizeArc * 0.8)));
+
+                        for (let s = 0; s < segments; s++) {
+                            // span arc deterministically across segments (no time-based rotation)
+                            const ang = startAng + (s / Math.max(1, segments - 1)) * angularRange;
+                            for (let layer = 0; layer < thickness; layer++) {
+                                const r = radius + (layer - (thickness-1)/2) * pixelSizeArc * 0.9;
+                                const x = ox + Math.cos(ang) * r;
+                                const y = oy + Math.sin(ang) * r;
+                                const qx = Math.floor(x / pixelSizeArc) * pixelSizeArc - pixelSizeArc/2;
+                                const qy = Math.floor(y / pixelSizeArc) * pixelSizeArc - pixelSizeArc/2;
+                                // color fades with progress
+                                const alpha = (1 - p) * (1 - layer * 0.18);
+                                ctx.fillStyle = baseColor.replace('%a%', Math.max(0, alpha).toFixed(3));
+                                ctx.fillRect(qx, qy, pixelSizeArc, pixelSizeArc);
+                            }
+                        }
+
+                        // edge brighter pixels along the center of arc
+                        const edgeCount = Math.max(6, Math.floor(segments * 0.35));
+                        const edgeRadius = radius * 0.7;
+                        for (let e = 0; e < edgeCount; e++) {
+                            // fixed edge positions along the same arc (no jitter)
+                            const ang = startAng + (e / Math.max(1, edgeCount - 1)) * angularRange;
+                            const x = ox + Math.cos(ang) * (edgeRadius + p * 8);
+                            const y = oy + Math.sin(ang) * (edgeRadius + p * 8);
+                            const qx = Math.floor(x / (pixelSizeArc)) * pixelSizeArc - pixelSizeArc/2;
+                            const qy = Math.floor(y / (pixelSizeArc)) * pixelSizeArc - pixelSizeArc/2;
+                            ctx.fillStyle = edgeColor.replace('%a%', (0.9 * (1 - p)).toFixed(3));
+                            ctx.fillRect(qx, qy, pixelSizeArc + 2, pixelSizeArc + 2);
+                        }
+
+                        ctx.restore();
+                    };
+
+                    // Ninja dash shock (restore): purple-ish
+                    try {
+                        // Ninja dash: prefer NINJA.dashShockTime, fallback to player.dashShockTime
+                        const ninjaStamp = (typeof NINJA !== 'undefined' && NINJA.dashShockTime) ? NINJA.dashShockTime : (player && player.dashShockTime ? player.dashShockTime : 0);
+                        if (ninjaStamp && ninjaStamp > 0) {
+                            const t = nowT - ninjaStamp;
+                            const ox = player.facingRight ? (dx + dw/2 + Math.max(dw,dh) * 0.6) : (dx + dw/2 - Math.max(dw,dh) * 0.6);
+                            const oy = dy + dh/2;
+                            // ensure only strict left/right arcs by passing player's facing
+                            drawForwardDashShock(ox, oy, t, 300, 0.9, 'rgba(160,120,255,%a%)', 'rgba(230,200,255,%a%)', !!player.facingRight);
+                        }
+                    } catch (e) {}
+
+                    // Errante dash shock: same shape but with Errante colors
+                    try {
+                        // Errante dash: prefer ERRANTE.dashShockTime, fallback to player.dashShockTime
+                        const erranteStamp = (typeof ERRANTE !== 'undefined' && ERRANTE.dashShockTime) ? ERRANTE.dashShockTime : (player && player.dashShockTime ? player.dashShockTime : 0);
+                        if (erranteStamp && erranteStamp > 0) {
+                            const t2 = nowT - erranteStamp;
+                            const ox2 = player.facingRight ? (dx + dw/2 + Math.max(dw,dh) * 0.6) : (dx + dw/2 - Math.max(dw,dh) * 0.6);
+                            const oy2 = dy + dh/2;
+                            drawForwardDashShock(ox2, oy2, t2, 300, 0.9, 'rgba(255,200,120,%a%)', 'rgba(255,230,180,%a%)', !!player.facingRight);
+                        }
+                    } catch (e) {}
+                    // light cavaleiro shield shockwave (use activationPulseTime)
+                    if (typeof CAVALEIRO !== 'undefined' && CAVALEIRO.activationPulseTime) {
+                        const t3 = nowT - (CAVALEIRO.activationPulseTime || 0);
+                        const dur3 = 800;
+                        if (t3 >= 0 && t3 < dur3) {
+                            const progress = Math.min(1, t3 / dur3);
+                            const maxR = Math.max(dw, dh) * (1.6 + progress * 2.0);
+                            const pixelSizeRingC = 6;
+                            // draw a pixel-art ring similar to mage's style
+                            const drawPixelRing = (cx, cy, radius, thickness, pixelSize, baseColor, alphaMul) => {
+                                const circumference = Math.max(12, 2 * Math.PI * radius);
+                                const segments = Math.max(12, Math.floor(circumference / (pixelSize * 0.8)));
+                                for (let s = 0; s < segments; s++) {
+                                    const ang = (s / segments) * Math.PI * 2 + (nowT * 0.0006);
+                                    for (let layer = 0; layer < thickness; layer++) {
+                                        const r = radius + (layer - (thickness-1)/2) * pixelSize * 0.9;
+                                        const x = cx + Math.cos(ang) * r;
+                                        const y = cy + Math.sin(ang) * r;
+                                        const qx = Math.floor(x / pixelSize) * pixelSize - pixelSize/2;
+                                        const qy = Math.floor(y / pixelSize) * pixelSize - pixelSize/2;
+                                        ctx.fillStyle = baseColor.replace('%a%', (alphaMul).toFixed(3));
+                                        ctx.fillRect(qx, qy, pixelSize, pixelSize);
+                                    }
+                                }
+                            };
+
+                            ctx.save();
+                            ctx.globalCompositeOperation = 'lighter';
+                            // two concentric rings, inner brighter
+                            drawPixelRing(dx+dw/2, dy+dh/2, maxR * (0.55 + progress * 0.1), 2, pixelSizeRingC, `rgba(120,200,255,%a%)`, 0.9 * (1 - progress));
+                            drawPixelRing(dx+dw/2, dy+dh/2, maxR * (0.75 + progress * 0.2), 2, pixelSizeRingC, `rgba(60,150,220,%a%)`, 0.6 * (1 - progress));
+                            ctx.restore();
+                        }
+                    }
+                } catch (e) {}
         config.drawSpecial(ctx);
 
         ctx.restore();
     }
     
     if (!player.visible) return;
+    // draw mage ethereal cable if applicable
+    try {
+        if (activeCharacter === 'Valthor, o Mago' && typeof magoCableTarget !== 'undefined' && magoCableTarget) {
+            const plat = magoCableTarget;
+            const platBox = getPlatformHitbox(plat);
+            const startX = dx + dw/2;
+            const startY = dy + dh/2;
+            const endX = platBox.x + platBox.w/2;
+            const endY = platBox.y + platBox.h/2;
+
+            // draw a pixel-art-ish dotted cable with small rectangles
+            const dist = Math.hypot(endX - startX, endY - startY);
+            const segments = Math.max(6, Math.floor(dist / 12));
+            for (let i = 0; i <= segments; i++) {
+                const t = i / segments;
+                // small sine wobble for ethereal feel
+                const wobble = Math.sin(performance.now() * 0.005 + i) * 3;
+                const x = startX + (endX - startX) * t + Math.cos(t * Math.PI * 2) * wobble;
+                const y = startY + (endY - startY) * t + Math.sin(t * Math.PI * 2) * wobble;
+                const size = 4;
+                ctx.save();
+                ctx.globalAlpha = 0.9 - Math.abs(0.5 - t) * 0.8;
+                ctx.fillStyle = `rgba(160, 120, 255, ${0.9 - Math.abs(0.5 - t) * 0.6})`;
+                ctx.fillRect(Math.floor(x) - size/2, Math.floor(y) - size/2, size, size);
+                ctx.restore();
+            }
+
+            // Add end particles: small pulsing squares at both ends
+            const now = performance.now();
+            const endParticle = (cx, cy, seed) => {
+                for (let p = 0; p < 6; p++) {
+                    const ang = (p / 6) * Math.PI * 2 + seed;
+                    const r = 6 + Math.abs(Math.sin(now * 0.007 + p + seed) * 4);
+                    const px = cx + Math.cos(ang) * r;
+                    const py = cy + Math.sin(ang) * r;
+                    ctx.save();
+                    ctx.globalAlpha = 0.7 + 0.3 * Math.sin(now * 0.01 + p + seed);
+                    ctx.fillStyle = `rgba(220,200,255,0.9)`;
+                    ctx.fillRect(Math.floor(px) - 2, Math.floor(py) - 2, 4, 4);
+                    ctx.restore();
+                }
+            };
+            endParticle(startX, startY, 0.1);
+            endParticle(endX, endY, 2.3);
+
+            // Thin glow line (back layer)
+            ctx.save();
+            const glowGrad = ctx.createLinearGradient(startX, startY, endX, endY);
+            glowGrad.addColorStop(0, 'rgba(180,150,255,0.12)');
+            glowGrad.addColorStop(0.5, 'rgba(200,180,255,0.18)');
+            glowGrad.addColorStop(1, 'rgba(180,150,255,0.12)');
+            ctx.strokeStyle = glowGrad;
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+            for (let i = 0; i <= segments; i++) {
+                const t = i / segments;
+                const wobble = Math.sin(now * 0.003 + t * Math.PI * 6) * 6 * (1 - Math.abs(0.5 - t) * 2);
+                const x = startX + (endX - startX) * t + Math.cos(t * Math.PI * 4) * wobble;
+                const y = startY + (endY - startY) * t + Math.sin(t * Math.PI * 4) * wobble;
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+    } catch (e) {
+        // ignore drawing errors
+    }
     if (!player.facingRight) {
         ctx.translate(dx + dw/2, dy + dh/2);
         ctx.scale(-1, 1);
