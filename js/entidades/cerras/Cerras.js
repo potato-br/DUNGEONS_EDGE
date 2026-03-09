@@ -58,6 +58,40 @@ function spawnCerras() {
     }
     lastSerraSpawn = now;
     nextSerraDelay = serraDelayMin + Math.random() * (serraDelayMax - serraDelayMin);
+    try {
+      // play serra spawn sound immediately at low volume
+      const newSerra = serras[serras.length - 1];
+      if (newSerra) {
+        // clear previous timeout if any
+        try { if (newSerra._serraSpawnTimeout) clearTimeout(newSerra._serraSpawnTimeout); } catch (e) {}
+        try {
+          const VOL = 0.03; // very very quiet (relative multiplier)
+          if (typeof AudioManager !== 'undefined') {
+            // prefer using AudioManager to ensure global sfxVolume and baseVolume apply
+            try {
+              // playWithFade will return the audio element or null; pass volume as relative multiplier
+              const played = AudioManager.playWithFade('serra_sfx', 400, { volume: VOL, loop: false });
+              // track active serra sounds so they can be stopped when entering the shop
+              if (played) {
+                try {
+                  window._activeSerraSounds = window._activeSerraSounds || [];
+                  window._activeSerraSounds.push(played);
+                  played.addEventListener('ended', () => {
+                    try {
+                      const idx = window._activeSerraSounds.indexOf(played);
+                      if (idx >= 0) window._activeSerraSounds.splice(idx, 1);
+                    } catch (e) {}
+                  });
+                } catch (e) {}
+              }
+            } catch (e) {
+              // fallback to AudioManager.play which should also respect sfxVolume
+              try { const p = AudioManager.play('serra_sfx', { volume: VOL }); if (p && typeof p.then === 'function') p.catch(()=>{}); } catch (er) {}
+            }
+          }
+        } catch (err) {}
+      }
+    } catch (err) {}
   }
 }
 

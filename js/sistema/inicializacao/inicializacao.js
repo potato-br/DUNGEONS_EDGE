@@ -14,7 +14,7 @@ function showLoadingTransition(callback) {
   blackScreen.style.justifyContent = 'center';
   blackScreen.style.alignItems = 'center';
   blackScreen.style.transition = 'opacity 0.4s';
-  blackScreen.innerHTML = '<span style="color:white;font-size:2.5rem;font-family:PixelFont;letter-spacing:2px;">Carregando...</span>';
+blackScreen.innerHTML = '<span style="color:white;font-size:2.5rem;font-family:PixelFont;letter-spacing:2px;">Carregando...</span>';
   document.body.appendChild(blackScreen);
 
   setTimeout(() => {
@@ -31,10 +31,22 @@ function showLoadingTransition(callback) {
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    aplicarEstilosMenuInicial();
+  aplicarEstilosMenuInicial();
+  // preload default audio assets (place files under media/audio/)
+  try { if (typeof AudioManager !== 'undefined' && typeof AudioManager.loadDefaults === 'function') AudioManager.loadDefaults(); } catch (e) {}
+  // Ensure saved options override defaults after AudioManager initializes
+  try {
+    if (typeof window !== 'undefined' && window.OptionsMenu && typeof window.OptionsMenu.getSettings === 'function') {
+      const s = window.OptionsMenu.getSettings();
+      if (s) {
+        try { if (AudioManager && typeof AudioManager.setMusicVolume === 'function' && typeof s.musicVolume === 'number') AudioManager.setMusicVolume(Number(s.musicVolume)); } catch (e) {}
+        try { if (AudioManager && typeof AudioManager.setSfxVolume === 'function' && typeof s.sfxVolume === 'number') AudioManager.setSfxVolume(Number(s.sfxVolume)); } catch (e) {}
+      }
+    }
+  } catch (e) {}
     setupMenuInicial(function () {
         showLoadingTransition(function (removeTransition) {
-            startIntroTutorial();
+            startIntro();
             gameLoop();
             ajustarCanvas();
             setTimeout(removeTransition, 500);

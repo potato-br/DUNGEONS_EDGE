@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>dungeons edge</title>    
-    <link rel="icon" type="image/png" href="images\imagens de fundo\fundo do menuprincipal\meu-fundo.png">
+    <link rel="icon" type="image/png" href="images\imagens de fundo\fundo do menuprincipal\titulo.png">
     <style>
         @font-face {
             font-family: 'PixelFont';
@@ -17,7 +17,9 @@
     </style>
 </head>
 <body>
-    <!-- Scripts do Jogo -->   
+    <!-- Scripts do Jogo --> 
+    <script src="js/sistema/inicializacao/menu_opcoes.js"></script>
+    <script src="js/sistema/inicializacao/save_manager.js"></script>
     <script src="js/sistema/inicializacao/menu_inicial.js"></script>
     <script src="js/sistema/pagina_e_canvas/pagina_e_canvas.js"></script>
     <script src="js/sistema/input/input.js"></script>
@@ -37,12 +39,17 @@
     <script src="js/funcionalidades/movimento/Movimento_e_Fisica.js"></script>
     <script src="js/funcionalidades/movimento/colisoes/Colisoes.js"></script>
     <script src="js/sistema/gameloop/Reset_e_Loop.js"></script>
-    <script src="js/sistema/tutorial/intro_tutorial.js"></script>
+    <script src="js/sistema/intro/intro.js"></script>
+    <script src="js/sistema/tutorial/dungeon_tutorial.js"></script>
+    <script src="js/sistema/audio/AudioManager.js"></script>
     <script src="js/funcionalidades/loja/loja_inputs.js"></script>
     <script src="js/funcionalidades/loja/loja_personagems.js"></script>
+    <script src="js/funcionalidades/loja/loja_data.js"></script>
+    <script src="js/sistema/tutorial/loja_tutorial.js"></script>
     <script src="js/funcionalidades/loja/Loja.js"></script>
     <script src="js/entidades/inimigos/aranha.js"></script>
     <script src="js/entidades/inimigos/morcego.js"></script>
+    <script src="js/entidades/inimigos/grande_inimigo.js"></script>
     <script src="js/entidades/cerras/Cerras.js"></script>
     <script src="js/sistema/estilos/estilos.js"></script>
     <script src="js/funcionalidades/ice_physics/ice_physics.js"></script>
@@ -60,3 +67,4 @@
     <script src="js/sistema/funçoes_de_desenho/dash_desenhos.js"></script>
 </body>
 </html>
+

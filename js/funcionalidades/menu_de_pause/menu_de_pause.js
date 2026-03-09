@@ -3,7 +3,8 @@
 
 
 let isPaused = false;
-let pauseOptions = ["Continuar", "Ir para Loja"];
+// Add 'Configuração' as a pause option (will toggle OptionsMenu)
+let pauseOptions = ["Continuar", "Configuração", "Ir para Loja"];
 let selectedPauseIndex = 0;
 
 
@@ -30,15 +31,37 @@ function handlePauseMenuInput(e) {
     } else if (e.key === "ArrowDown") {
         selectedPauseIndex = (selectedPauseIndex + 1) % pauseOptions.length;
         drawPause();
-    } else if (e.key === "Enter" || e.key === "c" || e.key === "C") {
-        if (selectedPauseIndex === 0) {
-            closePauseMenu();
-        } else if (selectedPauseIndex === 1) {
-            goToShopFromPause();
-        }
+        } else if (e.key === "Enter" || e.key === "c" || e.key === "C") {
+                if (selectedPauseIndex === 0) {
+                        closePauseMenu();
+                } else if (selectedPauseIndex === 1) {
+                        // Toggle options menu while staying in pause
+                        try {
+                            if (window.OptionsMenu && typeof window.OptionsMenu.toggle === 'function') {
+                                window.OptionsMenu.toggle(document.getElementById('menu'));
+                            } else if (window.OptionsMenu && typeof window.OptionsMenu.open === 'function') {
+                                window.OptionsMenu.open(document.getElementById('menu'));
+                            }
+                        } catch (err) {}
+                        drawPause();
+                } else if (selectedPauseIndex === 2) {
+                        goToShopFromPause();
+                }
     } else if (e.key === "r" || e.key === "R") {
         goToShopFromPause();
     }
+
+        // quick 'O' shortcut to open/toggle options when paused
+        if ((e.key === 'o' || e.key === 'O') && isPaused && gameState === 'pause') {
+            try {
+                if (window.OptionsMenu && typeof window.OptionsMenu.toggle === 'function') {
+                    window.OptionsMenu.toggle(document.getElementById('menu'));
+                } else if (window.OptionsMenu && typeof window.OptionsMenu.open === 'function') {
+                    window.OptionsMenu.open(document.getElementById('menu'));
+                }
+            } catch (err) {}
+            drawPause();
+        }
 }
 
 function closePauseMenu() {
@@ -80,7 +103,11 @@ function drawPause() {
 
     ctx.font = "18px PixelFont";
     ctx.fillStyle = "#fff";
-    ctx.fillText('Setas: Navegar   ⏎/C: Selecionar   R: Ir para Loja   P/Esc: Fechar', canvas.width/2, 400);
+    ctx.fillText('Setas: Navegar   ⏎/C: Selecionar   O: Configurações   R: Ir para Loja   P/Esc: Fechar', canvas.width/2, 400);
+    // instrução para fechar o jogo segurando X
+    ctx.font = "16px PixelFont";
+    ctx.fillStyle = "#ffdddd";
+    ctx.fillText('Segure X por 5s para fechar o jogo', canvas.width/2, 430);
 
     ctx.restore();
 }

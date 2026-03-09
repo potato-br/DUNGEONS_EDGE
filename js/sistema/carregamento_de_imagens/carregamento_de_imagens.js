@@ -105,9 +105,9 @@ heartSprite.onload = () => {
     heartSpriteLoaded = true;
 };
 heartSprite.onerror = (error) => {
-    console.error('Erro ao carregar sprite dos corações:', error);
+    
 };
-heartSprite.src = './images/UI/coraçoes.png';
+heartSprite.src = './images/UI/coracoes.png';
 
 
 let playerSprite = new Image();
@@ -324,7 +324,7 @@ moedaSprite.src = './images/variados/moeda_spritesheet.png';
 
 const ninjaAbilityIcon = new Image();
 
-ninjaAbilityIcon.src = './images/UI/bomba de fumaça.png';
+ninjaAbilityIcon.src = './images/UI/bomba_de_fumaca.png';
 let ninjaAbilityIconLoaded = false;
 ninjaAbilityIcon.onload = () => {
     ninjaAbilityIconLoaded = true;
@@ -332,21 +332,21 @@ ninjaAbilityIcon.onload = () => {
 
 
 const mageAbilityIcon = new Image();
-mageAbilityIcon.src = './images/UI/devastaçao mistica.png';
+mageAbilityIcon.src = './images/UI/devastacao_mistica.png';
 let mageAbilityIconLoaded = false;
 mageAbilityIcon.onload = () => {
     mageAbilityIconLoaded = true;
 };
 
 const knightShieldIcon = new Image();
-knightShieldIcon.src = './images/UI/edigie lunar.png';
+knightShieldIcon.src = './images/UI/efigie_lunar.png';
 let knightShieldIconLoaded = false;
 knightShieldIcon.onload = () => {
     knightShieldIconLoaded = true;
 };
 
 const knightResurrectionIcon = new Image();
-knightResurrectionIcon.src = './images/UI/alma reerguida.png';
+knightResurrectionIcon.src = './images/UI/alma_reerguida.png';
 let knightResurrectionIconLoaded = false;
 knightResurrectionIcon.onload = () => {
     knightResurrectionIconLoaded = true;
