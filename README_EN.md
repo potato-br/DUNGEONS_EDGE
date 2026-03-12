@@ -1,4 +1,4 @@
-🇺🇸 English | 🇧🇷 [Português](README_PT.md)
+🇺🇸 English | 🇧🇷 [Português](README.md)
 
 <p align="center">
   <img src="media/fundo.gif" alt="Menu principal" width="500"/>
