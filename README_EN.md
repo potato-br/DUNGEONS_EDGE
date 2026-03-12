@@ -1,4 +1,4 @@
-🇺🇸 English | 🇧🇷 [Português](README.md)
+🇺🇸 English | 🇧🇷 [Português](README_PT.md)
 
 <p align="center">
   <img src="media/fundo.gif" alt="Menu principal" width="500"/>
@@ -9,12 +9,16 @@
 **Dungeons Edge** is a 2D web game built with pure JavaScript. It started as a university assignment intended to be a collection of four small minigames. Due to tight deadlines and heavy workload, development became my sole responsibility — and the project evolved into something far more ambitious than the original assignment.
 
 ## ⚠️ Important note about AI usage
+
 The use of **artificial intelligence (AI)** was essential from the early stages. AI tools and models were used to:
 - prototype and generate complex gameplay logic;
 - automate routines and testing;
 - help create systems that form the backbone of the game's functionality.
+-create game assets, such as visual elements, graphical resources, and other components used during development.
 
-Because these solutions are integrated into the project, **continuing development without AI support is impractical**: the generated logic and fine-tuned adjustments are very complex to recreate manually. Thus, AI is not merely an aid — it is a core part of the project architecture.
+Due to the way these solutions were integrated, continuing development without AI support becomes impractical: the generated logic and fine-tuned adjustments are too complex to be manually rewritten within a reasonable time frame. In addition, the constant analysis and ongoing adjustments to both code and assets created by the AI, currently represent one of the main challenges in development.
+
+It is also important to note that many of the assets used could theoretically be produced without AI. However, this is not viable for this project, as I do not have the financial resources to hire artists or purchase assets, nor do I possess all the technical skills required to create them manually. As a result, AI makes it possible to create resources that otherwise could not be included in the game.
 
 ## 🚧 Current Status
 - Core mechanics implemented (movement, collisions, basic interactions).

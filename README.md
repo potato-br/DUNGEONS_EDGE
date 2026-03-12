@@ -14,8 +14,11 @@ O uso de **inteligência artificial (IA)** foi determinante desde as primeiras i
 - gerar e prototipar lógicas de jogo complexas;
 - automatizar rotinas e testes;
 - ajudar a montar sistemas que passaram a ser a base do funcionamento do jogo.
+- criar assets do jogo, como elementos visuais, recursos gráficos e outros componentes utilizados no desenvolvimento.
 
-Devido à forma como essas soluções foram integradas, **continuar o desenvolvimento sem o apoio da IA torna-se impraticável**: a lógica gerada e os ajustes finos são muito complexos para serem reescritos manualmente em tempo viável. Por isso, a IA não é apenas um auxílio — é parte essencial da arquitetura do projeto.
+Devido à forma como essas soluções foram integradas, continuar o desenvolvimento sem o apoio da IA torna-se impraticável: a lógica gerada e os ajustes finos são muito complexos para serem reescritos manualmente em tempo viável. Além disso, a análise constante e os ajustes contínuos de código e assets feitas por dita AI representam hoje o maior desafio do desenvolvimento.
+
+Também é importante destacar que muitos dos assets utilizados poderiam, em teoria, ser produzidos sem IA, porém isso não é viável neste projeto, pois não disponho de recursos financeiros para contratar artistas ou adquirir assets, nem possuo todas as habilidades técnicas necessárias para produzi-los manualmente. Dessa forma, a IA torna possível a criação de recursos que, de outra forma, não poderiam ser incluídos no jogo.
 
 ## 🚧 Estado atual
 
