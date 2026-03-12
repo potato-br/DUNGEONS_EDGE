@@ -14,7 +14,7 @@ The use of **artificial intelligence (AI)** was essential from the early stages.
 - prototype and generate complex gameplay logic;
 - automate routines and testing;
 - help create systems that form the backbone of the game's functionality.
--create game assets, such as visual elements, graphical resources, and other components used during development.
+- create game assets, such as visual elements, graphical resources, and other components used during development.
 
 Due to the way these solutions were integrated, continuing development without AI support becomes impractical: the generated logic and fine-tuned adjustments are too complex to be manually rewritten within a reasonable time frame. In addition, the constant analysis and ongoing adjustments to both code and assets created by the AI, currently represent one of the main challenges in development.
 
