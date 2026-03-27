@@ -34,6 +34,7 @@ function movePlataformas() {
             plat.broken = true;
             plat.breakAnimTime = 0;
             plat.breakStartY = plat.y;
+            if (typeof onPlatformBroken === 'function') onPlatformBroken(plat);
         }
 
         if (!plat.falling) {

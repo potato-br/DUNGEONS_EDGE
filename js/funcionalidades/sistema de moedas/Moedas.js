@@ -8,11 +8,58 @@ document.addEventListener('visibilitychange', () => {
   isPageVisible = !document.hidden;
 });
 
-function spawnMoeda() {
-  
-  if (gameState !== 'jogando' || isPaused || document.getElementById('blackScreenTransition')) return;
+// Reforço: também controla visibilidade ao perder/ganhar foco da janela
+window.addEventListener('blur', () => {
+  isPageVisible = false;
+});
+window.addEventListener('focus', () => {
+  isPageVisible = !document.hidden;
+});
 
-  
+function spawnMoeda(forceRainCoin = false) {
+  // Permite spawnar moedas que caem mesmo no gameover
+  if (!forceRainCoin && gameState !== 'jogando') return;
+  if (isPaused || document.getElementById('blackScreenTransition')) return;
+   const now = performance.now();
+
+  if (now < moneytime) return;
+  // Se for uma moeda caindo do céu
+  if (forceRainCoin) {
+    // Usa gamePlayArea para spawnar moedas apenas na área jogável
+    let x;
+    if (Math.random() < 0.6) {
+      // 60% de chance de spawnar na área central (30% a 70% da área jogável)
+      const minX = gamePlayArea.x + (gamePlayArea.width * 0.3);
+      const maxX = gamePlayArea.x + (gamePlayArea.width * 0.7) - 35; // 35 é a largura da moeda
+      x = minX + Math.random() * (maxX - minX);
+    } else {
+      // 40% de chance de spawnar nas laterais
+      if (Math.random() < 0.5) {
+        // Lado esquerdo (0% a 30% da área jogável)
+        x = gamePlayArea.x + Math.random() * (gamePlayArea.width * 0.3);
+      } else {
+        // Lado direito (70% a 100% da área jogável)
+        x = gamePlayArea.x + (gamePlayArea.width * 0.7) + Math.random() * (gamePlayArea.width * 0.3) - 35;
+      }
+    }
+    
+    // Calcula uma posição usando a lógica da área de jogo
+    const spawnX = x;
+    
+    moedas.push({ 
+      x: spawnX, 
+      y: -35, // Começa acima da tela
+      width: 35, 
+      height: 35, 
+      collected: false, 
+      spawnTime: Date.now(),
+      activeTime: 0,
+      isFalling: true, // Nova propriedade para identificar moedas que estão caindo
+      platformId: null
+    });
+    return;
+  }
+
   let plataformaAlvo = null;
   
   for (const plat of plataformas) {
@@ -67,7 +114,8 @@ function spawnMoeda() {
 }
 
 function updateMoedas() {
-  if(gameState !== 'jogando' ) return; 
+  // Não atualiza se estiver pausado, mas continua se for gameover e tiver moedas caindo
+  if (isPaused || (gameState !== 'jogando' && !moedas.some(m => m.isFalling))) return;
   
   const delta = 16; 
   moedas.forEach(m => {
@@ -76,11 +124,11 @@ function updateMoedas() {
     }
   });
 
-  moedas = moedas.filter(m => 
-    m.y < screenHeight &&
-    !m.collected &&
-    m.activeTime < 3500
-  );
+  moedas = moedas.filter(m => {
+    // Moedas que estão caindo podem ficar mais tempo na tela
+    const maxActiveTime = m.isFalling ? 7000 : 3500;
+    return m.y < screenHeight && !m.collected && m.activeTime < maxActiveTime;
+  });
 
   
   moedas.forEach(m => {
@@ -89,15 +137,16 @@ function updateMoedas() {
     
     
     const plat = plataformas.find(p => {
+      // Se a plataforma estiver quebrada, não considere como colisão
+      if (p.broken) return false;
+
       if (p.hitbox) {
-        
         const hitboxLeft = p.x + p.hitbox.offsetX;
         const hitboxRight = hitboxLeft + p.hitbox.width;
         return m.x + m.width/2 > hitboxLeft && 
                m.x + m.width/2 < hitboxRight && 
                Math.abs(m.y + m.height - (p.y + p.hitbox.offsetY)) < 30;
       } else {
-        
         return m.x + m.width/2 > p.x && 
                m.x + m.width/2 < p.x + p.width && 
                Math.abs(m.y + m.height - p.y) < 30;
@@ -128,8 +177,18 @@ function updateMoedas() {
         m.y = plat.y - m.height;
       }
     } else {
-      m.y += 1 * gameSpeed; 
-      m.platformOffset = undefined; 
+      // Se a moeda está caindo ou se a plataforma está quebrada
+      const fallSpeed = m.isFalling ? 2 : 1; // Reduzido de 5 para 2 para cair mais devagar
+      m.y += fallSpeed * gameSpeed;
+      m.platformOffset = undefined;
+      
+      // Se a moeda estava em uma plataforma e ela quebrou, começa a cair
+      if (m.platformId) {
+        const originalPlat = plataformas.find(p => p.id === m.platformId);
+        if (originalPlat && originalPlat.broken) {
+          m.isFalling = true;
+        }
+      }
     }
   });
 }
@@ -168,7 +227,8 @@ function checkMoedaCollision() {
 
 
 function drawMoedas() {
-  if(gameState !== 'jogando' ) return;
+  // Permite desenhar mesmo no gameover se houver moedas caindo
+  if (isPaused || (gameState !== 'jogando' && !moedas.some(m => m.isFalling))) return;
   const FRAME_WIDTH = 220;
   const FRAME_HEIGHT = 220;
   const FRAMES_POR_LINHA = 4;
@@ -176,11 +236,13 @@ function drawMoedas() {
   moedas.forEach(m => {
     if (!m.collected) {
       let tempoNaTela = m.activeTime;
+      let maxTime = m.isFalling ? 7000 : 3500;
+      let startBlinkTime = m.isFalling ? 5800 : 2300;
       let blink = true;
-      if (tempoNaTela > 2300 && !isPaused) {
-        blink = Math.floor((tempoNaTela - 2300) / 300) % 2 === 0;
+      if (tempoNaTela > startBlinkTime && !isPaused) {
+        blink = Math.floor((tempoNaTela - startBlinkTime) / 300) % 2 === 0;
       }
-      if (tempoNaTela <= 3500 && (tempoNaTela <= 2300 || blink)) {
+      if (tempoNaTela <= maxTime && (tempoNaTela <= startBlinkTime || blink)) {
         let totalFrames = 8;
         let frame = Math.floor((tempoNaTela / 80) % totalFrames);
         let linha = frame < 4 ? 0 : 1;
@@ -266,10 +328,20 @@ if (linha === 1) sy += 90;
 }
 
 
+// Spawnar moedas normais
 setInterval(() => {
   if (!isPageVisible) return;
   if(gameState !== 'jogando' || isPaused) return; 
   if (gameState === 'jogando' && plataformas.length > 0) {
     if (moedas.length < 20) spawnMoeda(); 
   }
-}, 800); 
+}, 800);
+
+// Spawnar moedas que caem do céu (continua no gameover)
+setInterval(() => {
+  if (!isPageVisible) return;
+  if (isPaused) return;
+  if (Math.random() < 0.45) { // Continua spawnando mesmo no gameover
+    spawnMoeda(true);
+  }
+}, 1000); // A cada segundo tenta spawnar uma moeda do céu

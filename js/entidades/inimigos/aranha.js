@@ -156,6 +156,7 @@ function updateEnemies() {
             platform.broken = true;
             platform.breakAnimTime = 0;
             platform.breakStartY = platform.y;
+            if (typeof onPlatformBroken === 'function') onPlatformBroken(platform);
           }
           
         }
@@ -168,6 +169,7 @@ function updateEnemies() {
             platform.broken = true;
             platform.breakAnimTime = 0;
             platform.breakStartY = platform.y;
+            if (typeof onPlatformBroken === 'function') onPlatformBroken(platform);
           }
           
         }

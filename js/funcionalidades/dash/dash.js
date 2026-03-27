@@ -9,7 +9,7 @@ const DASH = {
     cooldown: false,
     duration: 150, 
     speed: 10,
-    cooldownTime: 5000, 
+    dashRechargeTime: 5000, 
     lastDashTime: 0,
     extraInvuln: 1000, 
     extraInvulnMax: 3000, 
@@ -27,19 +27,19 @@ const DASH = {
 const CAVALEIRO = {
     shieldActive: false,
     shieldCooldown: false,
-    SHIELD_DURATION: 6000,
-    SHIELD_COOLDOWN: 8000,
+    SHIELD_DURATION: 12000,
+    SHIELD_COOLDOWN: 7000,
     shieldCooldownStart: null,
     voidResurrectionAvailable: true,
     voidResurrectionLastUsed: null,
-    VOID_RESURRECTION_COOLDOWN: 30000
+    VOID_RESURRECTION_COOLDOWN: 15000
 };
 
 
 const MAGO = {
     magicBlastActive: false,
     magicBlastCooldown: false,
-    MAGIC_BLAST_DURATION: 6000,
+    MAGIC_BLAST_DURATION: 8500,
     MAGIC_BLAST_COOLDOWN: 15000,
     MAGIC_INVULN_DURATION: 5500,
     magicBlastCooldownStart: null
@@ -194,7 +194,7 @@ function updateCooldowns(now) {
         now = pauseStartTime;
     }
     
-    if (DASH.cooldown && now - DASH.lastDashTime >= DASH.cooldownTime) {
+    if (DASH.cooldown && now - DASH.lastDashTime >= DASH.dashRechargeTime) {
         DASH.cooldown = false;
     }
     

@@ -13,15 +13,21 @@ function getUnlockedCharacters() {
   const unlocked = ['O Errante de Eldoria'];
   
   
-  for (let character in characterData) {
-    const purchases = characterData[character].purchases;
-    
-    ['Kuroshi, o Ninja', 'Roderick, o Cavaleiro', 'Valthor, o Mago'].forEach(charName => {
-      if (purchases[charName] && purchases[charName] > 0 && !unlocked.includes(charName)) {
-        unlocked.push(charName);
+  // Check global-aware purchase counts so characters bought by any profile count as unlocked
+  ['Kuroshi, o Ninja', 'Roderick, o Cavaleiro', 'Valthor, o Mago'].forEach(charName => {
+    try {
+      const count = (typeof getPurchasesCountByName === 'function') ? getPurchasesCountByName(charName) : (characterData.__global?.purchases?.[charName] || 0);
+      if (count > 0 && !unlocked.includes(charName)) unlocked.push(charName);
+    } catch (e) {
+      // fallback: if helper not available yet, inspect characterData entries
+      for (let character in characterData) {
+        const purchases = characterData[character]?.purchases || {};
+        if (purchases[charName] && purchases[charName] > 0 && !unlocked.includes(charName)) {
+          unlocked.push(charName);
+        }
       }
-    });
-  }
+    }
+  });
   
   return unlocked;
 }

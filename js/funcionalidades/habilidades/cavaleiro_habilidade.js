@@ -34,6 +34,7 @@ function handleCavaleiroVoidResurrection(now) {
     if (!CAVALEIRO.voidResurrectionAvailable) return false; 
     CAVALEIRO.voidResurrectionAvailable = false;
     CAVALEIRO.voidResurrectionLastUsed = now;
+    if (!activeAbilityTimers.voidRes) activeAbilityTimers.voidRes = {};
     activeAbilityTimers.voidRes.startTime = now;
     activeAbilityTimers.voidRes.duration = CAVALEIRO.VOID_RESURRECTION_COOLDOWN;
     

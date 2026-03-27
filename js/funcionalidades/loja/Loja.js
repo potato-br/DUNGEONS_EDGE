@@ -1,5 +1,3 @@
-
-
 let selectedElement = {
   type: 'dungeon', 
   index: -1 
@@ -14,41 +12,21 @@ const shopItems = [
     requiredDepthSteps: {
       0: 200,    
       1: 400,    
-      2: 600     
+      2: 600,
+      3: 4200,
+      4: 6400
     },
     disponivel: true,
-    efeito: () => { if (player.maxJumps < 3) player.maxJumps += 1; },
-    maxCompras: 3,
+    efeito: () => { if (player.maxJumps < 6) player.maxJumps += 1; },
+    maxCompras: 6,
     compras: 0,
     exclusiveToCharacter: 'O Errante de Eldoria',
     imgWidth: 90, 
-    imgHeight: 90 
-  },
-  {
-    nome: 'Cinto Relâmpago',
-    descricao: 'Aumenta a velocidade de movimento.',
-    preco: 500,
-    priceMultiplier: 1.35,
-    priceIncrement: 0,
-    disponivel: true,
-    efeito: () => { if (player.speed < 6.2) player.speed = Math.min(player.speed + 0.5, 6.2); },
-    maxCompras: 5,
-    requiredDepthSteps: {
-      0: 200,
-      1: 300,
-      2: 500,
-      3: 700,
-      4: 1000
+    imgHeight: 90,
+    hiddenUntilPurchases: {
+      'Cinto Relâmpago': 1
     },
-    requiredItem: 'Botas do Vento',
-    requiredItemSteps: {
-      0: 1,
-      1: 1,
-      2: 2,
-      3: 3
-    },
-    compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
+    disponivel: false,
   },
   {
     nome: 'Efígie da Paz',
@@ -66,18 +44,36 @@ const shopItems = [
       6: 10000,
       7: 15000
     },
-    requiredItem: 'Cálice da Chama Vital',
-    requiredItemSteps: {
-      0: 0,
-      1: 1,
-      2: 2,
-      3: 3
-    },
+    requiredItems: [
+      {
+        nome: 'Cálice da Chama Vital',
+        steps: {
+          0: 0,
+          1: 1,
+          2: 2,
+          3: 3
+        }
+      },
+      {
+        nome: 'Toque de Midas',
+        steps: {
+          0: 0,
+          1: 0,
+          2: 1,
+          3: 1
+        }
+      }
+    ],
     disponivel: true,
     efeito: () => { enemySpawnInterval += 170; },
     maxCompras: 11,
     compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
+    globalItem: true,
+    hiddenUntilPurchases: {
+      'Botas do Vento': 1
+    },
+    revealGlobally: true, // quando satisfeito, fica disponível para todos os personagens
+    disponivel: false,
   },
   {
     nome: 'Cálice da Chama Vital',
@@ -101,9 +97,13 @@ const shopItems = [
       3: 4
     },
     efeito: () => { if (liveupgrade < 6) liveupgrade += 1; if (liveupgrade > 0) { live = liveupgrade; } },
-    maxCompras: 5,
+    maxCompras: 6,
     compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
+    exclusiveToCharacter: 'O Errante de Eldoria',
+    hiddenUntilPurchases: {
+      'Efígie da Paz': 1
+    },
+    disponivel: false,
   },
 
 
@@ -120,12 +120,16 @@ const shopItems = [
     requiredItem: 'Cálice da Chama Vital',
     requiredItemSteps: {
       0: 1,
-      2: 2
+      1: 2
     },
     efeito: () => { moneyplus += 25; },
     maxCompras: 2,
     compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
+    exclusiveToCharacter: 'O Errante de Eldoria',
+    hiddenUntilPurchases: {
+      'Cálice da Chama Vital': 1
+    },
+    disponivel: false,
   },
 
 
@@ -134,15 +138,25 @@ const shopItems = [
     descricao: 'Aumenta o valor das moedas coletadas com técnicas ninja',
     preco: 1250,
     priceMultiplier: 2,
-    disponivel: true,
     priceIncrement: 0,
     requiredDepthSteps: {
-      0: 15000
+      0: 25000
+    },
+    requiredItem: 'Toque de Midas',
+    requiredItemSteps: {
+      0: 2,
     },
     efeito: () => { moneyplus += 55; },
     maxCompras: 2,
     compras: 0,
-    exclusiveToCharacter: 'Kuroshi, o Ninja'
+
+    hiddenUntilPurchases: {
+      'Kuroshi, o Ninja': 1
+    },
+    disponivel: false,
+    globalItem: true,
+    revealGlobally: true, // quando satisfeito, fica disponível para todos os personagens
+    disponivel: false,
   },
   {
     nome: 'Elmo do Destino Dourado',
@@ -152,12 +166,22 @@ const shopItems = [
     disponivel: true,
     priceIncrement: 0,
     requiredDepthSteps: {
-      0: 25000
+      0: 45000
+    },
+    requiredItem: 'Sopro do Ouro Invisível',
+    requiredItemSteps: {
+      0: 2,
     },
     efeito: () => { moneyplus += 185; },
     maxCompras: 3,
     compras: 0,
-    exclusiveToCharacter: 'Roderick, o Cavaleiro'
+    hiddenUntilPurchases: {
+      'Roderick, o Cavaleiro': 1
+    },
+    disponivel: false,
+    globalItem: true,
+    revealGlobally: true, // quando satisfeito, fica disponível para todos os personagens
+    disponivel: false,
   },
   {
     nome: 'Codex da Fortuna Velada',
@@ -167,14 +191,28 @@ const shopItems = [
     disponivel: true,
     priceIncrement: 0,
     requiredDepthSteps: {
-      0: 500
+      0: 60000
+    },
+    requiredItem: 'Elmo do Destino Dourado',
+    requiredItemSteps: {
+      0: 1,
+      2: 3
     },
     efeito: () => { moneyplus += 300; },
     maxCompras: 5,
     compras: 0,
-    exclusiveToCharacter: 'Valthor, o Mago'
+    
+    hiddenUntilPurchases: {
+      'Valthor, o Mago': 1
+    },
+    disponivel: false,
+    globalItem: true,
+    revealGlobally: true, // quando satisfeito, fica disponível para todos os personagens
+    disponivel: false,
   },
+
   {
+
     nome: 'Ampulheta do Fluxo Espectral',
     descricao: 'Reduz o tempo de recarga do dash.',
     preco: 2000,
@@ -188,10 +226,19 @@ const shopItems = [
       3: 15000,
       4: 20000
     },
-    efeito: () => { DASH.cooldownTime = Math.max(1000, DASH.cooldownTime - 500); },
+    requiredItem: 'Cálice da Chama Vital',
+    requiredItemSteps: {
+      1: 1,
+      3: 3
+    },
+  efeito: () => { DASH.dashRechargeTime = Math.max(1000, (DASH.dashRechargeTime || DASH.cooldownTime || 1000) - 500); },
     maxCompras: 4,
     compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
+    exclusiveToCharacter: 'O Errante de Eldoria',
+     hiddenUntilPurchases: {
+      'Efígie da Paz': 1
+    },
+    disponivel: false,
   },
   {
     nome: 'Manto Fantasma',
@@ -207,14 +254,25 @@ const shopItems = [
       3: 7000,
       4: 12000
     },
+    requiredItem: 'Efígie da Paz',
+    requiredItemSteps: {
+      0: 1,
+      3: 4
+    },
     efeito: () => { if (typeof DASH.extraInvuln !== 'undefined') { DASH.extraInvuln = Math.min(DASH.extraInvuln + 500, DASH.extraInvulnMax); } },
     maxCompras: 3,
     compras: 0,
     exclusiveToCharacter: 'O Errante de Eldoria',
     imgWidth: 140, 
-    imgHeight: 140 
+    imgHeight: 140,
+    hiddenUntilPurchases: {
+      'Cálice da Chama Vital': 1
+    },
+    disponivel: false,
+ 
   },
-{
+
+  {
     nome: 'Rolo Secreto de Kage',
     descricao: 'Reduz o tempo de recarga da Bomba de Fumaça.',
     preco: 8000,
@@ -279,6 +337,36 @@ let newSecretItems = new Set();
 
 const SECRET_ITEMS = [
   {
+    nome: 'Cinto Relâmpago',
+    descricao: 'Aumenta a velocidade de movimento.',
+    preco: 500,
+    priceMultiplier: 1.35,
+    priceIncrement: 0,
+    disponivel: true,
+    efeito: () => { if (player.speed < 6.2) player.speed = Math.min(player.speed + 0.5, 6.2); },
+    maxCompras: 11,
+    requiredDepth: 50,
+    requiredDepthSteps: {
+      0: 200,
+      1: 300,
+      2: 500,
+      3: 700,
+      4: 1000,
+      5: 1500,
+      6: 2000
+    },
+    requiredItem: 'Botas do Vento',
+    requiredItemSteps: {
+      0: 0,
+      1: 1,
+      2: 2,
+      3: 3,
+      8: 6
+    },
+    compras: 0,
+    exclusiveToCharacter: 'O Errante de Eldoria',
+  },
+  {
     nome: 'Kuroshi, o Ninja',
     descricao: 'Um personagem ágil e veloz, capaz de dar 3 dashs e usar bombas de fumaça de imortalidade.',
     preco: 70000,
@@ -295,7 +383,7 @@ const SECRET_ITEMS = [
     },
     maxCompras: 1,
     compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
+    
   },
   {
     nome: 'Roderick, o Cavaleiro',
@@ -314,7 +402,7 @@ const SECRET_ITEMS = [
     },
     maxCompras: 1,
     compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
+    
   },
    {
     nome: 'Valthor, o Mago',
@@ -333,7 +421,7 @@ const SECRET_ITEMS = [
     },
     maxCompras: 1,
     compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria',
+   
     imgWidth: 105, 
    
   },
@@ -343,6 +431,60 @@ const SECRET_ITEMS = [
 let isDebugMode = false;
 let newItemsSeen = new Set();
 let itemsRead = new Set();
+
+// --- Global purchases & reveals support ---
+// ensure there's a global purchases bucket stored on characterData so it's saved alongside other data
+const _charData = (typeof characterData !== 'undefined') ? characterData : (window.characterData = window.characterData || {});
+if (!_charData.__global) _charData.__global = { purchases: {} };
+// ensure a bucket for globally revealed hidden items
+if (typeof _charData.__global.revealedItems === 'undefined') _charData.__global.revealedItems = {};
+const globalPurchases = _charData.__global.purchases;
+const globalRevealedItems = _charData.__global.revealedItems;
+
+function isGlobalPurchaseItemName(name) {
+  if (!name) return false;
+  // 2) itens que tenham globalItem: true
+  const item = shopItems.concat(SECRET_ITEMS).find(i => i.nome === name);
+  if (item?.globalItem) return true;
+  // 3) itens cujo nome bate com personagem
+  return !!characterData[name];
+}
+// helper: draw rounded rectangle (filled and/or stroked)
+function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+  if (typeof radius === 'undefined') {
+    radius = 5;
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  if (fill) ctx.fill();
+  if (stroke) ctx.stroke();
+}
+
+function getPurchasesCountByName(name) {
+  if (!name) return 0;
+  if (isGlobalPurchaseItemName(name)) return globalPurchases[name] || 0;
+  return _charData[activeCharacter]?.purchases?.[name] || 0;
+}
+
+function incrementPurchaseByName(name) {
+  if (!name) return;
+  if (isGlobalPurchaseItemName(name)) {
+    globalPurchases[name] = (globalPurchases[name] || 0) + 1;
+  } else {
+    if (!_charData[activeCharacter].purchases) _charData[activeCharacter].purchases = {};
+    _charData[activeCharacter].purchases[name] = (_charData[activeCharacter].purchases[name] || 0) + 1;
+  }
+}
+
 
 function revelarItensSecretos() {
     SECRET_ITEMS.forEach(secretItem => {
@@ -357,14 +499,67 @@ function revelarItensSecretos() {
                 efeito: secretItem.efeito || (() => {})
             };
             shopItems.push(novoItem);
-            newSecretItems.add(novoItem.nome);
         }
     });
+}
+
+// --- Hidden items reveal logic ---
+// Items can define a property `hiddenUntilPurchases` with shape { "Other Item Nome": requiredCount, ... }
+// and `revealGlobally: true` to make them appear for all characters once requirements are met.
+function isItemRevealedGlobally(item) {
+  if (!item) return false;
+  if (globalRevealedItems[item.nome]) return true;
+  return false;
+}
+
+function doesMeetRevealRequirements(item) {
+  if (!item || !item.hiddenUntilPurchases) return false;
+  for (const reqName in item.hiddenUntilPurchases) {
+    const needed = item.hiddenUntilPurchases[reqName] || 0;
+    const have = getPurchasesCountByName(reqName) || 0;
+    if (have < needed) return false;
+  }
+  return true;
+}
+
+function checkAndRevealHiddenItems() {
+  // iterate all shop items and secret items
+  const allItems = shopItems.concat(SECRET_ITEMS || []);
+  for (const it of allItems) {
+    if (!it || !it.hiddenUntilPurchases) continue;
+    if (isItemRevealedGlobally(it)) continue;
+    if (doesMeetRevealRequirements(it)) {
+      // mark globally revealed so it persists across characters
+      globalRevealedItems[it.nome] = true;
+      // if requested, make it available to all characters
+      if (it.revealGlobally) {
+        delete it.exclusiveToCharacter;
+      }
+      // mark not hidden so drawLoja will show it
+      it.hidden = false;
+      // ensure availability recalculated
+      it.disponivel = true;
+    }
+  }
+}
+
+function isItemVisible(item) {
+  if (!item) return false;
+  // respect character exclusivity first
+  if (item.exclusiveToCharacter && item.exclusiveToCharacter !== activeCharacter) return false;
+  // if item has a hiddenUntilPurchases requirement, only show if globally revealed or explicitly unhidden
+  if (item.hiddenUntilPurchases) {
+    if (isItemRevealedGlobally(item)) return true;
+    if (item.hidden === false) return true;
+    return false;
+  }
+  return true;
 }
 
 function onDepthChange(newDepth) {
     depthPoints = newDepth;
     revelarItensSecretos();
+  checkAndRevealHiddenItems();
     if (gameState === 'loja') {
         updateShopAvailability();
         drawLoja();
@@ -383,35 +578,55 @@ function checkDepthRequirement(item, compras) {
 }
 
 function checkItemRequirement(item, compras) {
-    if (!item.requiredItem || !item.requiredItemSteps) return true;
-    
-    const characterPurchases = characterData[activeCharacter].purchases;
-    const requiredItemPurchases = characterPurchases[item.requiredItem] || 0;
-    
-    
-    const nextCompra = compras;
-    const currentRequired = item.requiredItemSteps[nextCompra] || 
-                          item.requiredItemSteps[0] || 0;
-    
-    return requiredItemPurchases >= currentRequired;
+  // Support multiple required items (new) or single requiredItem (legacy)
+  // If neither exists, no requirement
+  const hasMulti = Array.isArray(item.requiredItems) && item.requiredItems.length > 0;
+  const hasSingle = item.requiredItem && item.requiredItemSteps;
+  if (!hasMulti && !hasSingle) return true;
+
+  const nextCompra = compras;
+
+  if (hasMulti) {
+    // item.requiredItems is expected to be array of { nome, steps }
+    for (const req of item.requiredItems) {
+      const reqName = typeof req === 'string' ? req : req.nome;
+      const reqSteps = (req.steps || req.requiredItemSteps) || item.requiredItemSteps;
+      const currentRequired = reqSteps?.[nextCompra] || reqSteps?.[0] || 0;
+      const requiredItemPurchases = getPurchasesCountByName(reqName);
+      if (requiredItemPurchases < currentRequired) return false;
+    }
+    return true;
+  }
+
+  // legacy single requiredItem
+  const requiredItemPurchases = getPurchasesCountByName(item.requiredItem);
+  const currentRequired = item.requiredItemSteps[nextCompra] || item.requiredItemSteps[0] || 0;
+  return requiredItemPurchases >= currentRequired;
 }
 
 function getCurrentRequirements(item) {
-    const characterPurchases = characterData[activeCharacter].purchases;
-    const compras = characterPurchases[item.nome] || 0;
-    
-    
-    const nextCompra = compras;
-    
-    const depthReq = item.requiredDepthSteps?.[nextCompra] || 
-                    item.requiredDepthSteps?.[0] || 
-                    0;
+  // Determine how many times this item has been bought (global for some items)
+  const compras = getPurchasesCountByName(item.nome) || 0;
+  const nextCompra = compras;
 
-    const itemReq = item.requiredItemSteps?.[nextCompra] || 
-                    item.requiredItemSteps?.[0] || 
-                    0;
+  const depthReq = item.requiredDepthSteps?.[nextCompra] || item.requiredDepthSteps?.[0] || 0;
 
-    return { depthReq, itemReq };
+  // Build array of item requirements: [{ nome, itemReq }]
+  const itemReqs = [];
+
+  if (Array.isArray(item.requiredItems) && item.requiredItems.length > 0) {
+    for (const req of item.requiredItems) {
+      const reqName = typeof req === 'string' ? req : req.nome;
+      const reqSteps = (req.steps || req.requiredItemSteps) || item.requiredItemSteps;
+      const itemReq = reqSteps?.[nextCompra] || reqSteps?.[0] || 0;
+      itemReqs.push({ nome: reqName, quantidade: itemReq });
+    }
+  } else if (item.requiredItem && item.requiredItemSteps) {
+    const itemReq = item.requiredItemSteps?.[nextCompra] || item.requiredItemSteps?.[0] || 0;
+    itemReqs.push({ nome: item.requiredItem, quantidade: itemReq });
+  }
+
+  return { depthReq, itemReqs };
 }
 
 function updateShopAvailability() {
@@ -427,13 +642,12 @@ function updateShopAvailability() {
             return;
         }
 
-        const characterPurchases = characterData[activeCharacter].purchases;
-        const compras = characterPurchases[item.nome] || 0;
+  const compras = getPurchasesCountByName(item.nome);
 
-        const depthRequirementMet = checkDepthRequirement(item, compras);
-        const itemRequirementMet = checkItemRequirement(item, compras);
+  const depthRequirementMet = checkDepthRequirement(item, compras);
+  const itemRequirementMet = checkItemRequirement(item, compras);
 
-        item.disponivel = depthRequirementMet && itemRequirementMet;
+  item.disponivel = depthRequirementMet && itemRequirementMet;
     });
 }
 
@@ -580,14 +794,14 @@ function drawLoja() {
       item.requiredDepth : nearest, null);
 
   
-  // Texto de profundidade alinhado ao botão de dungeon
-  const { x: dungeonBtnX, y: dungeonBtnY, w: dungeonBtnW, h: dungeonBtnH } = getDungeonBtnRect();
+  // Texto de profundidade alinhado ao botão de seleção de personagem (usa dungeon como fallback)
+  const { x: charBtnX, y: charBtnY, w: charBtnW, h: charBtnH } = (typeof getCharacterBtnRect === 'function') ? getCharacterBtnRect() : getDungeonBtnRect();
   const profFontSize = Math.max(14, Math.min(canvas.width * 0.017, 22));
   ctx.font = `bold ${profFontSize}px PixelFont`;
   ctx.textAlign = 'center';
   ctx.fillStyle = 'white';
-  const profX = dungeonBtnX + dungeonBtnW/2;
-  const profY = dungeonBtnY + dungeonBtnH + profFontSize + 80;
+  const profX = charBtnX + charBtnW/2;
+  const profY = charBtnY + charBtnH + profFontSize + 10;
   ctx.fillText(`⬇⬇⬇ Profundidade atual: ${depthPoints}m`, profX, profY);
   if (nextSecretDepth) {
     ctx.font = `bold ${Math.max(12, Math.floor(profFontSize * 0.8))}px PixelFont`;
@@ -610,7 +824,7 @@ function drawLoja() {
   const itemSize = 100; 
   const itemGap = 10;
   const gridStartX = 20;
-  let visibleItems = shopItems.filter(item => !item.exclusiveToCharacter || item.exclusiveToCharacter === activeCharacter);
+  let visibleItems = shopItems.filter(item => isItemVisible(item));
   const totalRows = Math.ceil(visibleItems.length / itemsPerRow);
   
   const availableHeight = canvas.height - shopStartY - footerHeight - 10;
@@ -681,7 +895,8 @@ function drawLoja() {
         ctx.fillRect(x, y, itemSize, itemSize);
       }
       ctx.save();
-      if (item.isSecret && !newItemsSeen.has(item.nome)) {
+      // Indicador NEW para itens secretos ou revelados, LEIA para os demais
+      if ((item.isSecret || item.hiddenUntilPurchases) && !newItemsSeen.has(item.nome)) {
         ctx.font = 'bold 15px PixelFont';
         ctx.fillStyle = '#00ffea';
         ctx.textAlign = 'right';
@@ -690,7 +905,7 @@ function drawLoja() {
         ctx.fillText('NEW', x + itemSize - 8, y + 22);
         ctx.shadowBlur = 0;
       }
-      if (!item.isSecret && !itemsRead.has(item.nome)) {
+      else if (!item.isSecret && !item.hiddenUntilPurchases && !itemsRead.has(item.nome)) {
         ctx.font = 'bold 13px PixelFont';
         ctx.fillStyle = '#ffd700';
         ctx.textAlign = 'left';
@@ -713,6 +928,12 @@ function drawLoja() {
     let y = shopStartY + gridRow * (itemSize + itemGap) - scrollOffset;
     if (y + itemSize > shopStartY && y < shopStartY + shopHeight) {
       const item = visibleItems[i];
+      // Marcar como lido ao visualizar o painel de detalhes
+      if (item.isSecret || item.hiddenUntilPurchases) {
+        newItemsSeen.add(item.nome);
+      } else if (!item.isSecret && !item.hiddenUntilPurchases) {
+        itemsRead.add(item.nome);
+      }
       ctx.save();
       let centerX = x + itemSize / 2;
       let centerY = y + itemSize / 2;
@@ -732,26 +953,6 @@ function drawLoja() {
         ctx.fillStyle = 'rgba(255, 215, 0, 0.10)';
         ctx.fillRect(x, y, itemSize, itemSize);
       }
-      ctx.save();
-      if (item.isSecret && !newItemsSeen.has(item.nome)) {
-        ctx.font = 'bold 15px PixelFont';
-        ctx.fillStyle = '#00ffea';
-        ctx.textAlign = 'right';
-        ctx.shadowColor = '#000';
-        ctx.shadowBlur = 6;
-        ctx.fillText('NEW', x + itemSize - 8, y + 22);
-        ctx.shadowBlur = 0;
-      }
-      if (!item.isSecret && !itemsRead.has(item.nome)) {
-        ctx.font = 'bold 13px PixelFont';
-        ctx.fillStyle = '#ffd700';
-        ctx.textAlign = 'left';
-        ctx.shadowColor = '#000';
-        ctx.shadowBlur = 6;
-        ctx.fillText('LEIA!!!!', x + 8, y + 22);
-        ctx.shadowBlur = 0;
-      }
-      ctx.restore();
       ctx.restore();
       selectedItemRect = { x, y, item };
       lojaOptionRects.push({x, y, w: itemSize, h: itemSize, index: i});
@@ -771,8 +972,7 @@ function drawLoja() {
     const descWidth = ctx.measureText(item.descricao).width;
 
     
-    const characterPurchases = characterData[activeCharacter]?.purchases || {};
-    const comprasAtual = characterPurchases[item.nome] || 0;
+  const comprasAtual = getPurchasesCountByName(item.nome) || 0;
     let precoText;
     if (comprasAtual >= item.maxCompras) {
       precoText = 'MAX';
@@ -785,12 +985,15 @@ function drawLoja() {
       ctx.font = '14px PixelFont';
       const reqs = getCurrentRequirements(item);
       if (reqs.depthReq > 0 && depthPoints < reqs.depthReq) reqText = `Requer: ${reqs.depthReq}m`;
-      if (reqs.itemReq > 0) {
-        const currentItemCount = characterPurchases[item.requiredItem] || 0;
-        if (currentItemCount < reqs.itemReq) {
-          reqText += reqText ? ' e ' : 'Requer: ';
-          reqText += `${reqs.itemReq}x ${item.requiredItem}`;
-          reqText += ` (tem ${currentItemCount})`;
+      if (reqs.itemReqs && reqs.itemReqs.length > 0) {
+        for (let i = 0; i < reqs.itemReqs.length; i++) {
+          const r = reqs.itemReqs[i];
+          const currentItemCount = getPurchasesCountByName(r.nome) || 0;
+          if (currentItemCount < r.quantidade) {
+            reqText += reqText ? ' e ' : 'Requer: ';
+            reqText += `${r.quantidade > 1 ? r.quantidade + 'x de ' : ''}${r.nome}`;
+            reqText += ` (tem ${currentItemCount})`;
+          }
         }
       }
     }
@@ -852,19 +1055,52 @@ function drawLoja() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     
-    ctx.fillStyle = 'rgb(0, 0, 0)';
-    ctx.fillRect(0, canvas.height/2 - 50, canvas.width, 100);
-    
-    
-    ctx.strokeStyle = '#ff4444';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(0, canvas.height/2 - 50, canvas.width, 100);
-    
-    
+    // compute wrapped lines and size of background box
     ctx.font = 'bold 32px PixelFont';
     ctx.fillStyle = '#ff4444';
     ctx.textAlign = 'center';
-    ctx.fillText(insufficientFundsMessage, canvas.width/2, canvas.height/2);
+    const maxWidth = Math.max(200, Math.min(canvas.width - 120, 800));
+    const words = insufficientFundsMessage.split(' ');
+    let line = '';
+    const lines = [];
+    let textMaxWidth = 0;
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line ? (line + ' ' + words[i]) : words[i];
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && line) {
+        lines.push(line);
+        textMaxWidth = Math.max(textMaxWidth, ctx.measureText(line).width);
+        line = words[i];
+      } else {
+        line = testLine;
+      }
+    }
+    if (line) {
+      lines.push(line);
+      textMaxWidth = Math.max(textMaxWidth, ctx.measureText(line).width);
+    }
+
+    const paddingX = 40;
+    const paddingY = 24;
+    const boxWidth = Math.min(canvas.width - 80, textMaxWidth + paddingX * 2);
+    const boxHeight = lines.length * 40 + paddingY * 2;
+    const boxX = (canvas.width - boxWidth) / 2;
+    const boxY = (canvas.height - boxHeight) / 2;
+
+    // dark inner box
+    ctx.fillStyle = 'rgb(0, 0, 0)';
+    roundRect(ctx, boxX, boxY, boxWidth, boxHeight, 12, true, false);
+    // border
+    ctx.strokeStyle = '#ff4444';
+    ctx.lineWidth = 3;
+    roundRect(ctx, boxX, boxY, boxWidth, boxHeight, 12, false, true);
+
+    // draw text lines centered inside box
+    const startY = boxY + paddingY + 28; // baseline offset
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillStyle = '#ff4444';
+      ctx.fillText(lines[i], canvas.width / 2, startY + i * 40);
+    }
     ctx.restore();
   }
 
@@ -881,7 +1117,7 @@ function drawLoja() {
   ctx.font = '24px PixelFont';
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'left';
-  ctx.fillText('"Setas/🖱️" Navegar   |   "⏎/🖱️" Comprar   |   "Esc" ir para dungeon ', 20, canvas.height - 30);
+  ctx.fillText('"Setas/🖱️" Navegar   |   "⏎/🖱️" Confirmar   |   "Esc" ir para dungeon ', 20, canvas.height - 30);
   ctx.restore();
 
   
@@ -902,7 +1138,8 @@ const lojaItemImageNotFound = {};
 const personagensComImagem = [
   'Kuroshi, o Ninja',
   'Roderick, o Cavaleiro',
-  'Valthor, o Mago'
+  'Valthor, o Mago',
+  'Cinto Relâmpago'
 ];
 
 [...shopItems, ...SECRET_ITEMS.filter(i => personagensComImagem.includes(i.nome))].forEach(item => {
@@ -951,7 +1188,6 @@ function closeShop() {
   canvas.style.opacity = '0';
   setTimeout(() => {
     resetGame({ pauseOnStart: true, showShop: false, il: false, la: true });
-    
     
     
     platformFactory.updateScreenDimensions();
@@ -1006,12 +1242,12 @@ function showInsufficientFunds(price) {
   show = true;
   insufficientFundsMessage = `Dinheiro insuficiente! Faltam $${price - money}`;
   clearTimeout(insufficientFundsTimeout);
+  // keep message longer so user can read
   insufficientFundsTimeout = setTimeout(() => {
     show = false;
     insufficientFundsMessage = '';
     drawLoja();
-     
-  }, 1000);
+  }, 2200);
   
 }
 function showShopMessage(message) {
@@ -1019,17 +1255,18 @@ function showShopMessage(message) {
     show = true;
     insufficientFundsMessage = message;
     clearTimeout(insufficientFundsTimeout);
+    // display custom shop messages for longer by default
     insufficientFundsTimeout = setTimeout(() => {
       show = false;
-        insufficientFundsMessage = '';
-        drawLoja();
-    }, 1000);
+      insufficientFundsMessage = '';
+      drawLoja();
+    }, 2200);
 }
 
 function attemptPurchase() {
   if (showCharacterSelect || isShopLoading || gameState !== 'loja' || show) return;
 
-  const visibleItems = shopItems.filter(item => !item.exclusiveToCharacter || item.exclusiveToCharacter === activeCharacter);
+  const visibleItems = shopItems.filter(item => isItemVisible(item));
   const item = visibleItems[selectedIndex];
   if (!item) return;
 
@@ -1038,8 +1275,7 @@ function attemptPurchase() {
         newItemsSeen.add(item.nome);
     }
 
-  const characterPurchases = characterData[activeCharacter].purchases;
-  const compras = characterPurchases[item.nome] || 0;
+  const compras = getPurchasesCountByName(item.nome) || 0;
 
   
   if (compras >= item.maxCompras) {
@@ -1054,19 +1290,44 @@ function attemptPurchase() {
     const itemMet = checkItemRequirement(item, compras);
 
     if (!depthMet || !itemMet) {
-      const { depthReq, itemReq } = getCurrentRequirements(item);
+      const { depthReq, itemReqs } = getCurrentRequirements(item);
       let reqMessage = '';
-      
+
       if (!depthMet) {
-          reqMessage = `Requer ${depthReq}m de profundidade`;
+        reqMessage = `Requer ${depthReq}m de profundidade`;
       }
-      
-      if (!itemMet) {
-          const currentItemCount = characterPurchases[item.requiredItem] || 0;
-          reqMessage += reqMessage ? ' e ' : '';
-          reqMessage += `${itemReq}x ${item.requiredItem} (tem ${currentItemCount})`;
+
+      if (!itemMet && Array.isArray(itemReqs) && itemReqs.length > 0) {
+        // For each required item, check current count and who lists it
+        for (const r of itemReqs) {
+          const currentItemCount = getPurchasesCountByName(r.nome) || 0;
+          // Find which character (if any) has this required item listed in their shop
+          let ownerCharacter = null;
+          try {
+            for (let chName in _charData) {
+              if (chName === '__global') continue;
+              const found = shopItems.concat(SECRET_ITEMS || []).find(si => si.nome === r.nome && si.exclusiveToCharacter === chName);
+              if (found) { ownerCharacter = chName; break; }
+            }
+          } catch (e) {
+            ownerCharacter = null;
+          }
+
+          if (ownerCharacter) {
+            if (ownerCharacter === activeCharacter) {
+              reqMessage += reqMessage ? ' e ' : '';
+              reqMessage += `Requer ${r.quantidade > 1 ? r.quantidade + 'x de ' : ''}${r.nome}`;
+            } else {
+              reqMessage += reqMessage ? ' e ' : '';
+              reqMessage += `Requer ${r.quantidade > 1 ? r.quantidade + 'x de ' : ''}${r.nome} disponível no personagem ${ownerCharacter}`;
+            }
+          } else {
+            reqMessage += reqMessage ? ' e ' : '';
+            reqMessage += `${r.quantidade > 1 ? r.quantidade + 'x de ' : ''}${r.nome} (tem ${currentItemCount})`;
+          }
+        }
       }
-      
+
       showShopMessage(`Requisitos não atendidos! ${reqMessage}`);
       return;
     }
@@ -1076,20 +1337,19 @@ function attemptPurchase() {
     if (!isDebugMode) {
       money -= item.preco;
     }
-    
-    
-    characterPurchases[item.nome] = (characterPurchases[item.nome] || 0) + 1;
-    
-    
+
+    // record the purchase (global for some items)
+    incrementPurchaseByName(item.nome);
+
     item.efeito();
     
     
-    characterData[activeCharacter].stats = {
+  characterData[activeCharacter].stats = {
         speed: player.speed,
         maxJumps: player.maxJumps,
         liveupgrade: liveupgrade,
         moneyplus: moneyplus,
-        dashCooldownTime: DASH.cooldownTime,
+    dashRechargeTime: DASH.dashRechargeTime || DASH.cooldownTime || 1000,
         dashExtraInvuln: DASH.extraInvuln,
         enemySpawnInterval: enemySpawnInterval
     };
@@ -1116,6 +1376,8 @@ function attemptPurchase() {
         
         
         updateShopAvailability();
+  // after every purchase, try to reveal hidden items that depend on purchase counts
+  try { checkAndRevealHiddenItems(); } catch (e) { /* non-critical */ }
         drawLoja();
   } else {
     showInsufficientFunds(item.preco);
@@ -1157,7 +1419,7 @@ function tickLojaAnimation(now) {
     lastLojaFrame = now;
     if (gameState === 'loja') {
       lojaWobbleTime += 0.06;
-      const visibleItems = shopItems.filter(item => !item.exclusiveToCharacter || item.exclusiveToCharacter === activeCharacter);
+  const visibleItems = shopItems.filter(item => isItemVisible(item));
       if (!lojaZooms || lojaZooms.length !== visibleItems.length) {
         lojaZooms = new Array(visibleItems.length).fill(1);
         lojaWobbles = new Array(visibleItems.length).fill(0);
