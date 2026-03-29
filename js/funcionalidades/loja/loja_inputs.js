@@ -55,15 +55,14 @@ canvas.addEventListener('click', function(e) {
       
       selectedIndex = r.index;
       
-      const visibleItems = shopItems.filter(item => 
-        !item.exclusiveToCharacter || item.exclusiveToCharacter === activeCharacter
-      );
+      const visibleItems = shopItems.filter(item => isItemVisible(item));
       const item = visibleItems[r.index];
       if (item) {
-        if (item.isSecret) {
-          newItemsSeen.add(item.nome);
+        // mark as NEW for secrets/revealed items, otherwise mark as read only if it shows LEIA
+        if (item.isSecret || item.hiddenUntilPurchases) {
+          if (!newItemsSeen.has(item.nome)) newItemsSeen.add(item.nome);
         } else {
-          itemsRead.add(item.nome);
+          if (!itemsRead.has(item.nome)) itemsRead.add(item.nome);
         }
       }
       drawLoja();
@@ -512,19 +511,17 @@ canvas.addEventListener('mousemove', function(e) {
     for (let i = 0; i < lojaOptionRects.length; i++) {
         const r = lojaOptionRects[i];
         if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
-            const visibleItems = shopItems.filter(item => 
-                !item.exclusiveToCharacter || item.exclusiveToCharacter === activeCharacter
-            );
-            const item = visibleItems[r.index];
-            if (item) {
-                if (item.isSecret) {
-                    newItemsSeen.add(item.nome);
-                } else {
-                    itemsRead.add(item.nome);
-                }
-                selectedIndex = r.index;
-                drawLoja();
-            }
+      const visibleItems = shopItems.filter(item => isItemVisible(item));
+      const item = visibleItems[r.index];
+      if (item) {
+        if (item.isSecret || item.hiddenUntilPurchases) {
+          if (!newItemsSeen.has(item.nome)) newItemsSeen.add(item.nome);
+        } else {
+          if (!itemsRead.has(item.nome)) itemsRead.add(item.nome);
+        }
+        selectedIndex = r.index;
+        drawLoja();
+      }
             break;
         }
     }
@@ -543,17 +540,17 @@ window.addEventListener('keydown', e => {
         const visibleItems = shopItems.filter(item => 
             !item.exclusiveToCharacter || item.exclusiveToCharacter === activeCharacter
         );
-        if (selectedIndex >= 0 && selectedIndex < visibleItems.length) {
-            const item = visibleItems[selectedIndex];
-            if (item) {
-                if (item.isSecret) {
-                    newItemsSeen.add(item.nome);
-                } else {
-                    itemsRead.add(item.nome);
-                }
-                drawLoja();
-            }
+    if (selectedIndex >= 0 && selectedIndex < visibleItems.length) {
+      const item = visibleItems[selectedIndex];
+      if (item) {
+        if (item.isSecret || item.hiddenUntilPurchases) {
+          if (!newItemsSeen.has(item.nome)) newItemsSeen.add(item.nome);
+        } else {
+          if (!itemsRead.has(item.nome)) itemsRead.add(item.nome);
         }
+        drawLoja();
+      }
+    }
     }
 });
 

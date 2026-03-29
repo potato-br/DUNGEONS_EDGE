@@ -6,11 +6,18 @@ function usarHabilidadeMagica(now) {
     
     activeAbilityTimers.magicBlast.startTime = now;
     activeAbilityTimers.magicBlast.remainingTime = null;
-    aplicarInvulnerabilidade(MAGO.MAGIC_INVULN_DURATION);
+    aplicarInvulnerabilidade(MAGO.MAGIC_BLAST_DURATION);
 
     
     enemies.length = 0;
-    
+    morcegos.length = 0;
+    if (typeof grandeInimigos !== 'undefined') {
+        // marca as plataformas dos slimes para que não possam mais spawnar slimes
+        for (const gi of grandeInimigos) {
+            if (gi.attachedPlatform) gi.attachedPlatform._hasGrandeEnemy = true;
+        }
+        grandeInimigos.length = 0;
+    }
     lastEnemyAllowedTime = now + MAGO.MAGIC_BLAST_DURATION;
 
     

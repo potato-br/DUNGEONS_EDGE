@@ -17,6 +17,12 @@ function respawnPlayer() {
     
     enemies.length = 0;
      morcegos.length = 0;
+     if (typeof grandeInimigos !== 'undefined') {
+       for (const gi of grandeInimigos) {
+         if (gi.attachedPlatform && gi.attachedPlatform._hasGrandeEnemy) gi.attachedPlatform._hasGrandeEnemy = false;
+       }
+       grandeInimigos.length = 0;
+     }
     serras.length = 0;
     if (typeof spawnCerras !== "undefined") {
       spawnCerras.lastSpawn = undefined;

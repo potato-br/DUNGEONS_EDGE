@@ -1,348 +1,68 @@
 
 
-let selectedElement = {
-  type: 'dungeon', 
-  index: -1 
-};
-const shopItems = [
-  {
-    nome: 'Botas do Vento',
-    descricao: 'Aumenta a quantidade de pulos.',
-    preco: 250,
-    priceMultiplier: 1.5,
-    priceIncrement: 0,
-    requiredDepthSteps: {
-      0: 200,    
-      1: 400,    
-      2: 600     
-    },
-    disponivel: true,
-    efeito: () => { if (player.maxJumps < 3) player.maxJumps += 1; },
-    maxCompras: 3,
-    compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria',
-    imgWidth: 90, 
-    imgHeight: 90 
-  },
-  {
-    nome: 'Cinto Relâmpago',
-    descricao: 'Aumenta a velocidade de movimento.',
-    preco: 500,
-    priceMultiplier: 1.35,
-    priceIncrement: 0,
-    disponivel: true,
-    efeito: () => { if (player.speed < 6.2) player.speed = Math.min(player.speed + 0.5, 6.2); },
-    maxCompras: 5,
-    requiredDepthSteps: {
-      0: 200,
-      1: 300,
-      2: 500,
-      3: 700,
-      4: 1000
-    },
-    requiredItem: 'Botas do Vento',
-    requiredItemSteps: {
-      0: 1,
-      1: 1,
-      2: 2,
-      3: 3
-    },
-    compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
-  },
-  {
-    nome: 'Efígie da Paz',
-    descricao: 'Diminui a quantidade de inimigos.',
-    preco: 1000,
-    priceMultiplier: 1.25,
-    priceIncrement: 0,
-    requiredDepthSteps: {
-      0: 300,
-      1: 500,
-      2: 800,
-      3: 1700,
-      4: 3000,
-      5: 5000,
-      6: 10000,
-      7: 15000
-    },
-    requiredItem: 'Cálice da Chama Vital',
-    requiredItemSteps: {
-      0: 0,
-      1: 1,
-      2: 2,
-      3: 3
-    },
-    disponivel: true,
-    efeito: () => { enemySpawnInterval += 170; },
-    maxCompras: 11,
-    compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
-  },
-  {
-    nome: 'Cálice da Chama Vital',
-    descricao: 'Aumenta sua vida máxima.',
-    preco: 1500,
-    priceMultiplier: 2,
-    disponivel: true,
-    priceIncrement: 0,
-    requiredDepthSteps: {
-      0: 400,
-      1: 600,
-      2: 800,
-      3: 1200,
-      4: 3000
-    },
-    requiredItem: 'Efígie da Paz',
-    requiredItemSteps: {
-      0: 1,
-      1: 2,
-      2: 3,
-      3: 4
-    },
-    efeito: () => { if (liveupgrade < 6) liveupgrade += 1; if (liveupgrade > 0) { live = liveupgrade; } },
-    maxCompras: 5,
-    compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
-  },
-
-
-  {
-    nome: 'Toque de Midas',
-    descricao: 'Cada moeda coletada vale UM pouco mais.',
-    preco: 2000,
-    priceMultiplier: 2,
-    priceIncrement: 0,
-    disponivel: true,
-    requiredDepthSteps: {
-      0: 500
-    },
-    requiredItem: 'Cálice da Chama Vital',
-    requiredItemSteps: {
-      0: 1,
-      2: 2
-    },
-    efeito: () => { moneyplus += 25; },
-    maxCompras: 2,
-    compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
-  },
-
-
-  {
-    nome: 'Sopro do Ouro Invisível',
-    descricao: 'Aumenta o valor das moedas coletadas com técnicas ninja',
-    preco: 1250,
-    priceMultiplier: 2,
-    disponivel: true,
-    priceIncrement: 0,
-    requiredDepthSteps: {
-      0: 15000
-    },
-    efeito: () => { moneyplus += 55; },
-    maxCompras: 2,
-    compras: 0,
-    exclusiveToCharacter: 'Kuroshi, o Ninja'
-  },
-  {
-    nome: 'Elmo do Destino Dourado',
-    descricao: 'um Elmo antigo que abençoa suas moedas com poder de um super valor extra.',
-    preco: 12500,
-    priceMultiplier: 2,
-    disponivel: true,
-    priceIncrement: 0,
-    requiredDepthSteps: {
-      0: 25000
-    },
-    efeito: () => { moneyplus += 185; },
-    maxCompras: 3,
-    compras: 0,
-    exclusiveToCharacter: 'Roderick, o Cavaleiro'
-  },
-  {
-    nome: 'Codex da Fortuna Velada',
-    descricao: 'Um livro esquecido de runas que amplificam o valor das moedas exponencialmente.',
-    preco: 125000,
-    priceMultiplier: 2,
-    disponivel: true,
-    priceIncrement: 0,
-    requiredDepthSteps: {
-      0: 500
-    },
-    efeito: () => { moneyplus += 300; },
-    maxCompras: 5,
-    compras: 0,
-    exclusiveToCharacter: 'Valthor, o Mago'
-  },
-  {
-    nome: 'Ampulheta do Fluxo Espectral',
-    descricao: 'Reduz o tempo de recarga do dash.',
-    preco: 2000,
-    priceMultiplier: 2,
-    disponivel: true,
-    priceIncrement: 0,
-    requiredDepthSteps: {
-      0: 600,
-      1: 1000,
-      2: 12000,
-      3: 15000,
-      4: 20000
-    },
-    efeito: () => { DASH.cooldownTime = Math.max(1000, DASH.cooldownTime - 500); },
-    maxCompras: 4,
-    compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
-  },
-  {
-    nome: 'Manto Fantasma',
-    descricao: 'Aumenta o tempo de invulnerabilidade após usar dash.',
-    preco: 2500,
-    priceMultiplier: 2.5,
-    disponivel: true,
-    priceIncrement: 0,
-    requiredDepthSteps: {
-      0: 700,
-      1: 1000,
-      2: 5000,
-      3: 7000,
-      4: 12000
-    },
-    efeito: () => { if (typeof DASH.extraInvuln !== 'undefined') { DASH.extraInvuln = Math.min(DASH.extraInvuln + 500, DASH.extraInvulnMax); } },
-    maxCompras: 3,
-    compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria',
-    imgWidth: 140, 
-    imgHeight: 140 
-  },
-{
-    nome: 'Rolo Secreto de Kage',
-    descricao: 'Reduz o tempo de recarga da Bomba de Fumaça.',
-    preco: 8000,
-    priceMultiplier: 1.5,
-    priceIncrement: 0,
-    disponivel: true,
-    requiredDepthSteps: {
-      0: 15000,
-      1: 17000,
-      2: 22000
-    },
-    efeito: () => { 
-      NINJA.NINJA_SMOKE_COOLDOWN = Math.max(3000, NINJA.NINJA_SMOKE_COOLDOWN - 1000);
-    },
-    maxCompras: 5,
-    compras: 0,
-    exclusiveToCharacter: 'Kuroshi, o Ninja'
-  },
-  {
-    nome: 'Pendente lunar',
-    descricao: 'Reduz o tempo de recarga da Égide lunar.',
-    preco: 10000,
-    priceMultiplier: 1.5,
-    priceIncrement: 0,
-    disponivel: true,
-    requiredDepthSteps: {
-      0: 25000,
-      1: 30000,
-      2: 32000
-    },
-    efeito: () => {
-      CAVALEIRO.SHIELD_COOLDOWN = Math.max(3000, CAVALEIRO.SHIELD_COOLDOWN - 1000);
-    },
-    maxCompras: 5,
-    compras: 0,
-    exclusiveToCharacter: 'Roderick, o Cavaleiro'
-  },
-  {
-    nome: 'Runa Arcana',
-    descricao: 'Reduz o tempo de recarga da devastação mística.',
-    preco: 300000,
-    priceMultiplier: 1.5,
-    priceIncrement: 0,
-    disponivel: true,
-    requiredDepthSteps: {
-      0: 35000,
-      1: 39000,
-      2: 42000
-    },
-    efeito: () => {
-      MAGO.MAGIC_BLAST_COOLDOWN = Math.max(5000, MAGO.MAGIC_BLAST_COOLDOWN - 2000);
-    },
-    maxCompras: 5,
-    compras: 0,
-    exclusiveToCharacter: 'Valthor, o Mago'
-  }
-];
-
-
-let newSecretItems = new Set();
-
-
-const SECRET_ITEMS = [
-  {
-    nome: 'Kuroshi, o Ninja',
-    descricao: 'Um personagem ágil e veloz, capaz de dar 3 dashs e usar bombas de fumaça de imortalidade.',
-    preco: 70000,
-    priceMultiplier: 1,
-    priceIncrement: 0,
-    disponivel: true,
-    requiredItem: 'Cálice da Chama Vital',
-     requiredItemSteps: {
-      0: 2,
-    },
-    requiredDepth: 12000,
-    efeito: () => {
-      setActiveCharacter('Kuroshi, o Ninja');
-    },
-    maxCompras: 1,
-    compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
-  },
-  {
-    nome: 'Roderick, o Cavaleiro',
-    descricao: 'Um guerreiro resistente, com altas habilidades defensivas e de vitalidade.',
-    preco: 100000,
-    priceMultiplier: 1,
-    priceIncrement: 0,
-    disponivel: true,
-    requiredDepth: 20000,
-    requiredItemSteps: {
-      0: 3,
-    },
-    requiredItem: 'Cálice da Chama Vital',
-    efeito: () => {
-      setActiveCharacter('Roderick, o Cavaleiro');
-    },
-    maxCompras: 1,
-    compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria'
-  },
-   {
-    nome: 'Valthor, o Mago',
-    descricao: 'Um estudioso dos mistérios arcanos, mestre das runas antigas capaz de manipular inimigos ao seu favor.',
-    preco: 150000,
-    priceMultiplier: 1,
-    priceIncrement: 0,
-    disponivel: true,
-    requiredDepth: 30000,
-    requiredItemSteps: {
-      0: 4,
-    },
-    requiredItem: 'Cálice da Chama Vital',
-    efeito: () => {
-      setActiveCharacter('Valthor, o Mago');
-    },
-    maxCompras: 1,
-    compras: 0,
-    exclusiveToCharacter: 'O Errante de Eldoria',
-    imgWidth: 105, 
-   
-  },
+function isGlobalPurchaseItemName(name) {
+  if (!name) return false;
   
-];
+  const item = shopItems.concat(SECRET_ITEMS).find(i => i.nome === name);
+  if (item?.globalItem) return true;
+  
+  return !!characterData[name];
+}
 
-let isDebugMode = false;
-let newItemsSeen = new Set();
-let itemsRead = new Set();
+function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+  if (typeof radius === 'undefined') {
+    radius = 5;
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  if (fill) ctx.fill();
+  if (stroke) ctx.stroke();
+}
+
+function wrapText(ctx, text, maxWidth) {
+  if (!text) return [];
+  const words = String(text).split(' ');
+  const lines = [];
+  let line = '';
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    const testLine = line ? (line + ' ' + word) : word;
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = testLine;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+function getPurchasesCountByName(name) {
+  if (!name) return 0;
+  if (isGlobalPurchaseItemName(name)) return globalPurchases[name] || 0;
+  return _charData[activeCharacter]?.purchases?.[name] || 0;
+}
+
+function incrementPurchaseByName(name) {
+  if (!name) return;
+  if (isGlobalPurchaseItemName(name)) {
+    globalPurchases[name] = (globalPurchases[name] || 0) + 1;
+  } else {
+    if (!_charData[activeCharacter].purchases) _charData[activeCharacter].purchases = {};
+    _charData[activeCharacter].purchases[name] = (_charData[activeCharacter].purchases[name] || 0) + 1;
+  }
+}
 
 function revelarItensSecretos() {
     SECRET_ITEMS.forEach(secretItem => {
@@ -357,14 +77,64 @@ function revelarItensSecretos() {
                 efeito: secretItem.efeito || (() => {})
             };
             shopItems.push(novoItem);
-            newSecretItems.add(novoItem.nome);
         }
     });
+}
+
+function isItemRevealedGlobally(item) {
+  if (!item) return false;
+  if (globalRevealedItems[item.nome]) return true;
+  return false;
+}
+
+function doesMeetRevealRequirements(item) {
+  if (!item || !item.hiddenUntilPurchases) return false;
+  for (const reqName in item.hiddenUntilPurchases) {
+    const needed = item.hiddenUntilPurchases[reqName] || 0;
+    const have = getPurchasesCountByName(reqName) || 0;
+    if (have < needed) return false;
+  }
+  return true;
+}
+
+function checkAndRevealHiddenItems() {
+  
+  const allItems = shopItems.concat(SECRET_ITEMS || []);
+  for (const it of allItems) {
+    if (!it || !it.hiddenUntilPurchases) continue;
+    if (isItemRevealedGlobally(it)) continue;
+    if (doesMeetRevealRequirements(it)) {
+      
+      globalRevealedItems[it.nome] = true;
+      
+      if (it.revealGlobally) {
+        delete it.exclusiveToCharacter;
+      }
+      
+      it.hidden = false;
+      
+      it.disponivel = true;
+    }
+  }
+}
+
+function isItemVisible(item) {
+  if (!item) return false;
+  
+  if (item.exclusiveToCharacter && item.exclusiveToCharacter !== activeCharacter) return false;
+  
+  if (item.hiddenUntilPurchases) {
+    if (isItemRevealedGlobally(item)) return true;
+    if (item.hidden === false) return true;
+    return false;
+  }
+  return true;
 }
 
 function onDepthChange(newDepth) {
     depthPoints = newDepth;
     revelarItensSecretos();
+  checkAndRevealHiddenItems();
     if (gameState === 'loja') {
         updateShopAvailability();
         drawLoja();
@@ -383,35 +153,55 @@ function checkDepthRequirement(item, compras) {
 }
 
 function checkItemRequirement(item, compras) {
-    if (!item.requiredItem || !item.requiredItemSteps) return true;
+  
+  
+  const hasMulti = Array.isArray(item.requiredItems) && item.requiredItems.length > 0;
+  const hasSingle = item.requiredItem && item.requiredItemSteps;
+  if (!hasMulti && !hasSingle) return true;
+
+  const nextCompra = compras;
+
+  if (hasMulti) {
     
-    const characterPurchases = characterData[activeCharacter].purchases;
-    const requiredItemPurchases = characterPurchases[item.requiredItem] || 0;
-    
-    
-    const nextCompra = compras;
-    const currentRequired = item.requiredItemSteps[nextCompra] || 
-                          item.requiredItemSteps[0] || 0;
-    
-    return requiredItemPurchases >= currentRequired;
+    for (const req of item.requiredItems) {
+      const reqName = typeof req === 'string' ? req : req.nome;
+      const reqSteps = (req.steps || req.requiredItemSteps) || item.requiredItemSteps;
+      const currentRequired = reqSteps?.[nextCompra] || reqSteps?.[0] || 0;
+      const requiredItemPurchases = getPurchasesCountByName(reqName);
+      if (requiredItemPurchases < currentRequired) return false;
+    }
+    return true;
+  }
+
+  
+  const requiredItemPurchases = getPurchasesCountByName(item.requiredItem);
+  const currentRequired = item.requiredItemSteps[nextCompra] || item.requiredItemSteps[0] || 0;
+  return requiredItemPurchases >= currentRequired;
 }
 
 function getCurrentRequirements(item) {
-    const characterPurchases = characterData[activeCharacter].purchases;
-    const compras = characterPurchases[item.nome] || 0;
-    
-    
-    const nextCompra = compras;
-    
-    const depthReq = item.requiredDepthSteps?.[nextCompra] || 
-                    item.requiredDepthSteps?.[0] || 
-                    0;
+  
+  const compras = getPurchasesCountByName(item.nome) || 0;
+  const nextCompra = compras;
 
-    const itemReq = item.requiredItemSteps?.[nextCompra] || 
-                    item.requiredItemSteps?.[0] || 
-                    0;
+  const depthReq = item.requiredDepthSteps?.[nextCompra] || item.requiredDepthSteps?.[0] || 0;
 
-    return { depthReq, itemReq };
+  
+  const itemReqs = [];
+
+  if (Array.isArray(item.requiredItems) && item.requiredItems.length > 0) {
+    for (const req of item.requiredItems) {
+      const reqName = typeof req === 'string' ? req : req.nome;
+      const reqSteps = (req.steps || req.requiredItemSteps) || item.requiredItemSteps;
+      const itemReq = reqSteps?.[nextCompra] || reqSteps?.[0] || 0;
+      itemReqs.push({ nome: reqName, quantidade: itemReq });
+    }
+  } else if (item.requiredItem && item.requiredItemSteps) {
+    const itemReq = item.requiredItemSteps?.[nextCompra] || item.requiredItemSteps?.[0] || 0;
+    itemReqs.push({ nome: item.requiredItem, quantidade: itemReq });
+  }
+
+  return { depthReq, itemReqs };
 }
 
 function updateShopAvailability() {
@@ -427,51 +217,14 @@ function updateShopAvailability() {
             return;
         }
 
-        const characterPurchases = characterData[activeCharacter].purchases;
-        const compras = characterPurchases[item.nome] || 0;
+  const compras = getPurchasesCountByName(item.nome);
 
-        const depthRequirementMet = checkDepthRequirement(item, compras);
-        const itemRequirementMet = checkItemRequirement(item, compras);
+  const depthRequirementMet = checkDepthRequirement(item, compras);
+  const itemRequirementMet = checkItemRequirement(item, compras);
 
-        item.disponivel = depthRequirementMet && itemRequirementMet;
+  item.disponivel = depthRequirementMet && itemRequirementMet;
     });
 }
-
-if (typeof moneyplus === 'undefined') {
-  var moneyplus = 250;
-}
-
-let shopMessage = '';
-let shopMessageTimeout;
-let selectedIndex = 0;
-let lojaOptionRects = [];
-let lojaScrollOffset = 0; 
-const LOJA_ITENS_POR_PAGINA = 4;
-let scrollOffset = 0;
-const SCROLL_SPEED = 45; 
-let insufficientFundsMessage = '';
-let insufficientFundsTimeout;
-let purchaseHistory = []; 
-const MAX_HISTORY = 3; 
-let recentPurchases = {}; 
-let purchaseHistoryTimeout;
-let isShopLoading = false;
-let isDungeonButtonHovered = false;
-let show = false;
-
-
-let characterBarRects = [];
-let selectedCharacterIndex = 0;
-let isCharacterSelectButtonHovered = false;  
-
-
-
-const _oldDrawLoja = drawLoja;
-drawLoja = function() {
-  _oldDrawLoja.apply(this, arguments);
-  if (!showCharacterSelect) drawCharacterSelectButton();
-  if (showCharacterSelect) drawCharacterSelectModal();
-};
 
 function drawActiveCharacterViewer() {
   const nome = activeCharacter || 'O Errante de Eldoria';
@@ -580,14 +333,14 @@ function drawLoja() {
       item.requiredDepth : nearest, null);
 
   
-  // Texto de profundidade alinhado ao botão de dungeon
-  const { x: dungeonBtnX, y: dungeonBtnY, w: dungeonBtnW, h: dungeonBtnH } = getDungeonBtnRect();
+  
+  const { x: charBtnX, y: charBtnY, w: charBtnW, h: charBtnH } = (typeof getCharacterBtnRect === 'function') ? getCharacterBtnRect() : getDungeonBtnRect();
   const profFontSize = Math.max(14, Math.min(canvas.width * 0.017, 22));
   ctx.font = `bold ${profFontSize}px PixelFont`;
   ctx.textAlign = 'center';
   ctx.fillStyle = 'white';
-  const profX = dungeonBtnX + dungeonBtnW/2;
-  const profY = dungeonBtnY + dungeonBtnH + profFontSize + 80;
+  const profX = charBtnX + charBtnW/2;
+  const profY = charBtnY + charBtnH + profFontSize + 10;
   ctx.fillText(`⬇⬇⬇ Profundidade atual: ${depthPoints}m`, profX, profY);
   if (nextSecretDepth) {
     ctx.font = `bold ${Math.max(12, Math.floor(profFontSize * 0.8))}px PixelFont`;
@@ -610,7 +363,7 @@ function drawLoja() {
   const itemSize = 100; 
   const itemGap = 10;
   const gridStartX = 20;
-  let visibleItems = shopItems.filter(item => !item.exclusiveToCharacter || item.exclusiveToCharacter === activeCharacter);
+  let visibleItems = shopItems.filter(item => isItemVisible(item));
   const totalRows = Math.ceil(visibleItems.length / itemsPerRow);
   
   const availableHeight = canvas.height - shopStartY - footerHeight - 10;
@@ -644,6 +397,89 @@ function drawLoja() {
     ctx.closePath();
     ctx.fill();
   }
+
+  
+  (function drawScrollIndicators(){
+    
+    const rowHeight = itemSize + itemGap;
+    const firstVisibleRow = Math.floor(scrollOffset / rowHeight);
+    const lastVisibleRow = firstVisibleRow + visibleRows - 1;
+
+    let newAbove = false, newBelow = false, leiaAbove = false, leiaBelow = false;
+    for (let idx = 0; idx < visibleItems.length; idx++) {
+      const row = Math.floor(idx / itemsPerRow);
+      if (row >= firstVisibleRow && row <= lastVisibleRow) continue; 
+      const it = visibleItems[idx];
+      if (!it) continue;
+      const isNewFlag = (it.isSecret || it.hiddenUntilPurchases) && !newItemsSeen.has(it.nome);
+      const isLeiaFlag = (!it.isSecret && !it.hiddenUntilPurchases) && !itemsRead.has(it.nome);
+      if (row < firstVisibleRow) {
+        if (isNewFlag) newAbove = true;
+        if (isLeiaFlag) leiaAbove = true;
+      } else if (row > lastVisibleRow) {
+        if (isNewFlag) newBelow = true;
+        if (isLeiaFlag) leiaBelow = true;
+      }
+    }
+
+    const badgeSpacing = 6;
+    const badgeHeight = 18;
+    const badgePadX = 8;
+    const badgeGap = 6;
+    
+    const topBaseX = gridX + arrowOffsetX + 8;
+    const topBaseY = gridY - 36;
+    let bx = topBaseX;
+    if (newAbove) {
+      const text = 'NEW';
+      ctx.font = '11px PixelFont';
+      const w = Math.max(36, ctx.measureText(text).width + badgePadX);
+      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      roundRect(ctx, bx, topBaseY, w, badgeHeight, 6, true, false);
+      ctx.fillStyle = '#00ffea';
+      ctx.textAlign = 'center';
+      ctx.fillText(text, bx + w/2, topBaseY + 13);
+      bx += w + badgeGap;
+    }
+    if (leiaAbove) {
+      const text = 'LEIA';
+      ctx.font = '11px PixelFont';
+      const w = Math.max(36, ctx.measureText(text).width + badgePadX);
+      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      roundRect(ctx, bx, topBaseY, w, badgeHeight, 6, true, false);
+      ctx.fillStyle = '#ffd700';
+      ctx.textAlign = 'center';
+      ctx.fillText(text, bx + w/2, topBaseY + 13);
+      bx += w + badgeGap;
+    }
+
+    
+    const bottomBaseX = gridX + arrowOffsetX + 8;
+    const bottomBaseY = gridY + shopHeight + 14;
+    bx = bottomBaseX;
+    if (newBelow) {
+      const text = 'NEW';
+      ctx.font = '11px PixelFont';
+      const w = Math.max(36, ctx.measureText(text).width + badgePadX);
+      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      roundRect(ctx, bx, bottomBaseY, w, badgeHeight, 6, true, false);
+      ctx.fillStyle = '#00ffea';
+      ctx.textAlign = 'center';
+      ctx.fillText(text, bx + w/2, bottomBaseY + 13);
+      bx += w + badgeGap;
+    }
+    if (leiaBelow) {
+      const text = 'LEIA';
+      ctx.font = '11px PixelFont';
+      const w = Math.max(36, ctx.measureText(text).width + badgePadX);
+      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      roundRect(ctx, bx, bottomBaseY, w, badgeHeight, 6, true, false);
+      ctx.fillStyle = '#ffd700';
+      ctx.textAlign = 'center';
+      ctx.fillText(text, bx + w/2, bottomBaseY + 13);
+      bx += w + badgeGap;
+    }
+  })();
 
   selectedIndex = Math.min(selectedIndex, visibleItems.length - 1);
 
@@ -681,7 +517,8 @@ function drawLoja() {
         ctx.fillRect(x, y, itemSize, itemSize);
       }
       ctx.save();
-      if (item.isSecret && !newItemsSeen.has(item.nome)) {
+      
+      if ((item.isSecret || item.hiddenUntilPurchases) && !newItemsSeen.has(item.nome)) {
         ctx.font = 'bold 15px PixelFont';
         ctx.fillStyle = '#00ffea';
         ctx.textAlign = 'right';
@@ -690,7 +527,7 @@ function drawLoja() {
         ctx.fillText('NEW', x + itemSize - 8, y + 22);
         ctx.shadowBlur = 0;
       }
-      if (!item.isSecret && !itemsRead.has(item.nome)) {
+      else if (!item.isSecret && !item.hiddenUntilPurchases && !itemsRead.has(item.nome)) {
         ctx.font = 'bold 13px PixelFont';
         ctx.fillStyle = '#ffd700';
         ctx.textAlign = 'left';
@@ -701,6 +538,21 @@ function drawLoja() {
       }
       ctx.restore();
       ctx.restore();
+      
+      if (item.isStartDepthItem) {
+        ctx.save();
+        ctx.font = '11px PixelFont';
+        const tagText = 'Perde ao entrar';
+        const tagW = Math.min(itemSize - 8, ctx.measureText(tagText).width + 12);
+        const tagX = x + (itemSize - tagW) / 2;
+        const tagY = y + itemSize - 20;
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        roundRect(ctx, tagX, tagY, tagW, 18, 6, true, false);
+        ctx.fillStyle = '#ffcc66';
+        ctx.textAlign = 'center';
+        ctx.fillText(tagText, tagX + tagW/2, tagY + 13);
+        ctx.restore();
+      }
       lojaOptionRects.push({x, y, w: itemSize, h: itemSize, index: i});
     }
   }
@@ -713,6 +565,12 @@ function drawLoja() {
     let y = shopStartY + gridRow * (itemSize + itemGap) - scrollOffset;
     if (y + itemSize > shopStartY && y < shopStartY + shopHeight) {
       const item = visibleItems[i];
+      
+      if (item.isSecret || item.hiddenUntilPurchases) {
+        newItemsSeen.add(item.nome);
+      } else if (!item.isSecret && !item.hiddenUntilPurchases) {
+        itemsRead.add(item.nome);
+      }
       ctx.save();
       let centerX = x + itemSize / 2;
       let centerY = y + itemSize / 2;
@@ -732,26 +590,21 @@ function drawLoja() {
         ctx.fillStyle = 'rgba(255, 215, 0, 0.10)';
         ctx.fillRect(x, y, itemSize, itemSize);
       }
-      ctx.save();
-      if (item.isSecret && !newItemsSeen.has(item.nome)) {
-        ctx.font = 'bold 15px PixelFont';
-        ctx.fillStyle = '#00ffea';
-        ctx.textAlign = 'right';
-        ctx.shadowColor = '#000';
-        ctx.shadowBlur = 6;
-        ctx.fillText('NEW', x + itemSize - 8, y + 22);
-        ctx.shadowBlur = 0;
+  
+  if (item.isStartDepthItem && !(selectedElement.type === 'items' && selectedIndex === i)) {
+        ctx.save();
+        ctx.font = '12px PixelFont';
+        const tagText = 'Perde ao entrar';
+        const tagW = Math.min(itemSize - 8, ctx.measureText(tagText).width + 14);
+        const tagX = x + (itemSize - tagW) / 2;
+        const tagY = y + itemSize - 22;
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        roundRect(ctx, tagX, tagY, tagW, 20, 6, true, false);
+        ctx.fillStyle = '#ffcc66';
+        ctx.textAlign = 'center';
+        ctx.fillText(tagText, tagX + tagW/2, tagY + 14);
+        ctx.restore();
       }
-      if (!item.isSecret && !itemsRead.has(item.nome)) {
-        ctx.font = 'bold 13px PixelFont';
-        ctx.fillStyle = '#ffd700';
-        ctx.textAlign = 'left';
-        ctx.shadowColor = '#000';
-        ctx.shadowBlur = 6;
-        ctx.fillText('LEIA!!!!', x + 8, y + 22);
-        ctx.shadowBlur = 0;
-      }
-      ctx.restore();
       ctx.restore();
       selectedItemRect = { x, y, item };
       lojaOptionRects.push({x, y, w: itemSize, h: itemSize, index: i});
@@ -768,11 +621,24 @@ function drawLoja() {
     ctx.font = 'bold 18px PixelFont';
     const nomeWidth = ctx.measureText(item.nome).width;
     ctx.font = '16px PixelFont';
-    const descWidth = ctx.measureText(item.descricao).width;
+    
+    const maxDescWidth = 320; 
+    const descLines = wrapText(ctx, item.descricao || '', maxDescWidth);
+    
+    const MAX_DESC_LINES = 6;
+    let truncated = false;
+    if (descLines.length > MAX_DESC_LINES) {
+      descLines.length = MAX_DESC_LINES;
+      truncated = true;
+    }
+    if (truncated) {
+      const lastIndex = descLines.length - 1;
+      descLines[lastIndex] = descLines[lastIndex].trim().replace(/\.+$/, '') + '...';
+    }
+    const descWidth = descLines.reduce((w, l) => Math.max(w, ctx.measureText(l).width), 0);
 
     
-    const characterPurchases = characterData[activeCharacter]?.purchases || {};
-    const comprasAtual = characterPurchases[item.nome] || 0;
+  const comprasAtual = getPurchasesCountByName(item.nome) || 0;
     let precoText;
     if (comprasAtual >= item.maxCompras) {
       precoText = 'MAX';
@@ -785,24 +651,31 @@ function drawLoja() {
       ctx.font = '14px PixelFont';
       const reqs = getCurrentRequirements(item);
       if (reqs.depthReq > 0 && depthPoints < reqs.depthReq) reqText = `Requer: ${reqs.depthReq}m`;
-      if (reqs.itemReq > 0) {
-        const currentItemCount = characterPurchases[item.requiredItem] || 0;
-        if (currentItemCount < reqs.itemReq) {
-          reqText += reqText ? ' e ' : 'Requer: ';
-          reqText += `${reqs.itemReq}x ${item.requiredItem}`;
-          reqText += ` (tem ${currentItemCount})`;
+      if (reqs.itemReqs && reqs.itemReqs.length > 0) {
+        for (let i = 0; i < reqs.itemReqs.length; i++) {
+          const r = reqs.itemReqs[i];
+          const currentItemCount = getPurchasesCountByName(r.nome) || 0;
+          if (currentItemCount < r.quantidade) {
+            reqText += reqText ? ' e ' : 'Requer: ';
+            reqText += `${r.quantidade > 1 ? r.quantidade + 'x de ' : ''}${r.nome}`;
+            reqText += ` (tem ${currentItemCount})`;
+          }
         }
       }
     }
     ctx.font = '14px PixelFont';
     const reqWidth = reqText ? ctx.measureText('🔒 ' + reqText).width : 0;
     
-    const maxWidth = Math.max(220, nomeWidth, descWidth, precoWidth, reqWidth) + 30;
+  const maxWidth = Math.max(220, nomeWidth, descWidth, precoWidth, reqWidth) + 30;
     
-    let lines = 4; 
-    if (reqText) lines++;
-    const lineHeight = 22;
-    const boxHeight = lines * lineHeight + 10;
+  const lineHeight = 22;
+  const baseLines = 3; 
+  const descLineCount = Math.max(1, descLines.length);
+  let linesCount = baseLines - 1 + descLineCount; 
+  if (reqText) linesCount++;
+  
+  if (item.isStartDepthItem) linesCount++;
+  const boxHeight = linesCount * lineHeight + 18;
     
     ctx.globalAlpha = 0.85;
     ctx.fillStyle = '#222';
@@ -822,11 +695,21 @@ function drawLoja() {
     textY += lineHeight;
     ctx.font = '16px PixelFont';
     ctx.fillStyle = '#ffe066';
-    ctx.fillText(item.descricao, infoX, textY);
-    textY += lineHeight;
-    ctx.font = '16px PixelFont';
-    ctx.fillStyle = comprasAtual >= item.maxCompras ? '#ff4444' : '#fff';
-    ctx.fillText(precoText, infoX, textY);
+    
+    for (let li = 0; li < descLines.length; li++) {
+      ctx.fillText(descLines[li], infoX, textY);
+      textY += lineHeight;
+    }
+    
+    if (item.isStartDepthItem) {
+      ctx.font = '13px PixelFont';
+      ctx.fillStyle = '#ffdd99';
+      ctx.fillText('Aviso: item será perdido ao entrar na dungeon', infoX, textY);
+      textY += lineHeight;
+    }
+  ctx.font = '16px PixelFont';
+  ctx.fillStyle = comprasAtual >= item.maxCompras ? '#ff4444' : '#fff';
+  ctx.fillText(precoText, infoX, textY);
     if (reqText) {
       textY += lineHeight;
       ctx.font = '14px PixelFont';
@@ -852,19 +735,52 @@ function drawLoja() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     
-    ctx.fillStyle = 'rgb(0, 0, 0)';
-    ctx.fillRect(0, canvas.height/2 - 50, canvas.width, 100);
-    
-    
-    ctx.strokeStyle = '#ff4444';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(0, canvas.height/2 - 50, canvas.width, 100);
-    
     
     ctx.font = 'bold 32px PixelFont';
     ctx.fillStyle = '#ff4444';
     ctx.textAlign = 'center';
-    ctx.fillText(insufficientFundsMessage, canvas.width/2, canvas.height/2);
+    const maxWidth = Math.max(200, Math.min(canvas.width - 120, 800));
+    const words = insufficientFundsMessage.split(' ');
+    let line = '';
+    const lines = [];
+    let textMaxWidth = 0;
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line ? (line + ' ' + words[i]) : words[i];
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && line) {
+        lines.push(line);
+        textMaxWidth = Math.max(textMaxWidth, ctx.measureText(line).width);
+        line = words[i];
+      } else {
+        line = testLine;
+      }
+    }
+    if (line) {
+      lines.push(line);
+      textMaxWidth = Math.max(textMaxWidth, ctx.measureText(line).width);
+    }
+
+    const paddingX = 40;
+    const paddingY = 24;
+    const boxWidth = Math.min(canvas.width - 80, textMaxWidth + paddingX * 2);
+    const boxHeight = lines.length * 40 + paddingY * 2;
+    const boxX = (canvas.width - boxWidth) / 2;
+    const boxY = (canvas.height - boxHeight) / 2;
+
+    
+    ctx.fillStyle = 'rgb(0, 0, 0)';
+    roundRect(ctx, boxX, boxY, boxWidth, boxHeight, 12, true, false);
+    
+    ctx.strokeStyle = '#ff4444';
+    ctx.lineWidth = 3;
+    roundRect(ctx, boxX, boxY, boxWidth, boxHeight, 12, false, true);
+
+    
+    const startY = boxY + paddingY + 28; 
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillStyle = '#ff4444';
+      ctx.fillText(lines[i], canvas.width / 2, startY + i * 40);
+    }
     ctx.restore();
   }
 
@@ -881,10 +797,12 @@ function drawLoja() {
   ctx.font = '24px PixelFont';
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'left';
-  ctx.fillText('"Setas/🖱️" Navegar   |   "⏎/🖱️" Comprar   |   "Esc" ir para dungeon ', 20, canvas.height - 30);
+  ctx.fillText('"Setas/🖱️" Navegar   |   "⏎/🖱️" Confirmar   |   "Esc" ir para dungeon ', 20, canvas.height - 30);
   ctx.restore();
 
-  
+  if (!showCharacterSelect) drawCharacterSelectButton();
+  if (showCharacterSelect) drawCharacterSelectModal();
+
     if (isDebugMode) {
         ctx.save();
         ctx.font = 'bold 20px PixelFont';
@@ -895,17 +813,7 @@ function drawLoja() {
     }
 }
 
-const lojaItemImages = {};
-const lojaItemImageNotFound = {};
-
-
-const personagensComImagem = [
-  'Kuroshi, o Ninja',
-  'Roderick, o Cavaleiro',
-  'Valthor, o Mago'
-];
-
-[...shopItems, ...SECRET_ITEMS.filter(i => personagensComImagem.includes(i.nome))].forEach(item => {
+[...shopItems, ...SECRET_ITEMS].forEach(item => {
   if (!item.nome) return;
   const img = new Image();
   
@@ -951,7 +859,6 @@ function closeShop() {
   canvas.style.opacity = '0';
   setTimeout(() => {
     resetGame({ pauseOnStart: true, showShop: false, il: false, la: true });
-    
     
     
     platformFactory.updateScreenDimensions();
@@ -1006,30 +913,32 @@ function showInsufficientFunds(price) {
   show = true;
   insufficientFundsMessage = `Dinheiro insuficiente! Faltam $${price - money}`;
   clearTimeout(insufficientFundsTimeout);
+  
   insufficientFundsTimeout = setTimeout(() => {
     show = false;
     insufficientFundsMessage = '';
     drawLoja();
-     
-  }, 1000);
+  }, 2200);
   
 }
+
 function showShopMessage(message) {
     if (showCharacterSelect) return;
     show = true;
     insufficientFundsMessage = message;
     clearTimeout(insufficientFundsTimeout);
+    
     insufficientFundsTimeout = setTimeout(() => {
       show = false;
-        insufficientFundsMessage = '';
-        drawLoja();
-    }, 1000);
+      insufficientFundsMessage = '';
+      drawLoja();
+    }, 2200);
 }
 
 function attemptPurchase() {
   if (showCharacterSelect || isShopLoading || gameState !== 'loja' || show) return;
 
-  const visibleItems = shopItems.filter(item => !item.exclusiveToCharacter || item.exclusiveToCharacter === activeCharacter);
+  const visibleItems = shopItems.filter(item => isItemVisible(item));
   const item = visibleItems[selectedIndex];
   if (!item) return;
 
@@ -1038,12 +947,18 @@ function attemptPurchase() {
         newItemsSeen.add(item.nome);
     }
 
-  const characterPurchases = characterData[activeCharacter].purchases;
-  const compras = characterPurchases[item.nome] || 0;
+  const compras = getPurchasesCountByName(item.nome) || 0;
 
   
   if (compras >= item.maxCompras) {
     showShopMessage('Limite máximo de compras atingido!');
+    return;
+  }
+
+  
+  if (item.isStartDepthItem && _charData.__global && _charData.__global.savedStartDepth) {
+    const existing = _charData.__global.savedStartItemName || `Selo (${_charData.__global.savedStartDepth}m)`;
+    showShopMessage(`Você já possui um item de início: ${existing}`);
     return;
   }
 
@@ -1054,19 +969,44 @@ function attemptPurchase() {
     const itemMet = checkItemRequirement(item, compras);
 
     if (!depthMet || !itemMet) {
-      const { depthReq, itemReq } = getCurrentRequirements(item);
+      const { depthReq, itemReqs } = getCurrentRequirements(item);
       let reqMessage = '';
-      
+
       if (!depthMet) {
-          reqMessage = `Requer ${depthReq}m de profundidade`;
+        reqMessage = `Requer ${depthReq}m de profundidade`;
       }
-      
-      if (!itemMet) {
-          const currentItemCount = characterPurchases[item.requiredItem] || 0;
-          reqMessage += reqMessage ? ' e ' : '';
-          reqMessage += `${itemReq}x ${item.requiredItem} (tem ${currentItemCount})`;
+
+      if (!itemMet && Array.isArray(itemReqs) && itemReqs.length > 0) {
+        
+        for (const r of itemReqs) {
+          const currentItemCount = getPurchasesCountByName(r.nome) || 0;
+          
+          let ownerCharacter = null;
+          try {
+            for (let chName in _charData) {
+              if (chName === '__global') continue;
+              const found = shopItems.concat(SECRET_ITEMS || []).find(si => si.nome === r.nome && si.exclusiveToCharacter === chName);
+              if (found) { ownerCharacter = chName; break; }
+            }
+          } catch (e) {
+            ownerCharacter = null;
+          }
+
+          if (ownerCharacter) {
+            if (ownerCharacter === activeCharacter) {
+              reqMessage += reqMessage ? ' e ' : '';
+              reqMessage += `Requer ${r.quantidade > 1 ? r.quantidade + 'x de ' : ''}${r.nome}`;
+            } else {
+              reqMessage += reqMessage ? ' e ' : '';
+              reqMessage += `Requer ${r.quantidade > 1 ? r.quantidade + 'x de ' : ''}${r.nome} disponível no personagem ${ownerCharacter}`;
+            }
+          } else {
+            reqMessage += reqMessage ? ' e ' : '';
+            reqMessage += `${r.quantidade > 1 ? r.quantidade + 'x de ' : ''}${r.nome} (tem ${currentItemCount})`;
+          }
+        }
       }
-      
+
       showShopMessage(`Requisitos não atendidos! ${reqMessage}`);
       return;
     }
@@ -1076,23 +1016,25 @@ function attemptPurchase() {
     if (!isDebugMode) {
       money -= item.preco;
     }
+
     
-    
-    characterPurchases[item.nome] = (characterPurchases[item.nome] || 0) + 1;
-    
-    
+    incrementPurchaseByName(item.nome);
+
     item.efeito();
     
     
-    characterData[activeCharacter].stats = {
-        speed: player.speed,
-        maxJumps: player.maxJumps,
-        liveupgrade: liveupgrade,
-        moneyplus: moneyplus,
-        dashCooldownTime: DASH.cooldownTime,
-        dashExtraInvuln: DASH.extraInvuln,
-        enemySpawnInterval: enemySpawnInterval
-    };
+  
+  
+  if (!characterData[activeCharacter]) characterData[activeCharacter] = { stats: {} };
+  characterData[activeCharacter].stats = {
+    speed: player.speed,
+    maxJumps: player.maxJumps,
+    liveupgrade: liveupgrade,
+    moneyplus: moneyplus,
+    dashRechargeTime: player.dashRechargeTime || (characterData[activeCharacter].stats && characterData[activeCharacter].stats.dashRechargeTime) || 1000,
+    dashExtraInvuln: player.dashExtraInvuln || (characterData[activeCharacter].stats && characterData[activeCharacter].stats.dashExtraInvuln) || 0,
+    enemySpawnInterval: enemySpawnInterval
+  };
 
     
     item.preco = Math.floor(item.preco * item.priceMultiplier + item.priceIncrement);
@@ -1116,6 +1058,8 @@ function attemptPurchase() {
         
         
         updateShopAvailability();
+  
+  try { checkAndRevealHiddenItems(); } catch (e) { }
         drawLoja();
   } else {
     showInsufficientFunds(item.preco);
@@ -1143,21 +1087,13 @@ function openShopWithTransition() {
   });
 }
 
-
-let lojaZooms = [];
-let lojaWobbles = [];
-let lojaWobbleTime = 0;
-
-
-
-let lastLojaFrame = 0;
 function tickLojaAnimation(now) {
   if (!now) now = performance.now();
   if (now - lastLojaFrame >= 1000 / 60) { 
     lastLojaFrame = now;
     if (gameState === 'loja') {
       lojaWobbleTime += 0.06;
-      const visibleItems = shopItems.filter(item => !item.exclusiveToCharacter || item.exclusiveToCharacter === activeCharacter);
+  const visibleItems = shopItems.filter(item => isItemVisible(item));
       if (!lojaZooms || lojaZooms.length !== visibleItems.length) {
         lojaZooms = new Array(visibleItems.length).fill(1);
         lojaWobbles = new Array(visibleItems.length).fill(0);
@@ -1176,8 +1112,8 @@ function tickLojaAnimation(now) {
   }
   requestAnimationFrame(tickLojaAnimation);
 }
-tickLojaAnimation();
 
+tickLojaAnimation();
 
 function updateLojaZooms(visibleItems, selectedIndex) {
   if (!lojaZooms || lojaZooms.length !== visibleItems.length) {
@@ -1185,11 +1121,3 @@ function updateLojaZooms(visibleItems, selectedIndex) {
     lojaWobbles = new Array(visibleItems.length).fill(0);
   }
 }
-
-
-
-
-
-
-
-

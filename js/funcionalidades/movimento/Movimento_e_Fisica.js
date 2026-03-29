@@ -2,7 +2,16 @@
 
 
 
+let previousDownPressed = false;
+// Mage passive config
+const MAGO_PASSIVE_BONUS_HITS = 5; // how many extra hits mage grants to a platform
+// Reference to platform currently connected by the mage cable (for drawing)
+let magoCableTarget = null;
+
 function movePlayer() {
+    // remembers previous frame down-press to detect edge (pressed this frame)
+    // stored at module level in case multiple calls happen
+    // (defined below as module-scope variable)
     plataformas.forEach(p => p.isColliding = false);
 
     let onPlat = false;
@@ -19,6 +28,23 @@ function movePlayer() {
     aplicarGravidade();
     checarColisaoTeto();
     checarColisaoChao();
+    // If player pressed down in this frame (edge) while standing on a platform and is Roderick,
+    // mark the current platform to ignore collisions for a short window so player can fall through.
+    try {
+        const downPressed = (input.down && typeof input.down === 'object') ? !!input.down.pressed : !!input.down;
+        if (activeCharacter === 'Roderick, o Cavaleiro' && downPressed && !previousDownPressed) {
+            if (currentPlatform) {
+                // ignore collisions for this specific platform for a short time
+                currentPlatform.ignoreCollisionUntil = performance.now() + 600; // ms
+                // ensure player starts moving downward so gravity pushes through
+                player.velocityY = Math.max(player.velocityY, 2);
+            }
+        }
+        previousDownPressed = downPressed;
+    } catch (e) {
+        // defensive: if input shape is unexpected, don't break the loop
+        previousDownPressed = false;
+    }
     checarPlataformasEspeciais();
     checarColisaoDuranteQueda();
 
@@ -29,10 +55,11 @@ function movePlayer() {
     const nextX = player.x + player.velocityX;
     handleScreenBounds(player, nextX, gamePlayArea);
 
-    if (player.y < 0) {
-        player.y = 0;
-        player.velocityY = 0;
-    }
+    // Allow passing through the top of the gameplay area.
+    // Previously the code clamped player.y to 0 here, preventing the player
+    // from moving above the visible play area. That clamp was removed so
+    // the top boundary is traversable. If you want to re-enable a top
+    // collision later, add a configurable flag and handle it here.
 
     player._wasOnPlat = onPlat;
     updatePlayerSprite(player, input, currentPlatform);
@@ -100,6 +127,14 @@ function movePlayer() {
                 if (ray) {
                     // Ignora plataformas que estão caindo
                     if (ray.plataforma.falling) continue;
+                    // Não permite atravessar plataformas grandes
+                    if (ray.plataforma.isGrande) {
+                        // nunca ignora colisão para grandes
+                        if (ray.plataforma.ignoreCollisionUntil) ray.plataforma.ignoreCollisionUntil = 0;
+                    } else {
+                        // Ignore platforms that have an active ignoreCollisionUntil in the future
+                        if (ray.plataforma.ignoreCollisionUntil && performance.now() < ray.plataforma.ignoreCollisionUntil) continue;
+                    }
                     onPlat = true;
                     currentPlatform = ray.plataforma;
                     player.y = getPlatformHitbox(currentPlatform).y - player.height;
@@ -168,6 +203,7 @@ function movePlayer() {
                 platform.isColliding = true;
                 player.y = platBox.y - player.height;
                 player.velocityY = platform.currentFallSpeed;
+                // cable target should be a platform above the mage; don't set it here (platform under player)
                 break;
             }
         }
@@ -194,6 +230,7 @@ function movePlayer() {
                     platform.isColliding = true;
                     player.isJumping = false;
                     player.jumpCount = 0;
+                    // do not set cable to the platform the player landed on; cable must target a platform above the mage
                     break;
                 }
             }
@@ -208,7 +245,62 @@ function movePlayer() {
             handleMovingPlatform(currentPlatform);
             player.x += currentPlatform.moveSpeed;
         }
+
+        // Mage passive: target a platform above the mage (not the one underfoot) and apply bonus once.
+        if (activeCharacter === 'Valthor, o Mago') {
+            // validate current target
+            let validTarget = false;
+            if (magoCableTarget && !magoCableTarget.broken && !magoCableTarget.isInitial) {
+                const targetBox = getPlatformHitbox(magoCableTarget);
+                const isAbove = targetBox.y + targetBox.h < player.y; // strictly above player
+                const overlaps = player.x + player.width > targetBox.x && player.x < targetBox.x + targetBox.w;
+                if (isAbove && overlaps) validTarget = true;
+            }
+
+            if (!validTarget) {
+                magoCableTarget = findReplacementPlatformAbovePlayer(null);
+            }
+
+            if (magoCableTarget && !magoCableTarget.mageBonusApplied) {
+                magoCableTarget.maxHits = (magoCableTarget.maxHits || 0) + MAGO_PASSIVE_BONUS_HITS;
+                magoCableTarget.mageBonusApplied = true;
+            }
+        } else {
+            magoCableTarget = null;
+        }
     }
+
+}
+
+// Called externally by other systems that break a platform, or checked each loop
+function onPlatformBroken(brokenPlatform) {
+    // If the broken platform was the one connected to the mage cable, find replacement
+    if (!brokenPlatform) return;
+    if (magoCableTarget === brokenPlatform) {
+        magoCableTarget = findReplacementPlatformAbovePlayer(brokenPlatform);
+    }
+    // ensure broken platform doesn't keep the mage bonus flag
+    if (brokenPlatform.mageBonusApplied) brokenPlatform.mageBonusApplied = false;
+}
+
+function findReplacementPlatformAbovePlayer(excludePlatform) {
+    // Search for the nearest platform above the player that horizontally overlaps the player
+    let candidate = null;
+    const playerCenterX = player.x + player.width / 2;
+    for (const plat of plataformas) {
+        if (plat === excludePlatform) continue;
+        if (plat.broken) continue;
+    if (plat.type === PLATFORM_TYPES.FANTASMA && !plat.visible) continue;
+    if (plat.isInitial) continue; // initial platform must not be selected
+    // platform must be strictly above the player's current y
+    if (plat.y + plat.height >= player.y) continue;
+        const platBox = getPlatformHitbox(plat);
+        const overlapsHoriz = player.x + player.width > platBox.x && player.x < platBox.x + platBox.w;
+        if (!overlapsHoriz) continue;
+        // pick the closest (largest y but still above)
+        if (!candidate || plat.y > candidate.y) candidate = plat;
+    }
+    return candidate;
 }
 
 function handleIcePhysics(player, currentPlatform) {
@@ -344,6 +436,13 @@ function raycast(x, y, dx, dy, length, plataformas) {
             if (plataforma.type === PLATFORM_TYPES.FANTASMA && !plataforma.visible) continue;
             if (plataforma.falling) continue; 
             if (plataforma.broken) continue;
+            // Não permite atravessar plataformas grandes
+            if (plataforma.isGrande) {
+                if (plataforma.ignoreCollisionUntil) plataforma.ignoreCollisionUntil = 0;
+            } else {
+                // respect per-platform ignoreCollisionUntil flag
+                if (plataforma.ignoreCollisionUntil && performance.now() < plataforma.ignoreCollisionUntil) continue;
+            }
             // Ignora plataformas caindo em qualquer colisão
             const { x: px, y: py, w: pw, h: ph } = getPlatformHitbox(plataforma);
             if (checkX >= px && checkX <= px + pw &&
