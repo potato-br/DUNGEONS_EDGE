@@ -52,7 +52,7 @@ function showLoadingScreen(callback) {
     blackScreen.style.alignItems = 'center';
     blackScreen.style.opacity = '0';
     blackScreen.style.transition = 'opacity 0.4s';
-    blackScreen.innerHTML = '<span style="color:white;font-size:2.5rem;font-family:PixelFont;">Carregando...</span>';
+blackScreen.innerHTML = '<span style="color:white;font-size:2.5rem;font-family:PixelFont;letter-spacing:2px;">Indo para loja...</span>';
     document.body.appendChild(blackScreen);
 
     
@@ -78,6 +78,14 @@ function showLoadingScreen(callback) {
 document.addEventListener('keydown', function(e) {
     if (!introActive) return;
     
+    // Se apertar Enter, para o som
+    if (e.key === 'Enter') {
+        try {
+            if (typeof AudioManager !== 'undefined' && AudioManager.stop) {
+                AudioManager.stop('type_sfx');
+            }
+        } catch (err) {}
+    }
     
     if (introStep < introPhrases.length && textIndex < introPhrases[introStep].length) {
         currentText = introPhrases[introStep];
@@ -99,12 +107,23 @@ document.addEventListener('keydown', function(e) {
     }
     
     else if (introStep === introPhrases.length && textIndex >= tutorialText.length && e.key === 'Enter') {
+        try {
+            if (typeof AudioManager !== 'undefined' && AudioManager.stop) {
+                AudioManager.stop('type_sfx');
+            }
+        } catch (err) {}
         introActive = false;
-        showLoadingScreen((removeLoading) => {
-            resetGame({ pauseOnStart: false, showShop: true });
-            setTimeout(removeLoading, 300);
-             updateBodyStyles(true);
-        });
+                showLoadingScreen((removeLoading) => {
+                        resetGame({ pauseOnStart: false, showShop: true });
+                        // Toca música da loja se não estiver tocando
+                        try {
+                            if (AudioManager && typeof AudioManager.assets === 'object' && AudioManager.assets['shop_music'] && AudioManager.assets['shop_music'].paused) {
+                                AudioManager.playMusic('shop_music');
+                            }
+                        } catch (e) {}
+                        setTimeout(removeLoading, 300);
+                        updateBodyStyles(true);
+                });
     }
 });
 
@@ -112,15 +131,55 @@ function updateIntroTutorial(currentTime) {
     if (!introActive) return;
 
     
-    if (introStep < introPhrases.length) {
+    const isLastTutorialText = introStep === introPhrases.length;
+    const currentTextToType = isLastTutorialText ? tutorialText : introPhrases[introStep];
+    
+    // Só reinicia o som se houver mais texto relevante após o ponto final
+    if (textIndex === 0 || (window._lastStopPoint && textIndex === window._lastStopPoint + 1)) {
+        // Verifica se há mais texto relevante (não espaço, não \n)
+        let nextChar = currentTextToType[textIndex];
+        let hasMoreSentence = false;
+        for (let i = textIndex; i < currentTextToType.length; i++) {
+            if (currentTextToType[i] && ![' ', '\n'].includes(currentTextToType[i])) {
+                hasMoreSentence = true;
+                break;
+            }
+        }
+        if (hasMoreSentence) {
+            try {
+                if (typeof AudioManager !== 'undefined' && AudioManager.play) {
+                    AudioManager.play('type_sfx');
+                    window._lastStopPoint = null; // limpa o marcador de ponto
+                }
+            } catch (err) {}
+        }
+    }
+
+    if (textIndex < currentTextToType.length && currentTime - lastTypingTime >= TYPING_DELAY) {
+        currentText += currentTextToType[textIndex];
         
-        if (textIndex < introPhrases[introStep].length && currentTime - lastTypingTime >= TYPING_DELAY) {
-            currentText += introPhrases[introStep][textIndex];
-            textIndex++;
-            lastTypingTime = currentTime;
+        // Se encontramos um ponto final (e o próximo caractere não é um ponto)
+        if (currentTextToType[textIndex] === '.' && currentTextToType[textIndex + 1] !== '.') {
+            try {
+                if (typeof AudioManager !== 'undefined' && AudioManager.stop) {
+                    AudioManager.stop('type_sfx');
+                    window._lastStopPoint = textIndex; // marca onde paramos para reiniciar depois
+                }
+            } catch (err) {}
         }
         
-        else if (textIndex >= introPhrases[introStep].length && currentTime - lastTypingTime >= PHRASE_DELAY) {
+        textIndex++;
+        lastTypingTime = currentTime;
+    }
+    else if (textIndex >= currentTextToType.length && currentTime - lastTypingTime >= PHRASE_DELAY) {
+        // Garantir que o som pare no final da frase
+        try {
+            if (typeof AudioManager !== 'undefined' && AudioManager.stop) {
+                AudioManager.stop('type_sfx');
+            }
+        } catch (err) {}
+        
+        if (!isLastTutorialText) {
             introStep++;
             textIndex = 0;
             currentText = '';

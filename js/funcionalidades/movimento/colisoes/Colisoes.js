@@ -49,27 +49,46 @@ function checkSerraCollision() {
 
 
 function checkVoidFall() {
-    if (player.y > screenHeight && !isRespawning && gameState === "jogando") {
-      
-        
-        if (activeCharacter === 'Roderick, o Cavaleiro' && CAVALEIRO.voidResurrectionAvailable) {
-          
-          const now = performance.now();
-          if (handleCavaleiroVoidResurrection(now)) {
-            respawnPlayer();
-            return;
-          }
-        } 
-        
-        live--;
-        if (live < 0) {
-          gameOver();
-        } else {
-          cancelarInvulnerabilidade();
-          pararPiscar();
-          respawnPlayer();
-        }
+  if (player.y > screenHeight && !isRespawning && gameState === "jogando") {
+    const now = performance.now();
+    DASH.isInvulnerable = false;
+    // Se personagem tem habilidade ativa, coloca em cooldown
+    if (activeCharacter === 'Kuroshi, o Ninja' && NINJA.smokeBombActive) {
+      NINJA.smokeBombActive = false;
+      NINJA.smokeBombCooldown = true;
+      NINJA.smokeBombTimer = now;
+      NINJA.smokeBombCooldownStart = now;
+    }
+    if (activeCharacter === 'Valthor, o Mago' && MAGO.magicBlastActive) {
+      MAGO.magicBlastActive = false;
+      MAGO.magicBlastCooldown = true;
+      MAGO.magicBlastCooldownStart = now;
+    }
+    if (activeCharacter === 'Roderick, o Cavaleiro' && CAVALEIRO.shieldActive) {
+      CAVALEIRO.shieldActive = false;
+      CAVALEIRO.shieldCooldown = true;
+      CAVALEIRO.shieldCooldownStart = now;
+    }
+    // Cavaleiro: ressurreição do void
+    if (activeCharacter === 'Roderick, o Cavaleiro' && CAVALEIRO.voidResurrectionAvailable) {
+      if (handleCavaleiroVoidResurrection(now)) {
+        // cavalier handled the void resurrection — do not play void SFX
+        respawnPlayer();
+        return;
       }
+    }
+    live--;
+    if (live < 0) {
+       try { AudioManager && typeof AudioManager.play === 'function' && AudioManager.play('void_sfx'); } catch (e) {}
+      gameOver();
+    } else {
+      // play void sound when player actually falls (before decrementing life) with quick fade
+  try { if (AudioManager && typeof AudioManager.playWithFade === 'function') AudioManager.playWithFade('void_sfx', 1000, { volume: 0.08 }); else if (AudioManager && typeof AudioManager.play === 'function') AudioManager.play('void_sfx'); } catch (e) {}
+      cancelarInvulnerabilidade();
+      pararPiscar();
+      respawnPlayer();
+    }
+  }
 }
 
 function checkEnemyCollision() {
@@ -94,8 +113,14 @@ function checkEnemyCollision() {
         } else {
             
             enemies.length = 0;
-
             morcegos.length = 0;
+      if (typeof grandeInimigos !== 'undefined') {
+        // marcar as bloqueadas as plataformas que tinham slimes (impede respawn nelas), igual à habilidade do mago
+        for (const gi of grandeInimigos) {
+          if (gi.attachedPlatform) gi.attachedPlatform._hasGrandeEnemy = true;
+        }
+        grandeInimigos.length = 0;
+      }
 
             lastMorcegoAllowedTime = performance.now() + 8000; 
             
@@ -119,6 +144,11 @@ function checkEnemyCollision() {
                     }
                 );
             }
+            // play generic player hit sfx for non-knight characters
+            try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('player_hit_sfx'); } catch (e) {}
+            try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('mage_damage_mystic_devastation_sfx'); } catch (e) {}
+                // trigger visual pulse for rune shockwave when mage takes damage
+                try { if (typeof MAGO !== 'undefined') MAGO.damagePulseTime = performance.now(); } catch (e) {}
         }
         return;
     }
@@ -133,6 +163,8 @@ function checkEnemyCollision() {
           gameOver();
         } else {
          aplicarInvulnerabilidade(1000, true);
+         // play generic player hit sfx for ninja
+         try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('player_hit_sfx'); } catch (e) {}
         }
       }
     
@@ -143,6 +175,10 @@ function checkEnemyCollision() {
     gameOver();
   } else {
     aplicarInvulnerabilidade(1200, true); 
+    // play knight hit sfx when cavaleiro is damaged (non-lethal)
+    try { if (activeCharacter === 'Roderick, o Cavaleiro' && typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('knight_hit_sfx'); } catch (e) {}
+  // play generic hit sfx for other characters
+  try { if (activeCharacter !== 'Roderick, o Cavaleiro' && typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('player_hit_sfx'); } catch (e) {}
   }
 }
 

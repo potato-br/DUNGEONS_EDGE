@@ -4,6 +4,8 @@ function handleCavaleiroShield(now) {
     CAVALEIRO.shieldActive = true;
     CAVALEIRO.shieldCooldown = false;
     aplicarInvulnerabilidade(CAVALEIRO.SHIELD_DURATION);
+    // play lunar aegis sfx
+    try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('knight_lunar_aegis_sfx'); } catch (e) {}
     
     for (let i = 0; i < 2; i++) {
         setTimeout(() => {
@@ -34,6 +36,7 @@ function handleCavaleiroVoidResurrection(now) {
     if (!CAVALEIRO.voidResurrectionAvailable) return false; 
     CAVALEIRO.voidResurrectionAvailable = false;
     CAVALEIRO.voidResurrectionLastUsed = now;
+    if (!activeAbilityTimers.voidRes) activeAbilityTimers.voidRes = {};
     activeAbilityTimers.voidRes.startTime = now;
     activeAbilityTimers.voidRes.duration = CAVALEIRO.VOID_RESURRECTION_COOLDOWN;
     
@@ -50,5 +53,7 @@ function handleCavaleiroVoidResurrection(now) {
             gravity: -0.1
         }
     );
+    // play knight void resurrection sfx
+    try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('knight_void_res_sfx'); } catch (e) {}
     return true; 
 }

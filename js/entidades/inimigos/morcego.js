@@ -46,32 +46,30 @@ class Hitbox {
 
 const CollisionSystem = {
     checkMorcegoCollisions(morcego, index) {
-        if (isRespawning || (typeof DASH !== 'undefined' && DASH.isInvulnerable)) return false;
-        
         
         if (morcego.modo === MorcegoModo.TRANSPORTADOR && morcego.carregandoEnemy) return false;
-        
-        
         if (morcego.modo === MorcegoModo.KAMIKAZE && morcego.estado !== MorcegoEstado.RASANTE) return false;
 
-        
-        if (this.checkPlayerCollision(morcego, index)) return true;
-
-        
-        return this.checkPlatformCollisions(morcego);
-    },
-
-    checkPlayerCollision(morcego, index) {
         if (!morcego.hitbox.intersects(morcego, player)) return false;
 
         
-        if (this.checkCavaleiroStomp(morcego)) {
+        
+        
+        
+        
+        
+        const stompResult = this.checkCavaleiroStomp(morcego);
+        
+        if (stompResult) {
+            
             this.destroyMorcego(morcego);
             if (typeof player.jumpCount !== 'undefined') player.jumpCount = 0;
             return true;
         }
 
         
+        if (isRespawning || (typeof DASH !== 'undefined' && DASH.isInvulnerable)) return false;
+
         if (morcego.modo === MorcegoModo.KAMIKAZE) {
             morcego.estado = MorcegoEstado.MORRENDO;
         }
@@ -81,11 +79,18 @@ const CollisionSystem = {
     },
 
     checkCavaleiroStomp(morcego) {
-        return (
+        
+        
+        
+        
+        
+        const result = (
             activeCharacter === 'Roderick, o Cavaleiro' &&
             player.velocityY > 0 &&
-            (player.y + player.height - player.velocityY) <= morcego.y + 8
+            Math.abs((player.y + player.height - player.velocityY) - morcego.y) < 25
         );
+        
+        return result;
     },
 
     checkPlatformCollisions(morcego) {
@@ -110,6 +115,7 @@ const CollisionSystem = {
                 );
                 morcego._particulasCriadas = true;
             }
+            try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.playWithFade === 'function') AudioManager.playWithFade('enemy_death_sfx', 250, { volume: 0.04 }); else if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('enemy_death_sfx', { volume: 0.04 }); } catch (err) {}
             morcegos.splice(idx, 1);
         }
     }
@@ -143,6 +149,14 @@ function atualizarSpawnMorcegos(profundidadeAtual) {
         if ((tipo === MorcegoModo.KAMIKAZE || tipo === MorcegoModo.TRANSPORTADOR) && (gameState === 'gameover')) {
             return false;
         }
+        
+        if (typeof MAGO !== 'undefined' && MAGO.magicBlastActive) {
+            return false;
+        }
+        const now = performance.now();
+
+         if (now < lastEnemyAllowedTime) return;
+
         return SpawnSystem.podeSpawnarTipo(tipo, profundidadeAtual);
     });
 
@@ -325,8 +339,8 @@ const MORCEGO_CONFIG = {
         PROFUNDIDADE: {
             NORMAL: 10000,
             ONDULADO: 15000,
-            KAMIKAZE: 0,
-            TRANSPORTADOR: 0
+            KAMIKAZE: 30000,
+            TRANSPORTADOR: 35000
         },
         LIMITE_POR_TIPO: {
             NORMAL: 2,
@@ -334,8 +348,8 @@ const MORCEGO_CONFIG = {
             KAMIKAZE: 1,
             TRANSPORTADOR: 2
         },
-        INTERVALO: 2000, 
-        CHANCE: 0.5 
+        INTERVALO: 8000, 
+        CHANCE: 0.3 
     }
 };
 
@@ -565,22 +579,35 @@ function updateMorcegoTransportador(morcego) {
     
     
     
-    if (idx === 0 &&
-        morcego.x + morcego.width/2 > player.x &&
-        morcego.x + morcego.width/2 < player.x + player.width
-    ) {
-        morcego.tempoSobreJogador += 1/60 * gameSpeed;
-        if (morcego.tempoSobreJogador > 2 && morcego.carregandoEnemy) {
-            
+    // Use real elapsed time to wait above the player before dropping.
+    const centerX = morcego.x + morcego.width/2;
+    // small margin so slight player movement doesn't reset the timer
+    const HORIZ_MARGIN = Math.max(12, (player.width || 32) * 0.25);
+    const FAR_MARGIN = Math.max(40, (player.width || 32) * 1.5); // only reset when far away
+    const isAbovePlayer = (centerX > player.x - HORIZ_MARGIN && centerX < player.x + player.width + HORIZ_MARGIN);
+
+    if (idx === 0 && isAbovePlayer) {
+        if (!morcego._sobreStart) morcego._sobreStart = performance.now();
+        const elapsed = (performance.now() - morcego._sobreStart) / 1000; // seconds
+        morcego.tempoSobreJogador = elapsed; // keep for compatibility with draw logic
+        // require 2 seconds above player before dropping (keep 1.5-2s exclamation window)
+        if (elapsed > 2 && morcego.carregandoEnemy) {
             morcego.carregandoEnemy = false;
             if (morcego.enemy) {
                 morcego.enemy.isDetached = true;
                 morcego.enemy._transportado = false;
-                
+                // ensure dropped enemy has no web visuals
+                morcego.enemy.webAlpha = 0;
+                morcego.enemy.webFade = false;
+                morcego.enemy.webStartX = undefined;
+                morcego.enemy.webEndX = undefined;
+                morcego.enemy.webEndY = undefined;
+                morcego.enemy.webFixed = false;
+
                 enemies.push(morcego.enemy);
                 morcego.enemy = null;
             }
-            
+
             morcego.modo   = MorcegoModo.KAMIKAZE;
             morcego.estado = MorcegoEstado.SUBINDO;
             morcego.timerEstado = 0;
@@ -594,12 +621,19 @@ function updateMorcegoTransportador(morcego) {
             morcego.velocidadeRasante = 8 + Math.random() * 3;
             morcego._rasanteDir = null;
             morcego.alvoRasante = null;
+            morcego._sobreStart = null;
+            morcego.tempoSobreJogador = 0;
         }
     } else if (idx === 0) {
-        
-        
+        // not within the small margin: if the morcego is far from player's horizontal area,
+        // reset the timer; otherwise keep it so slight player movement doesn't cancel drop.
+        if (centerX < player.x - FAR_MARGIN || centerX > player.x + player.width + FAR_MARGIN) {
+            morcego._sobreStart = null;
+            morcego.tempoSobreJogador = 0;
+        }
     } else {
         morcego.tempoSobreJogador = 0;
+        morcego._sobreStart = null;
     }
 }
 
@@ -621,12 +655,14 @@ function updateMorcegos() {
 
         
         if (morcego.y > screenHeight + 150) {
+            // removido som de morte para offscreen (não tocar sfx quando morcego sai da tela)
             morcegos.splice(i, 1);
             continue;
         }
         
         
         if (morcego.y < -150) {
+            // removido som de morte para offscreen (não tocar sfx quando morcego sai da tela)
             morcegos.splice(i, 1);
             continue;
         }
@@ -674,7 +710,7 @@ const estadoKamikaze = {
         const tx = morcego.transicaoDestino.x - morcego.x;
         const ty = morcego.transicaoDestino.y - morcego.y;
         const dist = Math.sqrt(tx*tx + ty*ty);
-    let speed = 6;
+    let speed = 9;
 
         if (dist < speed) {
             morcego.x = morcego.transicaoDestino.x;
@@ -710,7 +746,7 @@ const estadoKamikaze = {
 
         
         if (morcego.tempoEstado > morcego.tempoAguardar) {
-            // Verifica se está dentro da área de jogo
+            
             const dentroArea = (
                 morcego.x + morcego.width > gamePlayArea.x &&
                 morcego.x < gamePlayArea.x + gamePlayArea.width &&
@@ -724,8 +760,8 @@ const estadoKamikaze = {
                 };
                 this.mudarEstado(morcego, MorcegoEstado.alerta);
             } else {
-                // Se estiver fora da área, adiciona mais tempo em órbita
-                morcego.tempoAguardar += 30; // Adiciona 30 frames
+                
+                morcego.tempoAguardar += 30; 
             }
         }
     },
@@ -802,6 +838,13 @@ const estadoKamikaze = {
         }
         const idx = morcegos.indexOf(morcego);
         if (idx !== -1) {
+            try {
+                if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.playWithFade === 'function') {
+                    AudioManager.playWithFade('enemy_death_sfx', 250, { volume: 0.04 });
+                } else if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') {
+                    AudioManager.play('enemy_death_sfx', { volume: 0.04 });
+                }
+            } catch (err) {}
             morcegos.splice(idx, 1);
         }
     },
@@ -865,6 +908,13 @@ function applyDanoJogador() {
           } else {
             enemies.length = 0;
             morcegos.length = 0; 
+            if (typeof grandeInimigos !== 'undefined') {
+                // marcar as bloqueadas as plataformas que tinham slimes (impede respawn nelas)
+                for (const gi of grandeInimigos) {
+                    if (gi.attachedPlatform) gi.attachedPlatform._hasGrandeEnemy = true;
+                }
+                grandeInimigos.length = 0;
+            }
             lastEnemyAllowedTime = performance.now() + 8000;
             aplicarInvulnerabilidade(6000, true);
             for (let i = 0; i < 30; i++) {
@@ -882,6 +932,8 @@ function applyDanoJogador() {
                 }
               );
             }
+            // generic hit sfx for non-knight characters
+            try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('player_hit_sfx'); } catch (e) {}
           }
         
         return;
@@ -895,6 +947,7 @@ function applyDanoJogador() {
           gameOver();
         } else {
           aplicarInvulnerabilidade(1000, true);
+          try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('player_hit_sfx'); } catch (e) {}
         }
       }
     
@@ -907,6 +960,9 @@ function applyDanoJogador() {
        gameOver();
    } else {
      aplicarInvulnerabilidade(1200, true);
+            try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') {
+                if (activeCharacter === 'Roderick, o Cavaleiro') AudioManager.play('knight_hit_sfx'); else AudioManager.play('player_hit_sfx');
+            } } catch (e) {}
        
    }
 }
@@ -1215,8 +1271,17 @@ function criarMorcegoTransportador(x, y) {
     const enemy = createEnemy();
     enemy.x = x + 4;
     enemy.y = y + 32;
-    enemy.isDetached = false;
+    // mark transported enemy as already detached so it won't draw its web rope
+    enemy.isDetached = true;
     enemy._transportado = true;
+    // ensure web visuals won't be drawn when dropped
+    enemy.webAlpha = 0;
+    enemy.webFade = false;
+    enemy.webFadeStart = 0;
+    enemy.webStartX = undefined;
+    enemy.webEndX = undefined;
+    enemy.webEndY = undefined;
+    enemy.webFixed = false;
 
     return {
         ...criarMorcegoBase(x, y, MorcegoModo.TRANSPORTADOR),

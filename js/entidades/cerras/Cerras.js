@@ -58,6 +58,44 @@ function spawnCerras() {
     }
     lastSerraSpawn = now;
     nextSerraDelay = serraDelayMin + Math.random() * (serraDelayMax - serraDelayMin);
+    try {
+      // play serra spawn sound immediately at low volume
+      const newSerra = serras[serras.length - 1];
+      if (newSerra) {
+        // clear previous timeout if any
+        try { if (newSerra._serraSpawnTimeout) clearTimeout(newSerra._serraSpawnTimeout); } catch (e) {}
+        try {
+          const VOL = 0.03; // very very quiet
+          if (typeof AudioManager !== 'undefined' && AudioManager.assets && AudioManager.assets['serra_sfx']) {
+            const asset = AudioManager.assets['serra_sfx'];
+            const src = asset.src || (asset.currentSrc || (asset.getAttribute && asset.getAttribute('src')));
+            if (src) {
+                const a = new Audio(src);
+                a.volume = VOL;
+                // track active serra sounds so they can be stopped when entering the shop
+                try {
+                  if (typeof window !== 'undefined') {
+                    window._activeSerraSounds = window._activeSerraSounds || [];
+                    window._activeSerraSounds.push(a);
+                    a.addEventListener('ended', () => {
+                      try {
+                        const idx = window._activeSerraSounds.indexOf(a);
+                        if (idx >= 0) window._activeSerraSounds.splice(idx, 1);
+                      } catch (e) {}
+                    });
+                  }
+                } catch (e) {}
+                a.play().catch(()=>{});
+            } else {
+              try { AudioManager.play('serra_sfx'); } catch (e) {}
+              try { asset.volume = VOL; } catch (e) {}
+            }
+          } else if (typeof AudioManager !== 'undefined') {
+            try { AudioManager.play('serra_sfx'); } catch (e) {}
+          }
+        } catch (err) {}
+      }
+    } catch (err) {}
   }
 }
 

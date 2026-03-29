@@ -614,6 +614,75 @@ function drawPlayer() {
                         ctx.shadowBlur = 25;
                     }
                 };
+                // end config for mage
+                // add outer small helper to draw rune shockwave when mage triggers or takes damage
+                config.drawRuneShockwave = (ctx) => {
+                    try {
+                        if (typeof MAGO === 'undefined') return;
+                        const nowT = performance.now();
+                        const pulseTime = MAGO.activationPulseTime || 0;
+                        const dmgTime = MAGO.damagePulseTime || 0;
+                        const recentPulse = (nowT - pulseTime) < 900 && pulseTime > 0;
+                        const recentDmg = (nowT - dmgTime) < 900 && dmgTime > 0;
+                        if (!recentPulse && !recentDmg) return;
+
+                        const pulseOriginX = centerX;
+                        const pulseOriginY = centerY;
+                        const t = recentPulse ? (nowT - pulseTime) : (nowT - dmgTime);
+                        const duration = 800;
+                        const progress = Math.min(1, t / duration);
+
+                        // visual parameters
+                        const maxRadius = Math.max(dw, dh) * (1.6 + progress * 2.0);
+                        const alpha = 1 - progress;
+
+                        // circular glow
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'lighter';
+                        ctx.beginPath();
+                        const g = ctx.createRadialGradient(pulseOriginX, pulseOriginY, maxRadius * 0.15, pulseOriginX, pulseOriginY, maxRadius);
+                        g.addColorStop(0, `rgba(200,160,255,${0.35 * alpha})`);
+                        g.addColorStop(0.5, `rgba(150,100,230,${0.18 * alpha})`);
+                        g.addColorStop(1, `rgba(120,60,200,${0.02 * alpha})`);
+                        ctx.fillStyle = g;
+                        ctx.arc(pulseOriginX, pulseOriginY, maxRadius, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // runes ring
+                        const runeCount = 10 + Math.floor(8 * (1 - progress));
+                        const runeSize = 6 + (1 - progress) * 8;
+                        for (let i = 0; i < runeCount; i++) {
+                            const ang = (i / runeCount) * Math.PI * 2 + progress * 4.0;
+                            const r = maxRadius * (0.7 + progress * 0.4);
+                            const x = pulseOriginX + Math.cos(ang) * r;
+                            const y = pulseOriginY + Math.sin(ang) * r;
+                            ctx.save();
+                            ctx.translate(x, y);
+                            ctx.rotate(ang + progress * 6);
+                            ctx.globalAlpha = 0.9 * (1 - progress);
+                            // tiny pixel-art rune: small rotated rectangle + cross
+                            ctx.fillStyle = `rgba(180,130,255,${0.9 * (1 - progress)})`;
+                            ctx.fillRect(-runeSize/2, -runeSize/6, runeSize, runeSize/3);
+                            ctx.fillStyle = `rgba(230,220,255,${0.5 * (1 - progress)})`;
+                            ctx.fillRect(-runeSize/6, -runeSize/2, runeSize/3, runeSize);
+                            ctx.restore();
+                        }
+
+                        // subtle outward strobes
+                        const rings = 3;
+                        for (let ri = 0; ri < rings; ri++) {
+                            const ringProg = Math.min(1, Math.max(0, (progress - ri * 0.18) / 0.6));
+                            if (ringProg <= 0) continue;
+                            ctx.beginPath();
+                            ctx.strokeStyle = `rgba(170,120,240,${0.25 * (1 - ringProg)})`;
+                            ctx.lineWidth = 2 + (1 - ringProg) * 6;
+                            ctx.arc(pulseOriginX, pulseOriginY, maxRadius * (0.4 + ri * 0.25 + ringProg * 0.8), 0, Math.PI * 2);
+                            ctx.stroke();
+                        }
+
+                        ctx.restore();
+                    } catch (e) {}
+                };
                 break;
 
             default: 
@@ -776,12 +845,83 @@ function drawPlayer() {
         }
 
         
+        // draw optional rune shockwave (activation or damage)
+        if (typeof config.drawRuneShockwave === 'function') {
+            config.drawRuneShockwave(ctx);
+        }
         config.drawSpecial(ctx);
 
         ctx.restore();
     }
     
     if (!player.visible) return;
+    // draw mage ethereal cable if applicable
+    try {
+        if (activeCharacter === 'Valthor, o Mago' && typeof magoCableTarget !== 'undefined' && magoCableTarget) {
+            const plat = magoCableTarget;
+            const platBox = getPlatformHitbox(plat);
+            const startX = dx + dw/2;
+            const startY = dy + dh/2;
+            const endX = platBox.x + platBox.w/2;
+            const endY = platBox.y + platBox.h/2;
+
+            // draw a pixel-art-ish dotted cable with small rectangles
+            const dist = Math.hypot(endX - startX, endY - startY);
+            const segments = Math.max(6, Math.floor(dist / 12));
+            for (let i = 0; i <= segments; i++) {
+                const t = i / segments;
+                // small sine wobble for ethereal feel
+                const wobble = Math.sin(performance.now() * 0.005 + i) * 3;
+                const x = startX + (endX - startX) * t + Math.cos(t * Math.PI * 2) * wobble;
+                const y = startY + (endY - startY) * t + Math.sin(t * Math.PI * 2) * wobble;
+                const size = 4;
+                ctx.save();
+                ctx.globalAlpha = 0.9 - Math.abs(0.5 - t) * 0.8;
+                ctx.fillStyle = `rgba(160, 120, 255, ${0.9 - Math.abs(0.5 - t) * 0.6})`;
+                ctx.fillRect(Math.floor(x) - size/2, Math.floor(y) - size/2, size, size);
+                ctx.restore();
+            }
+
+            // Add end particles: small pulsing squares at both ends
+            const now = performance.now();
+            const endParticle = (cx, cy, seed) => {
+                for (let p = 0; p < 6; p++) {
+                    const ang = (p / 6) * Math.PI * 2 + seed;
+                    const r = 6 + Math.abs(Math.sin(now * 0.007 + p + seed) * 4);
+                    const px = cx + Math.cos(ang) * r;
+                    const py = cy + Math.sin(ang) * r;
+                    ctx.save();
+                    ctx.globalAlpha = 0.7 + 0.3 * Math.sin(now * 0.01 + p + seed);
+                    ctx.fillStyle = `rgba(220,200,255,0.9)`;
+                    ctx.fillRect(Math.floor(px) - 2, Math.floor(py) - 2, 4, 4);
+                    ctx.restore();
+                }
+            };
+            endParticle(startX, startY, 0.1);
+            endParticle(endX, endY, 2.3);
+
+            // Thin glow line (back layer)
+            ctx.save();
+            const glowGrad = ctx.createLinearGradient(startX, startY, endX, endY);
+            glowGrad.addColorStop(0, 'rgba(180,150,255,0.12)');
+            glowGrad.addColorStop(0.5, 'rgba(200,180,255,0.18)');
+            glowGrad.addColorStop(1, 'rgba(180,150,255,0.12)');
+            ctx.strokeStyle = glowGrad;
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+            for (let i = 0; i <= segments; i++) {
+                const t = i / segments;
+                const wobble = Math.sin(now * 0.003 + t * Math.PI * 6) * 6 * (1 - Math.abs(0.5 - t) * 2);
+                const x = startX + (endX - startX) * t + Math.cos(t * Math.PI * 4) * wobble;
+                const y = startY + (endY - startY) * t + Math.sin(t * Math.PI * 4) * wobble;
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+    } catch (e) {
+        // ignore drawing errors
+    }
     if (!player.facingRight) {
         ctx.translate(dx + dw/2, dy + dh/2);
         ctx.scale(-1, 1);

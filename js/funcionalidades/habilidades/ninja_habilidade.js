@@ -10,9 +10,14 @@ function ninjasmokebomb() {
         return true;
     }
 
-    
+    try { if (typeof AudioManager !== 'undefined' && AudioManager && typeof AudioManager.play === 'function') AudioManager.play('ninja_smoke_sfx'); } catch (e) {}
     NINJA.smokeBombActive = true;
     NINJA.smokeBombTimer = now;
+
+    // record start time for active ability timers so pause/resume can compute remaining time
+    if (typeof activeAbilityTimers !== 'undefined') {
+        activeAbilityTimers.ninjaSmoke = { startTime: now, remainingTime: 0 };
+    }
 
     
     aplicarInvulnerabilidade(NINJA.NINJA_SMOKE_DURATION);

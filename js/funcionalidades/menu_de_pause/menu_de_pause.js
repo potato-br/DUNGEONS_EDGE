@@ -81,6 +81,10 @@ function drawPause() {
     ctx.font = "18px PixelFont";
     ctx.fillStyle = "#fff";
     ctx.fillText('Setas: Navegar   ⏎/C: Selecionar   R: Ir para Loja   P/Esc: Fechar', canvas.width/2, 400);
+    // instrução para fechar o jogo segurando X
+    ctx.font = "16px PixelFont";
+    ctx.fillStyle = "#ffdddd";
+    ctx.fillText('Segure X por 5s para fechar o jogo', canvas.width/2, 430);
 
     ctx.restore();
 }
