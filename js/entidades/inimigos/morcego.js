@@ -139,8 +139,12 @@ function atualizarSpawnMorcegos(profundidadeAtual) {
 
     
     const tiposDisponiveis = Object.values(MorcegoModo).filter(tipo => {
-        
+        // Impede spawn de kamikaze e transportador se o jogador estiver morto
         if ((tipo === MorcegoModo.KAMIKAZE || tipo === MorcegoModo.TRANSPORTADOR) && (gameState === 'gameover')) {
+            return false;
+        }
+        // Habilidade do mago: impede spawn de morcegos enquanto magicBlastActive
+        if (typeof MAGO !== 'undefined' && MAGO.magicBlastActive) {
             return false;
         }
         return SpawnSystem.podeSpawnarTipo(tipo, profundidadeAtual);
