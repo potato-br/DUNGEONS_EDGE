@@ -49,27 +49,41 @@ function checkSerraCollision() {
 
 
 function checkVoidFall() {
-    if (player.y > screenHeight && !isRespawning && gameState === "jogando") {
-      
-        
-        if (activeCharacter === 'Roderick, o Cavaleiro' && CAVALEIRO.voidResurrectionAvailable) {
-          
-          const now = performance.now();
-          if (handleCavaleiroVoidResurrection(now)) {
-            respawnPlayer();
-            return;
-          }
-        } 
-        
-        live--;
-        if (live < 0) {
-          gameOver();
-        } else {
-          cancelarInvulnerabilidade();
-          pararPiscar();
-          respawnPlayer();
-        }
+  if (player.y > screenHeight && !isRespawning && gameState === "jogando") {
+    const now = performance.now();
+    // Se personagem tem habilidade ativa, coloca em cooldown
+    if (activeCharacter === 'Kuroshi, o Ninja' && NINJA.smokeBombActive) {
+      NINJA.smokeBombActive = false;
+      NINJA.smokeBombCooldown = true;
+      NINJA.smokeBombTimer = now;
+      NINJA.smokeBombCooldownStart = now;
+    }
+    if (activeCharacter === 'Valthor, o Mago' && MAGO.magicBlastActive) {
+      MAGO.magicBlastActive = false;
+      MAGO.magicBlastCooldown = true;
+      MAGO.magicBlastCooldownStart = now;
+    }
+    if (activeCharacter === 'Roderick, o Cavaleiro' && CAVALEIRO.shieldActive) {
+      CAVALEIRO.shieldActive = false;
+      CAVALEIRO.shieldCooldown = true;
+      CAVALEIRO.shieldCooldownStart = now;
+    }
+    // Cavaleiro: ressurreição do void
+    if (activeCharacter === 'Roderick, o Cavaleiro' && CAVALEIRO.voidResurrectionAvailable) {
+      if (handleCavaleiroVoidResurrection(now)) {
+        respawnPlayer();
+        return;
       }
+    }
+    live--;
+    if (live < 0) {
+      gameOver();
+    } else {
+      cancelarInvulnerabilidade();
+      pararPiscar();
+      respawnPlayer();
+    }
+  }
 }
 
 function checkEnemyCollision() {

@@ -10,7 +10,7 @@ function usarHabilidadeMagica(now) {
 
     
     enemies.length = 0;
-    
+    morcegos.length = 0;
     lastEnemyAllowedTime = now + MAGO.MAGIC_BLAST_DURATION;
 
     
