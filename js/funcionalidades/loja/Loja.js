@@ -14,11 +14,13 @@ const shopItems = [
     requiredDepthSteps: {
       0: 200,    
       1: 400,    
-      2: 600     
+      2: 600,
+      3: 4200,
+      4: 6400
     },
     disponivel: true,
-    efeito: () => { if (player.maxJumps < 3) player.maxJumps += 1; },
-    maxCompras: 3,
+    efeito: () => { if (player.maxJumps < 6) player.maxJumps += 1; },
+    maxCompras: 6,
     compras: 0,
     exclusiveToCharacter: 'O Errante de Eldoria',
     imgWidth: 90, 
@@ -32,20 +34,23 @@ const shopItems = [
     priceIncrement: 0,
     disponivel: true,
     efeito: () => { if (player.speed < 6.2) player.speed = Math.min(player.speed + 0.5, 6.2); },
-    maxCompras: 5,
+    maxCompras: 11,
     requiredDepthSteps: {
       0: 200,
       1: 300,
       2: 500,
       3: 700,
-      4: 1000
+      4: 1000,
+      5: 1500,
+      6: 2000
     },
     requiredItem: 'Botas do Vento',
     requiredItemSteps: {
       0: 1,
       1: 1,
       2: 2,
-      3: 3
+      3: 3,
+      8: 6
     },
     compras: 0,
     exclusiveToCharacter: 'O Errante de Eldoria'
@@ -101,7 +106,7 @@ const shopItems = [
       3: 4
     },
     efeito: () => { if (liveupgrade < 6) liveupgrade += 1; if (liveupgrade > 0) { live = liveupgrade; } },
-    maxCompras: 5,
+    maxCompras: 6,
     compras: 0,
     exclusiveToCharacter: 'O Errante de Eldoria'
   },
@@ -120,7 +125,7 @@ const shopItems = [
     requiredItem: 'Cálice da Chama Vital',
     requiredItemSteps: {
       0: 1,
-      2: 2
+      1: 2
     },
     efeito: () => { moneyplus += 25; },
     maxCompras: 2,
@@ -188,7 +193,12 @@ const shopItems = [
       3: 15000,
       4: 20000
     },
-    efeito: () => { DASH.cooldownTime = Math.max(1000, DASH.cooldownTime - 500); },
+    requiredItem: 'Cálice da Chama Vital',
+    requiredItemSteps: {
+      1: 1,
+      3: 3
+    },
+  efeito: () => { DASH.dashRechargeTime = Math.max(1000, (DASH.dashRechargeTime || DASH.cooldownTime || 1000) - 500); },
     maxCompras: 4,
     compras: 0,
     exclusiveToCharacter: 'O Errante de Eldoria'
@@ -206,6 +216,11 @@ const shopItems = [
       2: 5000,
       3: 7000,
       4: 12000
+    },
+    requiredItem: 'Efígie da Paz',
+    requiredItemSteps: {
+      0: 1,
+      3: 4
     },
     efeito: () => { if (typeof DASH.extraInvuln !== 'undefined') { DASH.extraInvuln = Math.min(DASH.extraInvuln + 500, DASH.extraInvulnMax); } },
     maxCompras: 3,
@@ -1084,12 +1099,12 @@ function attemptPurchase() {
     item.efeito();
     
     
-    characterData[activeCharacter].stats = {
+  characterData[activeCharacter].stats = {
         speed: player.speed,
         maxJumps: player.maxJumps,
         liveupgrade: liveupgrade,
         moneyplus: moneyplus,
-        dashCooldownTime: DASH.cooldownTime,
+    dashRechargeTime: DASH.dashRechargeTime || DASH.cooldownTime || 1000,
         dashExtraInvuln: DASH.extraInvuln,
         enemySpawnInterval: enemySpawnInterval
     };

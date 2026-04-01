@@ -2,7 +2,12 @@
 
 
 
+let previousDownPressed = false;
+
 function movePlayer() {
+    // remembers previous frame down-press to detect edge (pressed this frame)
+    // stored at module level in case multiple calls happen
+    // (defined below as module-scope variable)
     plataformas.forEach(p => p.isColliding = false);
 
     let onPlat = false;
@@ -19,6 +24,23 @@ function movePlayer() {
     aplicarGravidade();
     checarColisaoTeto();
     checarColisaoChao();
+    // If player pressed down in this frame (edge) while standing on a platform and is Roderick,
+    // mark the current platform to ignore collisions for a short window so player can fall through.
+    try {
+        const downPressed = (input.down && typeof input.down === 'object') ? !!input.down.pressed : !!input.down;
+        if (activeCharacter === 'Roderick, o Cavaleiro' && downPressed && !previousDownPressed) {
+            if (currentPlatform) {
+                // ignore collisions for this specific platform for a short time
+                currentPlatform.ignoreCollisionUntil = performance.now() + 600; // ms
+                // ensure player starts moving downward so gravity pushes through
+                player.velocityY = Math.max(player.velocityY, 2);
+            }
+        }
+        previousDownPressed = downPressed;
+    } catch (e) {
+        // defensive: if input shape is unexpected, don't break the loop
+        previousDownPressed = false;
+    }
     checarPlataformasEspeciais();
     checarColisaoDuranteQueda();
 
@@ -100,6 +122,14 @@ function movePlayer() {
                 if (ray) {
                     // Ignora plataformas que estão caindo
                     if (ray.plataforma.falling) continue;
+                    // Não permite atravessar plataformas grandes
+                    if (ray.plataforma.isGrande) {
+                        // nunca ignora colisão para grandes
+                        if (ray.plataforma.ignoreCollisionUntil) ray.plataforma.ignoreCollisionUntil = 0;
+                    } else {
+                        // Ignore platforms that have an active ignoreCollisionUntil in the future
+                        if (ray.plataforma.ignoreCollisionUntil && performance.now() < ray.plataforma.ignoreCollisionUntil) continue;
+                    }
                     onPlat = true;
                     currentPlatform = ray.plataforma;
                     player.y = getPlatformHitbox(currentPlatform).y - player.height;
@@ -344,6 +374,13 @@ function raycast(x, y, dx, dy, length, plataformas) {
             if (plataforma.type === PLATFORM_TYPES.FANTASMA && !plataforma.visible) continue;
             if (plataforma.falling) continue; 
             if (plataforma.broken) continue;
+            // Não permite atravessar plataformas grandes
+            if (plataforma.isGrande) {
+                if (plataforma.ignoreCollisionUntil) plataforma.ignoreCollisionUntil = 0;
+            } else {
+                // respect per-platform ignoreCollisionUntil flag
+                if (plataforma.ignoreCollisionUntil && performance.now() < plataforma.ignoreCollisionUntil) continue;
+            }
             // Ignora plataformas caindo em qualquer colisão
             const { x: px, y: py, w: pw, h: ph } = getPlatformHitbox(plataforma);
             if (checkX >= px && checkX <= px + pw &&
